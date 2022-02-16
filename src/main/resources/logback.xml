@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <conversionRule conversionWord="color"
+            converterClass="dev.mayuna.lostarkbot.util.logging.ColorConverter"/>
+    <conversionRule conversionWord="end_color"
+                    converterClass="dev.mayuna.lostarkbot.util.logging.EndColorConverter"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d{HH:mm:ss.SSS}][%logger{0}/%thread] %color%-5level: %color%msg %n%end_color</pattern>
+        </encoder>
+    </appender>
+    <root level="debug">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
