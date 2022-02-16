@@ -2,9 +2,11 @@ package dev.mayuna.lostarkbot;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import dev.mayuna.lostarkbot.commands.AboutCommand;
-import dev.mayuna.lostarkbot.commands.ServerWidgetCommand;
+import dev.mayuna.lostarkbot.commands.LostArkCommand;
+import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
-import dev.mayuna.lostarkbot.managers.ServerWidgetManager;
+import dev.mayuna.lostarkbot.managers.PresenceManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -33,8 +35,9 @@ public class Main {
     public static void main(String[] args) {
         Logger.init();
 
-        Logger.info("Starting up Lost Ark bot...");
+        Logger.info("Starting up Lost Ark - Server Status Bot @ v" + Constants.VERSION + "...");
         Logger.info("Made by mayuna#8016");
+        ConsoleCommandManager.init();
 
         Logger.info("Loading library settings...");
         loadLibrarySettings();
@@ -69,11 +72,13 @@ public class Main {
     }
 
     private static void loadManagers() {
-        ServerWidgetManager.load();
+        ServerDashboardManager.load();
+        ServerDashboardManager.init();
+        PresenceManager.init();
     }
 
     private static void loadCommands() {
-        client.addSlashCommands(new AboutCommand(), new ServerWidgetCommand());
+        client.addSlashCommands(new AboutCommand(), new LostArkCommand());
     }
 
     private static void loginIntoDiscord() {
@@ -119,7 +124,7 @@ public class Main {
                 Logger.info("Shutting down...");
 
                 Config.save();
-                ServerWidgetManager.save();
+                ServerDashboardManager.save();
 
                 Logger.info("o/");
             }

@@ -1,5 +1,7 @@
 package dev.mayuna.lostarkbot.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.managed.ManagedMessage;
@@ -9,6 +11,9 @@ import dev.mayuna.mayuslibrary.logging.LogPrefix;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Config {
 
     private static @Getter @Setter String prefix = "la!";
@@ -16,6 +21,11 @@ public class Config {
     private static @Getter @Setter long exceptionMessageChannelID = 0;
     private static @Getter @Setter long ownerID = 0;
     private static @Getter @Setter boolean debug = false;
+
+    private static @Getter List<String> westNorthAmerica = new ArrayList<>();
+    private static @Getter List<String> eastNorthAmerica = new ArrayList<>();
+    private static @Getter List<String> centralEurope = new ArrayList<>();
+    private static @Getter List<String> southAmerica = new ArrayList<>();
 
     public static boolean load() {
         try {
@@ -26,6 +36,11 @@ public class Config {
             exceptionMessageChannelID = mayuJson.getOrCreate("exceptionMessageChannelID", new JsonPrimitive(exceptionMessageChannelID)).getAsLong();
             ownerID = mayuJson.getOrCreate("ownerID", new JsonPrimitive(ownerID)).getAsLong();
             debug = mayuJson.getOrCreate("debug", new JsonPrimitive(debug)).getAsBoolean();
+
+            westNorthAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("westNorthAmerica", new JsonArray()).getAsJsonArray());
+            eastNorthAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("eastNorthAmerica", new JsonArray()).getAsJsonArray());
+            centralEurope = JsonUtils.toStringList(mayuJson.getOrCreate("centralEurope", new JsonArray()).getAsJsonArray());
+            southAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("southAmerica", new JsonArray()).getAsJsonArray());
 
             mayuJson.saveJson();
 
@@ -46,6 +61,11 @@ public class Config {
             mayuJson.add("exceptionMessageChannelID", exceptionMessageChannelID);
             mayuJson.add("ownerID", ownerID);
             mayuJson.add("debug", debug);
+
+            mayuJson.add("westNorthAmerica", JsonUtils.toStringJsonArray(westNorthAmerica));
+            mayuJson.add("eastNorthAmerica", JsonUtils.toStringJsonArray(eastNorthAmerica));
+            mayuJson.add("centralEurope", JsonUtils.toStringJsonArray(centralEurope));
+            mayuJson.add("southAmerica", JsonUtils.toStringJsonArray(southAmerica));
 
             mayuJson.saveJson();
 
