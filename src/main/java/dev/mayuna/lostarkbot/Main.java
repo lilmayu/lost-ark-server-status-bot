@@ -2,7 +2,9 @@ package dev.mayuna.lostarkbot;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import dev.mayuna.lostarkbot.commands.AboutCommand;
+import dev.mayuna.lostarkbot.commands.ServerWidgetCommand;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
+import dev.mayuna.lostarkbot.managers.ServerWidgetManager;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -18,7 +20,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 public class Main {
 
@@ -60,10 +61,19 @@ public class Main {
         Logger.info("Logging into Discord...");
         loginIntoDiscord();
         Logger.success("Logged in!");
+
+        Logger.info("Loading managers...");
+        loadManagers();
+
+        Logger.success("Loading done!");
+    }
+
+    private static void loadManagers() {
+        ServerWidgetManager.load();
     }
 
     private static void loadCommands() {
-        client.addSlashCommands(new AboutCommand());
+        client.addSlashCommands(new AboutCommand(), new ServerWidgetCommand());
     }
 
     private static void loginIntoDiscord() {
@@ -109,6 +119,7 @@ public class Main {
                 Logger.info("Shutting down...");
 
                 Config.save();
+                ServerWidgetManager.save();
 
                 Logger.info("o/");
             }
