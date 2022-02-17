@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'dev.mayuna'
-version '1.0'
+version '1.1'
 
 repositories {
     flatDir { dirs 'libs'}
@@ -51,6 +51,8 @@ tasks.withType(JavaCompile) {
 }
 
 shadowJar {
+    archiveName = 'lost-ark-server-status-bot.jar'
+
     manifest {
         attributes 'Main-Class': 'dev.mayuna.lostarkbot.Main'
     }

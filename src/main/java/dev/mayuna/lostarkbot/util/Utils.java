@@ -5,22 +5,20 @@ import com.google.gson.GsonBuilder;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
+import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.managed.ManagedMessage;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Utils {
-
-    public static Gson createGson() {
-        return new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(ManagedMessage.class, new ServerDashboard()) // TODO: ManagedMessage adapter
-                .create();
-    }
 
     public static LostArkRegion getRegionForServer(String serverName) {
         if (Config.getWestNorthAmerica().contains(serverName)) {
@@ -31,6 +29,8 @@ public class Utils {
             return LostArkRegion.CENTRAL_EUROPE;
         } else if (Config.getSouthAmerica().contains(serverName)) {
             return LostArkRegion.SOUTH_AMERICA;
+        } else if (Config.getEuropeWest().contains(serverName)) {
+            return LostArkRegion.EUROPE_WEST;
         }
         return null;
     }
@@ -84,5 +84,17 @@ public class Utils {
         }
 
         return null;
+    }
+
+    public static long toUnixTimestamp(String timestamp) {
+        try {
+            LocalDateTime localDateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("MMMM dd, yyyy h:mm:ss a z", Locale.US));
+            ZoneId zoneId = ZoneId.of("America/Los_Angeles");
+            return localDateTime.atZone(zoneId).toEpochSecond();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            Logger.error("Cannot parse timestamp! Returning zero.");
+            return 0;
+        }
     }
 }

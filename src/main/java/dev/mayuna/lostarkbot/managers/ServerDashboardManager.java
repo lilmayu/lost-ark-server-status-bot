@@ -41,13 +41,14 @@ public class ServerDashboardManager {
                     long start = System.currentTimeMillis();
                     updateAll();
                     long took = System.currentTimeMillis() - start;
+
                     Logger.debug("Updating " + dashboards.size() + " server dashboards took " + took + "ms " + (dashboards.size() != 0 ? "(avg. " + (took / dashboards.size()) + "ms)" : ""));
                 } catch (Exception exception) {
                     exception.printStackTrace();
                     Logger.error("Exception occurred while refreshing cache!");
                 }
             }
-        }, 1000, 60000);
+        }, 1000, 60000 * 5);
     }
 
     public static void updateCache() throws IOException {
