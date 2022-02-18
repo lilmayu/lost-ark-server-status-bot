@@ -68,9 +68,12 @@ public class LostArkCommand extends SlashCommand {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully created Server Dashboard.").build())
                         .queue();
             } else {
-                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while creating Server Dashboard. Please, try again.").build()).queue();
+                if (!channel.canTalk()) {
+                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("Bot cannot send messages in this channel. Please, check bot's permissions in your server! (Write Messages and View Channel permissions)").build()).queue();
+                } else {
+                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while creating Server Dashboard. Please, try again. Check if bot has View Channel permission!").build()).queue();
+                }
             }
-
         }
     }
 
