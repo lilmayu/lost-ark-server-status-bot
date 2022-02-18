@@ -32,12 +32,10 @@ public class LostArkCommand extends SlashCommand {
                 new DashboardAddFavoriteCommand(),
                 new DashboardRemoveFavoriteCommand(),
                 new DashboardHideRegionCommand(),
-                new DashboardShowRegionCommand()
+                new DashboardShowRegionCommand(),
+                new DashboardHideAllRegionsCommand(),
+                new DashboardShowAllRegionsCommand()
         };
-    }
-
-    private static void makeEphemeral(SlashCommandEvent event, boolean ephemeral) {
-        event.deferReply(ephemeral).complete();
     }
 
     @Override
@@ -55,7 +53,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -87,7 +85,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -113,7 +111,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -140,7 +138,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -167,7 +165,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -206,7 +204,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -250,7 +248,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -258,6 +256,11 @@ public class LostArkCommand extends SlashCommand {
 
             if (serverOption == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `server` argument.").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
@@ -296,7 +299,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -304,6 +307,11 @@ public class LostArkCommand extends SlashCommand {
 
             if (regionOption == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `region` argument.").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
@@ -345,7 +353,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
 
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
@@ -354,6 +362,11 @@ public class LostArkCommand extends SlashCommand {
 
             if (regionOption == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `region` argument.").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
@@ -372,6 +385,63 @@ public class LostArkCommand extends SlashCommand {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getAsString() + "` does not exist!").build()).queue();
             }
 
+        }
+    }
+
+    protected static class DashboardHideAllRegionsCommand extends SlashCommand {
+
+        public DashboardHideAllRegionsCommand() {
+            this.name = "hide-all-regions";
+            this.help = "Hides all regions from Server dashboard";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
+                return;
+            }
+
+            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            dashboard.getHiddenRegions().clear();
+            for (LostArkRegion region : LostArkRegion.values()) {
+                dashboard.getHiddenRegions().add(region.name());
+            }
+            ServerDashboardManager.update(dashboard);
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully hide all regions!").build()).queue();
+        }
+    }
+
+    protected static class DashboardShowAllRegionsCommand extends SlashCommand {
+
+        public DashboardShowAllRegionsCommand() {
+            this.name = "show-all-regions";
+            this.help = "Shows all regions on Server dashboard";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
+                return;
+            }
+
+            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            dashboard.getHiddenRegions().clear();
+            ServerDashboardManager.update(dashboard);
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed all regions!").build()).queue();
         }
     }
 }

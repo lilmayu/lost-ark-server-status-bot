@@ -205,10 +205,11 @@ public class ServerDashboardManager {
     public static void save() {
         Logger.info("Saving Server Dashboards...");
 
+        JsonArray jsonArray = new JsonArray();
         try {
             JsonObject jsonObject = new JsonObject();
 
-            JsonArray jsonArray = new JsonArray();
+            jsonArray = new JsonArray();
             for (ServerDashboard serverDashboard : dashboards) {
                 jsonArray.add(serverDashboard.toJsonObject());
             }
@@ -220,6 +221,6 @@ public class ServerDashboardManager {
             Logger.error("Failed to save Server Dashboards!");
         }
 
-        Logger.success("Successfully saved Server Dashboards!");
+        Logger.success("Successfully saved " + jsonArray.size() + " Server Dashboards!");
     }
 }

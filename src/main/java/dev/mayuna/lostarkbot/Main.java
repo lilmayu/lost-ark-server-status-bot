@@ -2,6 +2,7 @@ package dev.mayuna.lostarkbot;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import dev.mayuna.lostarkbot.commands.AboutCommand;
+import dev.mayuna.lostarkbot.commands.DebugCommand;
 import dev.mayuna.lostarkbot.commands.LostArkCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
@@ -82,7 +83,7 @@ public class Main {
     }
 
     private static void loadCommands() {
-        client.addSlashCommands(new AboutCommand(), new LostArkCommand());
+        client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new DebugCommand());
     }
 
     private static void loginIntoDiscord() {

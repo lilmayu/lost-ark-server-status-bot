@@ -10,6 +10,7 @@ import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.managed.ManagedMessage;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -96,5 +97,9 @@ public class Utils {
             Logger.error("Cannot parse timestamp! Returning zero.");
             return 0;
         }
+    }
+
+    public static void makeEphemeral(SlashCommandEvent event, boolean ephemeral) {
+        event.deferReply(ephemeral).complete();
     }
 }

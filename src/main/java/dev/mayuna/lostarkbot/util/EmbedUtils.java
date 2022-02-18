@@ -18,13 +18,11 @@ public class EmbedUtils {
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setTitle("Lost Ark - Server Dashboard");
 
-        String lastUpdated; // <t:unix_time>
-        if (servers.getLastUpdated() == null || servers.getLastUpdated().isEmpty()) {
+        String lastUpdated = servers.getLastUpdated();
+        if (lastUpdated == null || lastUpdated.isEmpty()) {
             lastUpdated = "Error";
-        } else {
-            lastUpdated = "<t:" + Utils.toUnixTimestamp(servers.getLastUpdated()) + ">";
         }
-        embedBuilder.setDescription(lastUpdated + "\n\n<:circle_green:943546669558018139> Online <:circle_red:943546670229114911> Busy <:circle_blue:943546670115848202> Full <:circle_yellow:943546669688049725> Maintenance");
+        embedBuilder.setDescription("`" + lastUpdated + "`\n\n<:circle_green:943546669558018139> Online <:circle_red:943546670229114911> Busy <:circle_blue:943546670115848202> Full <:circle_yellow:943546669688049725> Maintenance");
 
         LinkedHashMap<String, String> regionFields = new LinkedHashMap<>();
 
