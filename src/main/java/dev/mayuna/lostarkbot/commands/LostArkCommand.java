@@ -29,7 +29,6 @@ public class LostArkCommand extends SlashCommand {
                 new DashboardStatusCommand(),
                 new DashboardUpdateCommand(),
                 new DashboardResendCommand(),
-                new DashboardSettingsCommand(),
                 new DashboardAddFavoriteCommand(),
                 new DashboardRemoveFavoriteCommand(),
                 new DashboardHideRegionCommand(),
@@ -49,6 +48,7 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardCreateCommand() {
             this.name = "create";
+            this.help = "Creates Server dashboard";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
         }
@@ -67,7 +67,7 @@ public class LostArkCommand extends SlashCommand {
             ServerDashboard dashboard = ServerDashboardManager.createServerDashboard(channel);
 
             if (dashboard != null) {
-                hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully created Server Dashboard.\nYou can edit it with `/lost-ark settings` command!").build())
+                hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully created Server Dashboard.").build())
                         .queue();
             } else {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while creating Server Dashboard. Please, try again.").build()).queue();
@@ -80,6 +80,7 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardRemoveCommand() {
             this.name = "remove";
+            this.help = "Removes Server dashboard";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
         }
@@ -107,6 +108,7 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardStatusCommand() {
             this.name = "status";
+            this.help = "Shows debug information for Server dashboard";
         }
 
         @Override
@@ -131,6 +133,7 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardUpdateCommand() {
             this.name = "update";
+            this.help = "Forces Server dashboard to update itself";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
         }
@@ -146,10 +149,10 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            hook.editOriginalEmbeds(MessageInfo.informationEmbed("Updating Server Dashboard...").build()).queue();
-
             ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
             ServerDashboardManager.update(dashboard);
+
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard updated!").build()).queue();
         }
     }
 
@@ -157,6 +160,7 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardResendCommand() {
             this.name = "resend";
+            this.help = "Forces Server dashboard to resend itself";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
         }
@@ -172,12 +176,12 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            hook.editOriginalEmbeds(MessageInfo.informationEmbed("Resending Server Dashboard...").build()).queue();
-
             try {
                 ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
                 dashboard.getManagedMessage().getMessage().delete().complete();
                 ServerDashboardManager.update(dashboard);
+
+                hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard resent!").build()).queue();
             } catch (Exception exception) {
                 exception.printStackTrace();
                 Logger.error("Exception occurred while resending Server Dashboard!");
@@ -187,25 +191,11 @@ public class LostArkCommand extends SlashCommand {
         }
     }
 
-    protected static class DashboardSettingsCommand extends SlashCommand {
-
-        public DashboardSettingsCommand() {
-            this.name = "settings";
-
-            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
-        }
-
-        @Override
-        protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
-
-        }
-    }
-
     protected static class DashboardAddFavoriteCommand extends SlashCommand {
 
         public DashboardAddFavoriteCommand() {
             this.name = "add-favorite";
+            this.help = "Adds specified server into Favorites section";
 
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "server", "Server name to add into Favorite section", true));
@@ -249,6 +239,7 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardRemoveFavoriteCommand() {
             this.name = "remove-favorite";
+            this.help = "Removes specified server from Favorites section";
 
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "server", "Server name to remove from Favorite section", true));
@@ -288,6 +279,7 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardHideRegionCommand() {
             this.name = "hide-region";
+            this.help = "Hides specified region from Server dashboard";
 
             List<OptionData> options = new ArrayList<>();
 
@@ -322,12 +314,12 @@ public class LostArkCommand extends SlashCommand {
                 if (!dashboard.getHiddenRegions().contains(correctRegion)) {
                     dashboard.getHiddenRegions().add(correctRegion);
                     ServerDashboardManager.update(dashboard);
-                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully hide region `" + regionOption.getName() + "`!").build()).queue();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully hide region `" + correctRegion + "`!").build()).queue();
                 } else {
-                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getName() + "` is already hidden!").build()).queue();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + correctRegion + "` is already hidden!").build()).queue();
                 }
             } else {
-                hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getName() + "` does not exist!").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getAsString() + "` does not exist!").build()).queue();
             }
         }
     }
@@ -336,10 +328,11 @@ public class LostArkCommand extends SlashCommand {
 
         public DashboardShowRegionCommand() {
             this.name = "show-region";
+            this.help = "Shows specified region in Server dashboard";
 
             List<OptionData> options = new ArrayList<>();
 
-            OptionData regionOption = new OptionData(OptionType.STRING, "region", "Region to hide from dashboard", true);
+            OptionData regionOption = new OptionData(OptionType.STRING, "region", "Region to show if it is hidden", true);
             for (LostArkRegion region : LostArkRegion.values()) {
                 regionOption.addChoice(region.getFormattedName(), region.name());
             }
@@ -371,12 +364,12 @@ public class LostArkCommand extends SlashCommand {
                 if (dashboard.getHiddenRegions().contains(correctRegion)) {
                     dashboard.getHiddenRegions().remove(correctRegion);
                     ServerDashboardManager.update(dashboard);
-                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed region `" + regionOption.getName() + "`!").build()).queue();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed region `" + correctRegion + "`!").build()).queue();
                 } else {
-                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getName() + "` is not hidden!").build()).queue();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + correctRegion + "` is not hidden!").build()).queue();
                 }
             } else {
-                hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getName() + "` does not exist!").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getAsString() + "` does not exist!").build()).queue();
             }
 
         }

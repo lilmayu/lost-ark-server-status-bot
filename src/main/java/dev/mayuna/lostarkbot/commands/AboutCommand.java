@@ -10,6 +10,7 @@ public class AboutCommand extends SlashCommand {
 
     public AboutCommand() {
         this.name = "about";
+        this.help = "About this bot";
 
         this.guildOnly = false;
     }

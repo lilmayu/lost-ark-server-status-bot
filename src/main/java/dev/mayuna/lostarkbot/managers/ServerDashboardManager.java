@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.AbstractChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class ServerDashboardManager {
@@ -35,18 +36,23 @@ public class ServerDashboardManager {
                 Logger.debug("Updating " + dashboards.size() + " server dashboards...");
 
                 try {
-                    lostArkServersCache = LostArk.fetchServers();
+                    updateCache();
 
                     long start = System.currentTimeMillis();
                     updateAll();
                     long took = System.currentTimeMillis() - start;
+
                     Logger.debug("Updating " + dashboards.size() + " server dashboards took " + took + "ms " + (dashboards.size() != 0 ? "(avg. " + (took / dashboards.size()) + "ms)" : ""));
                 } catch (Exception exception) {
                     exception.printStackTrace();
                     Logger.error("Exception occurred while refreshing cache!");
                 }
             }
-        }, 1000, 60000);
+        }, 1000, 60000 * 5);
+    }
+
+    public static void updateCache() throws IOException {
+        lostArkServersCache = LostArk.fetchServers();
     }
 
     /**

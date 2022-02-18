@@ -26,6 +26,7 @@ public class Config {
     private static @Getter List<String> eastNorthAmerica = new ArrayList<>();
     private static @Getter List<String> centralEurope = new ArrayList<>();
     private static @Getter List<String> southAmerica = new ArrayList<>();
+    private static @Getter List<String> europeWest = new ArrayList<>();
 
     public static boolean load() {
         try {
@@ -41,6 +42,7 @@ public class Config {
             eastNorthAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("eastNorthAmerica", new JsonArray()).getAsJsonArray());
             centralEurope = JsonUtils.toStringList(mayuJson.getOrCreate("centralEurope", new JsonArray()).getAsJsonArray());
             southAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("southAmerica", new JsonArray()).getAsJsonArray());
+            europeWest = JsonUtils.toStringList(mayuJson.getOrCreate("europeWest", new JsonArray()).getAsJsonArray());
 
             mayuJson.saveJson();
 
@@ -66,6 +68,7 @@ public class Config {
             mayuJson.add("eastNorthAmerica", JsonUtils.toStringJsonArray(eastNorthAmerica));
             mayuJson.add("centralEurope", JsonUtils.toStringJsonArray(centralEurope));
             mayuJson.add("southAmerica", JsonUtils.toStringJsonArray(southAmerica));
+            mayuJson.add("europeWest", JsonUtils.toStringJsonArray(europeWest));
 
             mayuJson.saveJson();
 

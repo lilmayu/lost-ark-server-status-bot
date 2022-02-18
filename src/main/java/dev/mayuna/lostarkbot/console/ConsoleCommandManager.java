@@ -2,6 +2,7 @@ package dev.mayuna.lostarkbot.console;
 
 import dev.mayuna.lostarkbot.console.commands.GuildsConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.HelpConsoleCommand;
+import dev.mayuna.lostarkbot.console.commands.LostArkConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.StopConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
@@ -23,6 +24,7 @@ public class ConsoleCommandManager {
         consoleCommands.add(new HelpConsoleCommand());
         consoleCommands.add(new StopConsoleCommand());
         consoleCommands.add(new GuildsConsoleCommand());
+        consoleCommands.add(new LostArkConsoleCommand());
 
         startCommandThread();
     }

@@ -7,7 +7,8 @@ public enum LostArkRegion {
     WEST_NORTH_AMERICA("West North America"),
     EAST_NORTH_AMERICA("East North America"),
     CENTRAL_EUROPE("Central Europe"),
-    SOUTH_AMERICA("South America");
+    SOUTH_AMERICA("South America"),
+    EUROPE_WEST("Europe West");
 
     private final @Getter String formattedName;
 
