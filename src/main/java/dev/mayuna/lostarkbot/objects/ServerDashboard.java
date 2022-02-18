@@ -1,6 +1,7 @@
 package dev.mayuna.lostarkbot.objects;
 
 import com.google.gson.JsonObject;
+import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.util.JsonUtils;
 import dev.mayuna.mayusjdautils.managed.ManagedMessage;
 import lombok.Getter;
@@ -32,6 +33,7 @@ public class ServerDashboard {
         ServerDashboard serverDashboard = new ServerDashboard();
 
         serverDashboard.managedMessage = new ManagedMessage(jsonObject.getAsJsonObject("managedMessage"));
+        serverDashboard.managedMessage.updateEntries(Main.getJda());
         serverDashboard.showLegend = jsonObject.get("showLegend").getAsBoolean();
         serverDashboard.hiddenRegions = JsonUtils.toStringList(jsonObject.getAsJsonArray("hiddenRegions"));
         serverDashboard.favoriteServers = JsonUtils.toStringList(jsonObject.getAsJsonArray("favoriteServers"));

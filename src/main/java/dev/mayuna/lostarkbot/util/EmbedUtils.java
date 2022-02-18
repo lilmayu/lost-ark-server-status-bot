@@ -1,5 +1,6 @@
 package dev.mayuna.lostarkbot.util;
 
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -18,11 +19,12 @@ public class EmbedUtils {
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setTitle("Lost Ark - Server Dashboard");
 
+        String onlinePlayers = ServerDashboardManager.getOnlinePlayersCache();
         String lastUpdated = servers.getLastUpdated();
         if (lastUpdated == null || lastUpdated.isEmpty()) {
             lastUpdated = "Error";
         }
-        embedBuilder.setDescription("`" + lastUpdated + "`\n\n<:circle_green:943546669558018139> Online <:circle_red:943546670229114911> Busy <:circle_blue:943546670115848202> Full <:circle_yellow:943546669688049725> Maintenance");
+        embedBuilder.setDescription("`" + lastUpdated + "`\nCurrently **" + onlinePlayers + "** in-game players\n\n<:circle_green:943546669558018139> Online <:circle_red:943546670229114911> Busy <:circle_blue:943546670115848202> Full <:circle_yellow:943546669688049725> Maintenance");
 
         LinkedHashMap<String, String> regionFields = new LinkedHashMap<>();
 

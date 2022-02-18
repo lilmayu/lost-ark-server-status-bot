@@ -2,9 +2,13 @@ package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.objects.LostArkRegion;
+import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
+import dev.mayuna.mayuslibrary.console.colors.Color;
+import dev.mayuna.mayuslibrary.console.colors.Colors;
 
 public class LostArkConsoleCommand extends AbstractConsoleCommand {
 
@@ -26,7 +30,16 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
 
                     int counter = 0;
                     for (LostArkServer server : servers.getServers()) {
-                        Logger.info("[" + counter + "]: " + server.getName() + " // " + server.getStatus().name());
+                        LostArkRegion region = Utils.getRegionForServer(server.getName());
+                        String regionName;
+
+                        if (region == null) {
+                            regionName = new Color().setBackground(Colors.RED).setForeground(Colors.BLACK).build() + "NOT SET" + Color.RESET;
+                        } else {
+                            regionName = region.name();
+                        }
+
+                        Logger.info("[" + counter + "]: " + server.getName() + " // " + server.getStatus().name() + " - " + regionName);
 
                         counter++;
                     }
@@ -46,7 +59,7 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
                 }
             }
             default -> {
-                Logger.warn("Syntax: /lost-ark <show-cache|update-cache>");
+                Logger.error("Syntax: lost-ark <show-cache|update-cache>");
             }
         }
     }

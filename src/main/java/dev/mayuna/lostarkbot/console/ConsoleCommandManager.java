@@ -24,6 +24,7 @@ public class ConsoleCommandManager {
         consoleCommands.add(new LostArkConsoleCommand());
         consoleCommands.add(new SaveDataConsoleCommand());
         consoleCommands.add(new LoadDataConsoleCommand());
+        consoleCommands.add(new DebugConsoleCommand());
 
         startCommandThread();
     }

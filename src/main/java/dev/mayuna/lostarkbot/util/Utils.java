@@ -1,7 +1,6 @@
 package dev.mayuna.lostarkbot.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
@@ -12,6 +11,10 @@ import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.managed.ManagedMessage;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -101,5 +104,29 @@ public class Utils {
 
     public static void makeEphemeral(SlashCommandEvent event, boolean ephemeral) {
         event.deferReply(ephemeral).complete();
+    }
+
+    public static String getOnlinePlayers() {
+        try {
+            URL url = new URL("https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=1599340");
+            URLConnection request = url.openConnection();
+            request.connect();
+
+            JsonObject rootJsonObject = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
+
+            if (rootJsonObject.has("response")) {
+                JsonObject responseJsonObject = rootJsonObject.getAsJsonObject("response");
+                if (responseJsonObject.has("player_count")) {
+                    return String.valueOf(responseJsonObject.get("player_count").getAsInt());
+                }
+            }
+
+            Logger.error("Invalid response from SteamAPI: " + rootJsonObject);
+            return "Error_01";
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            Logger.error("Could not get online players in Lost Ark from SteamAPI!");
+            return "Error_02";
+        }
     }
 }

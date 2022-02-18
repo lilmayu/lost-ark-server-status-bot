@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
+import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.LostArk;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
@@ -26,6 +27,7 @@ public class ServerDashboardManager {
     public static final String DATA_FILE = "./server_dashboards.json";
     private final static @Getter List<ServerDashboard> dashboards = new ArrayList<>();
     private static @Getter LostArkServers lostArkServersCache;
+    private static @Getter String onlinePlayersCache;
 
     public static void init() {
         Timer timer = new Timer();
@@ -53,6 +55,7 @@ public class ServerDashboardManager {
 
     public static void updateCache() throws IOException {
         lostArkServersCache = LostArk.fetchServers();
+        onlinePlayersCache = Utils.getOnlinePlayers();
     }
 
     /**

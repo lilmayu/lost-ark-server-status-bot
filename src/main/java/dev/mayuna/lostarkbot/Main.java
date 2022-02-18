@@ -109,7 +109,7 @@ public class Main {
             exceptionReport.getThrowable().printStackTrace();
 
             if (configLoaded) {
-                Logger.error("Exception occurred! Sending it to Úžlabina Discord Bot's exception Message channel.");
+                Logger.error("Exception occurred! Sending it to Lost Ark Bot's exception Message channel.");
 
                 if (Main.getJda() != null && Config.getExceptionMessageChannelID() != 0) {
                     MessageChannel messageChannel = Main.getJda().getTextChannelById(Config.getExceptionMessageChannelID());
