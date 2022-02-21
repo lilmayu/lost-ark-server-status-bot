@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.mayusjdautils.managed.ManagedMessage;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
 import dev.mayuna.mayuslibrary.logging.LogPrefix;

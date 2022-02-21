@@ -124,7 +124,7 @@ public class LostArkCommand extends SlashCommand {
             }
 
             ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
-            long id = dashboard.getManagedMessage().getMessageID();
+            long id = dashboard.getManagedGuildMessage().getRawGuildID();
 
             hook.editOriginalEmbeds(MessageInfo.informationEmbed("There is Server Dashboard with message ID `" + id + "`.").build()).queue();
         }
@@ -179,7 +179,7 @@ public class LostArkCommand extends SlashCommand {
 
             try {
                 ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
-                dashboard.getManagedMessage().getMessage().delete().complete();
+                dashboard.getManagedGuildMessage().getMessage().delete().complete();
                 ServerDashboardManager.update(dashboard);
 
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard resent!").build()).queue();

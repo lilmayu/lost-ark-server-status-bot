@@ -91,6 +91,8 @@ public class EmbedUtils {
             embedBuilder.addField("Favorites", fieldValue, false);
         }
 
+        embedBuilder.setFooter("This message will be updated every 5 minutes");
+
         return embedBuilder;
     }
 }

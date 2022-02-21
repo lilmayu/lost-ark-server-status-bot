@@ -10,7 +10,7 @@ import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.LostArk;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
-import dev.mayuna.mayusjdautils.managed.ManagedMessage;
+import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
 import lombok.Getter;
@@ -68,7 +68,7 @@ public class ServerDashboardManager {
     public static ServerDashboard getServerDashboardByChannel(AbstractChannel channel) {
         synchronized (dashboards) {
             for (ServerDashboard serverDashboard : dashboards) {
-                if (serverDashboard.getManagedMessage().getMessageChannel().getIdLong() == channel.getIdLong()) {
+                if (serverDashboard.getManagedGuildMessage().getTextChannel().getIdLong() == channel.getIdLong()) {
                     return serverDashboard;
                 }
             }
@@ -100,8 +100,8 @@ public class ServerDashboardManager {
             return null;
         }
 
-        ManagedMessage managedMessage = new ManagedMessage(UUID.randomUUID().toString(), textChannel.getGuild(), textChannel);
-        ServerDashboard serverDashboard = new ServerDashboard(managedMessage);
+        ManagedGuildMessage managedGuildMessage = ManagedGuildMessage.create(UUID.randomUUID().toString(), textChannel.getGuild(), textChannel, null);
+        ServerDashboard serverDashboard = new ServerDashboard(managedGuildMessage);
 
         if (update(serverDashboard)) {
             dashboards.add(serverDashboard);
@@ -129,11 +129,11 @@ public class ServerDashboardManager {
             dashboards.remove(serverDashboard);
         }
 
-        ManagedMessage managedMessage = serverDashboard.getManagedMessage();
-        managedMessage.updateEntries(Main.getJda());
+        ManagedGuildMessage managedGuildMessage = serverDashboard.getManagedGuildMessage();
+        managedGuildMessage.updateEntries(Main.getJda());
 
         try {
-            managedMessage.getMessage().delete().complete();
+            managedGuildMessage.getMessage().delete().complete();
         } catch (Exception exception) {
             exception.printStackTrace();
             Logger.warn("Failed to update Server Dashboard " + serverDashboard.getName() + "! Probably user deleted guild/channel or bot does not have permissions. However, it was removed from internal cache.");
@@ -151,30 +151,33 @@ public class ServerDashboardManager {
      * @return True if message was successfully sent/edited
      */
     public static boolean update(ServerDashboard serverDashboard) {
-        ManagedMessage managedMessage = serverDashboard.getManagedMessage();
+        ManagedGuildMessage managedGuildMessage = serverDashboard.getManagedGuildMessage();
 
         try {
-            managedMessage.updateEntries(Main.getJda());
-            managedMessage.sendOrEditMessage(new MessageBuilder().setEmbeds(EmbedUtils.createEmbed(serverDashboard, lostArkServersCache).build()));
+            managedGuildMessage.updateEntries(Main.getJda());
+            managedGuildMessage.sendOrEditMessage(new MessageBuilder().setEmbeds(EmbedUtils.createEmbed(serverDashboard, lostArkServersCache).build()).build());
             return true;
         } catch (Exception exception) {
             exception.printStackTrace();
-            Logger.warn("Failed to update Server Dashboard " + serverDashboard.getName() + "! Probably user removed channel/kicked bot or bot does not have permissions. Removing from internal cache...");
+            Logger.warn("Failed to update Server Dashboard " + serverDashboard.getName() + "! Probably user removed channel/kicked bot or bot does not have permissions.");
             return false;
         }
     }
 
     public static void updateAll() {
         synchronized (dashboards) {
-            List<ServerDashboard> dashboardsToRemove = new ArrayList<>();
+            //List<ServerDashboard> dashboardsToRemove = new ArrayList<>();
 
             for (ServerDashboard serverDashboard : dashboards) {
+                update(serverDashboard);
+                /* Disabled due a bug
                 if (!update(serverDashboard)) {
                     dashboardsToRemove.add(serverDashboard);
-                }
+                }*/
             }
 
-            dashboards.removeAll(dashboardsToRemove);
+            // Disabled due a bug
+            //dashboards.removeAll(dashboardsToRemove);
         }
     }
 

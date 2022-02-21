@@ -24,6 +24,7 @@ public class DebugCommand extends SlashCommand {
 
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setTitle("Debug");
+        embedBuilder.setDescription("");
 
         embedBuilder.addField("Bot Information",
                               "Currently on **" + Main.getJda().getGuilds().size() + "** guilds\n" +

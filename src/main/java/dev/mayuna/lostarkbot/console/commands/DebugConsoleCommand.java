@@ -13,6 +13,13 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
 
     @Override
     public void execute(String arguments) {
+        if (arguments.contains("force-update")) {
+            Logger.info("Force updating all dashboards...");
+
+            ServerDashboardManager.updateAll();
+            return;
+        }
+
         Logger.info("=== Debug ===");
         Logger.info("Guilds: " + Main.getJda().getGuilds().size());
         Logger.info("Dashboards: " + ServerDashboardManager.getDashboards().size());
