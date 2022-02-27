@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.mayusjdautils.managed.ManagedMessage;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
 import dev.mayuna.mayuslibrary.logging.LogPrefix;
@@ -22,6 +21,8 @@ public class Config {
     private static @Getter @Setter long ownerID = 0;
     private static @Getter @Setter boolean debug = false;
 
+    private static @Getter List<String> contributors = new ArrayList<>();
+
     private static @Getter List<String> westNorthAmerica = new ArrayList<>();
     private static @Getter List<String> eastNorthAmerica = new ArrayList<>();
     private static @Getter List<String> centralEurope = new ArrayList<>();
@@ -37,6 +38,8 @@ public class Config {
             exceptionMessageChannelID = mayuJson.getOrCreate("exceptionMessageChannelID", new JsonPrimitive(exceptionMessageChannelID)).getAsLong();
             ownerID = mayuJson.getOrCreate("ownerID", new JsonPrimitive(ownerID)).getAsLong();
             debug = mayuJson.getOrCreate("debug", new JsonPrimitive(debug)).getAsBoolean();
+
+            contributors = JsonUtils.toStringList(mayuJson.getOrCreate("contributors", new JsonArray()).getAsJsonArray());
 
             westNorthAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("westNorthAmerica", new JsonArray()).getAsJsonArray());
             eastNorthAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("eastNorthAmerica", new JsonArray()).getAsJsonArray());
@@ -63,6 +66,8 @@ public class Config {
             mayuJson.add("exceptionMessageChannelID", exceptionMessageChannelID);
             mayuJson.add("ownerID", ownerID);
             mayuJson.add("debug", debug);
+
+            mayuJson.add("contributors", JsonUtils.toStringJsonArray(contributors));
 
             mayuJson.add("westNorthAmerica", JsonUtils.toStringJsonArray(westNorthAmerica));
             mayuJson.add("eastNorthAmerica", JsonUtils.toStringJsonArray(eastNorthAmerica));

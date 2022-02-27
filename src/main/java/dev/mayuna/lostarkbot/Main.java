@@ -2,9 +2,11 @@ package dev.mayuna.lostarkbot;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import dev.mayuna.lostarkbot.commands.AboutCommand;
+import dev.mayuna.lostarkbot.commands.DebugCommand;
 import dev.mayuna.lostarkbot.commands.LostArkCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
+import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.PresenceManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.util.Config;
@@ -26,6 +28,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -35,8 +38,10 @@ public class Main {
 
     // Runtime
     private static boolean configLoaded = false;
+    private static boolean fullyLoaded = false;
 
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
         Logger.init();
 
         Logger.info("Starting up Lost Ark - Server Status Bot @ v" + Constants.VERSION + "...");
@@ -57,7 +62,7 @@ public class Main {
         client = new CommandClientBuilder().useDefaultGame()
                 .useHelpBuilder(false)
                 .setOwnerId(String.valueOf(Config.getOwnerID()))
-                .setActivity(Activity.playing("sus"))
+                .setActivity(Activity.playing("Loading..."))
                 .setPrefix(Config.getPrefix())
                 .setAlternativePrefix(Constants.ALTERNATIVE_PREFIX)
                 .setListener(new CommandListener());
@@ -72,17 +77,19 @@ public class Main {
         Logger.info("Loading managers...");
         loadManagers();
 
-        Logger.success("Loading done!");
+        fullyLoaded = true;
+        Logger.success("Loading done! (took " + (System.currentTimeMillis() - start) + "ms)");
     }
 
     private static void loadManagers() {
+        LanguageManager.load();
         ServerDashboardManager.load();
         ServerDashboardManager.init();
         PresenceManager.init();
     }
 
     private static void loadCommands() {
-        client.addSlashCommands(new AboutCommand(), new LostArkCommand());
+        client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new DebugCommand());
     }
 
     private static void loginIntoDiscord() {
@@ -91,9 +98,7 @@ public class Main {
                     .addEventListeners(client.build())
                     .addEventListeners(new MayuCoreListener())
                     .enableIntents(GatewayIntent.GUILD_PRESENCES)
-                    .enableIntents(GatewayIntent.GUILD_MEMBERS)
-                    .enableIntents(GatewayIntent.DIRECT_MESSAGES)
-                    .enableIntents(GatewayIntent.DIRECT_MESSAGE_REACTIONS);
+                    .enableIntents(GatewayIntent.GUILD_MEMBERS);
             jda = jdaBuilder.build().awaitReady();
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -108,7 +113,7 @@ public class Main {
             exceptionReport.getThrowable().printStackTrace();
 
             if (configLoaded) {
-                Logger.error("Exception occurred! Sending it to Úžlabina Discord Bot's exception Message channel.");
+                Logger.error("Exception occurred! Sending it to Lost Ark Bot's exception Message channel.");
 
                 if (Main.getJda() != null && Config.getExceptionMessageChannelID() != 0) {
                     MessageChannel messageChannel = Main.getJda().getTextChannelById(Config.getExceptionMessageChannelID());
@@ -127,8 +132,13 @@ public class Main {
             if (configLoaded) {
                 Logger.info("Shutting down...");
 
-                Config.save();
-                ServerDashboardManager.save();
+                if (fullyLoaded) {
+                    Logger.info("Saving config and dashboards...");
+                    Config.save();
+                    ServerDashboardManager.save();
+                } else {
+                    Logger.warn("Bot did not fully loaded! Config and dashboards won't be saved.");
+                }
 
                 Logger.info("o/");
             }

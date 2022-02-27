@@ -1,12 +1,15 @@
 package dev.mayuna.lostarkbot.commands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
+import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.utils.MessageInfo;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -32,12 +35,12 @@ public class LostArkCommand extends SlashCommand {
                 new DashboardAddFavoriteCommand(),
                 new DashboardRemoveFavoriteCommand(),
                 new DashboardHideRegionCommand(),
-                new DashboardShowRegionCommand()
+                new DashboardShowRegionCommand(),
+                new DashboardHideAllRegionsCommand(),
+                new DashboardShowAllRegionsCommand(),
+                new LanguageListCommand(),
+                new LanguageCommand()
         };
-    }
-
-    private static void makeEphemeral(SlashCommandEvent event, boolean ephemeral) {
-        event.deferReply(ephemeral).complete();
     }
 
     @Override
@@ -55,7 +58,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -70,9 +73,12 @@ public class LostArkCommand extends SlashCommand {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully created Server Dashboard.").build())
                         .queue();
             } else {
-                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while creating Server Dashboard. Please, try again.").build()).queue();
+                if (!channel.canTalk()) {
+                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("Bot cannot send messages in this channel. Please, check bot's permissions in your server! (Write Messages and View Channel permissions)").build()).queue();
+                } else {
+                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while creating Server Dashboard. Please, try again. Check if bot has View Channel permission!").build()).queue();
+                }
             }
-
         }
     }
 
@@ -87,7 +93,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -113,7 +119,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -123,7 +129,7 @@ public class LostArkCommand extends SlashCommand {
             }
 
             ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
-            long id = dashboard.getManagedMessage().getMessageID();
+            long id = dashboard.getManagedGuildMessage().getRawGuildID();
 
             hook.editOriginalEmbeds(MessageInfo.informationEmbed("There is Server Dashboard with message ID `" + id + "`.").build()).queue();
         }
@@ -140,7 +146,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -167,7 +173,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -178,7 +184,7 @@ public class LostArkCommand extends SlashCommand {
 
             try {
                 ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
-                dashboard.getManagedMessage().getMessage().delete().complete();
+                dashboard.getManagedGuildMessage().getMessage().delete().complete();
                 ServerDashboardManager.update(dashboard);
 
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard resent!").build()).queue();
@@ -206,7 +212,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -250,7 +256,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -258,6 +264,11 @@ public class LostArkCommand extends SlashCommand {
 
             if (serverOption == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `server` argument.").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
@@ -296,7 +307,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
@@ -304,6 +315,11 @@ public class LostArkCommand extends SlashCommand {
 
             if (regionOption == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `region` argument.").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
@@ -345,7 +361,7 @@ public class LostArkCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            makeEphemeral(event, true);
+            Utils.makeEphemeral(event, true);
 
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
@@ -354,6 +370,11 @@ public class LostArkCommand extends SlashCommand {
 
             if (regionOption == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `region` argument.").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
@@ -372,6 +393,135 @@ public class LostArkCommand extends SlashCommand {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getAsString() + "` does not exist!").build()).queue();
             }
 
+        }
+    }
+
+    protected static class DashboardHideAllRegionsCommand extends SlashCommand {
+
+        public DashboardHideAllRegionsCommand() {
+            this.name = "hide-all-regions";
+            this.help = "Hides all regions from Server dashboard";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
+                return;
+            }
+
+            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            dashboard.getHiddenRegions().clear();
+            for (LostArkRegion region : LostArkRegion.values()) {
+                dashboard.getHiddenRegions().add(region.name());
+            }
+            ServerDashboardManager.update(dashboard);
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully hide all regions!").build()).queue();
+        }
+    }
+
+    protected static class DashboardShowAllRegionsCommand extends SlashCommand {
+
+        public DashboardShowAllRegionsCommand() {
+            this.name = "show-all-regions";
+            this.help = "Shows all regions on Server dashboard";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
+                return;
+            }
+
+            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            dashboard.getHiddenRegions().clear();
+            ServerDashboardManager.update(dashboard);
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed all regions!").build()).queue();
+        }
+    }
+
+    protected static class LanguageListCommand extends SlashCommand {
+
+        public LanguageListCommand() {
+            this.name = "language-list";
+            this.help = "Lists all available languages";
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+
+            EmbedBuilder embedBuilder = MessageInfo.informationEmbed("");
+            embedBuilder.setTitle("Available languages");
+
+            String description = "Format: `code` - name\n\n";
+            for (LanguagePack languagePack : LanguageManager.getLoadedLanguages()) {
+                description += "`" + languagePack.getLangCode() + "` - " + languagePack.getLangName() + "\n";
+            }
+            embedBuilder.setDescription(description);
+            embedBuilder.setFooter("There are " + LanguageManager.getLoadedLanguages().size() + " languages");
+            hook.editOriginalEmbeds(embedBuilder.build()).queue();
+        }
+    }
+
+    protected static class LanguageCommand extends SlashCommand {
+
+        public LanguageCommand() {
+            this.name = "language";
+            this.help = "Changes dashboard's language";
+
+            List<OptionData> options = new ArrayList<>();
+            OptionData languageOption = new OptionData(OptionType.STRING, "code", "Language code. You can see all languages via /lost-ark language-list", true);
+            options.add(languageOption);
+            this.options = options;
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            OptionMapping languageOption = event.getOption("code");
+
+            if (languageOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `code` argument.").build()).queue();
+                return;
+            }
+
+            LanguagePack languagePack = LanguageManager.getLanguageByCode(languageOption.getAsString());
+
+            if (languagePack == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Invalid language code `" + languageOption.getAsString() + "`.\n\nYou can see all languages via `/lost-ark language-list` command").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
+                return;
+            }
+
+            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            dashboard.setLangCode(languagePack.getLangCode());
+            ServerDashboardManager.update(dashboard);
+
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully changed language to **" + languagePack.getLangName() + "**!").build()).queue();
         }
     }
 }

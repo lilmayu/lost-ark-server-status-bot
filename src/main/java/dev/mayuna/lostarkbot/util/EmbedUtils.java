@@ -1,5 +1,8 @@
 package dev.mayuna.lostarkbot.util;
 
+import dev.mayuna.lostarkbot.managers.LanguageManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -15,16 +18,31 @@ import java.util.Map;
 public class EmbedUtils {
 
     public static EmbedBuilder createEmbed(ServerDashboard serverDashboard, LostArkServers servers) {
-        EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
-        embedBuilder.setTitle("Lost Ark - Server Dashboard");
+        LanguagePack languagePack = LanguageManager.getLanguageByCode(serverDashboard.getLangCode());
 
-        String lastUpdated; // <t:unix_time>
-        if (servers.getLastUpdated() == null || servers.getLastUpdated().isEmpty()) {
-            lastUpdated = "Error";
-        } else {
-            lastUpdated = "<t:" + Utils.toUnixTimestamp(servers.getLastUpdated()) + ">";
+        if (languagePack == null) {
+            Logger.warn("Missing language: " + serverDashboard.getLangCode());
+            languagePack = LanguageManager.getDefaultLanguage();
         }
-        embedBuilder.setDescription(lastUpdated + "\n\n<:circle_green:943546669558018139> Online <:circle_red:943546670229114911> Busy <:circle_blue:943546670115848202> Full <:circle_yellow:943546669688049725> Maintenance");
+
+        EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
+        embedBuilder.setTitle(languagePack.getTitle());
+
+        String onlinePlayers = ServerDashboardManager.getOnlinePlayersCache();
+        String lastUpdated = servers.getLastUpdated();
+
+        if (lastUpdated == null || lastUpdated.isEmpty()) {
+            lastUpdated = "Error";
+        }
+
+        String description = "";
+        description += "`" + lastUpdated + "`\n";
+        description += languagePack.getCurrentPlayers().replace("{players}", onlinePlayers) + "\n\n";
+        description += "<:circle_green:943546669558018139> " + languagePack.getOnline() + " ";
+        description += "<:circle_red:943546670229114911> " + languagePack.getBusy() + " ";
+        description += "<:circle_blue:943546670115848202> " + languagePack.getFull() + " ";
+        description += "<:circle_yellow:943546669688049725> " + languagePack.getMaintenance();
+        embedBuilder.setDescription(description);
 
         LinkedHashMap<String, String> regionFields = new LinkedHashMap<>();
 
@@ -33,7 +51,7 @@ public class EmbedUtils {
                 continue;
             }
 
-            String fieldName = region.getFormattedName();
+            String fieldName = languagePack.getTranslatedRegionName(region);
             StringBuilder fieldValue = new StringBuilder();
 
             for (Map.Entry<String, ServerStatus> entry : Utils.getServersByRegion(region, servers).entrySet()) {
@@ -61,7 +79,7 @@ public class EmbedUtils {
             String fieldValue = entry.getValue();
 
             if (fieldValue.isEmpty()) {
-                embedBuilder.addField(entry.getKey(), "No servers available. Probably bug or some kind of maintenance.", true);
+                embedBuilder.addField(entry.getKey(), languagePack.getNoServers(), true);
             } else {
                 embedBuilder.addField(entry.getKey(), fieldValue, true);
             }
@@ -80,16 +98,26 @@ public class EmbedUtils {
 
             for (String serverName : serverDashboard.getFavoriteServers()) {
                 ServerStatus serverStatus = Utils.getServerStatus(serverName, servers);
+                String toAppend;
 
                 if (serverStatus != null) {
-                    fieldValue += Utils.getServerLine(serverName, serverStatus) + "\n";
+                    toAppend = Utils.getServerLine(serverName, serverStatus) + "\n";
                 } else {
-                    fieldValue += "<:circle_black:943546670166188142> " + serverName + " (Not found)";
+                    toAppend = "<:circle_black:943546670166188142> " + serverName + " (" + languagePack.getNotFound() + ")\n";
+                }
+
+                if (fieldValue.length() + toAppend.length() < 1024) {
+                    fieldValue += toAppend;
+                } else {
+                    Logger.warn("Cannot fit line into Field for Favorite: " + toAppend);
+                    break;
                 }
             }
 
-            embedBuilder.addField("Favorites", fieldValue, false);
+            embedBuilder.addField(languagePack.getFavorite(), fieldValue, false);
         }
+
+        embedBuilder.setFooter(languagePack.getUpdateFooter());
 
         return embedBuilder;
     }
