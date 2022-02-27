@@ -128,4 +128,10 @@ public class Utils {
             return "Error_02";
         }
     }
+
+    public static Gson getGson() {
+        return new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create();
+    }
 }
