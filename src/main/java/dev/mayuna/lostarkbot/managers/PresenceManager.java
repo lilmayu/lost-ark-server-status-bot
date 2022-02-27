@@ -17,7 +17,7 @@ public class PresenceManager {
                 Thread.currentThread().setName("PresenceWorker");
 
                 Logger.debug("Updating presence activity...");
-                Main.getJda().getPresence().setActivity(Activity.listening("to " + Main.getJda().getGuilds().size() + " guilds!"));
+                Main.getJda().getPresence().setActivity(Activity.listening(Main.getJda().getGuilds().size() + " guilds!"));
             }
         }, 0, 3600000);
     }

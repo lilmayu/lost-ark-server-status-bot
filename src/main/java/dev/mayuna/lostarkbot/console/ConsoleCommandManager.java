@@ -25,6 +25,7 @@ public class ConsoleCommandManager {
         consoleCommands.add(new SaveDataConsoleCommand());
         consoleCommands.add(new LoadDataConsoleCommand());
         consoleCommands.add(new DebugConsoleCommand());
+        consoleCommands.add(new LangConsoleCommand());
 
         startCommandThread();
     }

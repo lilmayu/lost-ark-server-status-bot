@@ -1,12 +1,15 @@
 package dev.mayuna.lostarkbot.commands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
+import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.utils.MessageInfo;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -34,7 +37,9 @@ public class LostArkCommand extends SlashCommand {
                 new DashboardHideRegionCommand(),
                 new DashboardShowRegionCommand(),
                 new DashboardHideAllRegionsCommand(),
-                new DashboardShowAllRegionsCommand()
+                new DashboardShowAllRegionsCommand(),
+                new LanguageListCommand(),
+                new LanguageCommand()
         };
     }
 
@@ -445,6 +450,78 @@ public class LostArkCommand extends SlashCommand {
             dashboard.getHiddenRegions().clear();
             ServerDashboardManager.update(dashboard);
             hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed all regions!").build()).queue();
+        }
+    }
+
+    protected static class LanguageListCommand extends SlashCommand {
+
+        public LanguageListCommand() {
+            this.name = "language-list";
+            this.help = "Lists all available languages";
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+
+            EmbedBuilder embedBuilder = MessageInfo.informationEmbed("");
+            embedBuilder.setTitle("Available languages");
+
+            String description = "Format: `code` - name\n\n";
+            for (LanguagePack languagePack : LanguageManager.getLoadedLanguages()) {
+                description += "`" + languagePack.getLangCode() + "` - " + languagePack.getLangName() + "\n";
+            }
+            embedBuilder.setDescription(description);
+            embedBuilder.setFooter("There are " + LanguageManager.getLoadedLanguages().size() + " languages");
+            hook.editOriginalEmbeds(embedBuilder.build()).queue();
+        }
+    }
+
+    protected static class LanguageCommand extends SlashCommand {
+
+        public LanguageCommand() {
+            this.name = "language";
+            this.help = "Changes dashboard's language";
+
+            List<OptionData> options = new ArrayList<>();
+            OptionData languageOption = new OptionData(OptionType.STRING, "code", "Language code. You can see all languages via /lost-ark language-list", true);
+            options.add(languageOption);
+            this.options = options;
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            OptionMapping languageOption = event.getOption("code");
+
+            if (languageOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `code` argument.").build()).queue();
+                return;
+            }
+
+            LanguagePack languagePack = LanguageManager.getLanguageByCode(languageOption.getAsString());
+
+            if (languagePack == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Invalid language code `" + languageOption.getAsString() + "`.\n\nYou can see all languages via `/lost-ark language-list` command").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
+                return;
+            }
+
+            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            dashboard.setLangCode(languagePack.getLangCode());
+            ServerDashboardManager.update(dashboard);
+
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully changed language to **" + languagePack.getLangName() + "**!").build()).queue();
         }
     }
 }
