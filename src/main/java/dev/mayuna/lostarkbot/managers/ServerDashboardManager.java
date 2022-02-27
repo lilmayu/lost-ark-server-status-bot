@@ -36,6 +36,7 @@ public class ServerDashboardManager {
     private static @Getter String onlinePlayersCache;
 
     public static void init() {
+        Logger.debug("Creating timer with 5 minute delay...");
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -56,7 +57,7 @@ public class ServerDashboardManager {
                     Logger.error("Exception occurred while refreshing cache!");
                 }
             }
-        }, 1000, 60000 * 5);
+        }, 60000 * 5, 60000 * 5);
     }
 
     public static void updateCache() throws IOException {
