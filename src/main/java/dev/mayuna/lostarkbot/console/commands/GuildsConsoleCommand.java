@@ -2,7 +2,7 @@ package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -27,8 +27,9 @@ public class GuildsConsoleCommand extends AbstractConsoleCommand {
         for (Guild guild : guilds) {
             int numberOfDashboards = 0;
 
+            // TODO: Toto půjde zoptimalizovat (získávat přímo z GuildData .size listu)
             for (TextChannel textChannel : guild.getTextChannels()) {
-                if (ServerDashboardManager.isServerDashboardInChannel(textChannel)) {
+                if (ServerDashboardHelper.isServerDashboardInChannel(textChannel)) {
                     numberOfDashboards++;
                 }
             }

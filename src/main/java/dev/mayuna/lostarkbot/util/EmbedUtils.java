@@ -1,7 +1,7 @@
 package dev.mayuna.lostarkbot.util;
 
 import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
@@ -28,7 +28,7 @@ public class EmbedUtils {
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setTitle(languagePack.getTitle());
 
-        String onlinePlayers = ServerDashboardManager.getOnlinePlayersCache();
+        String onlinePlayers = ServerDashboardHelper.getOnlinePlayersCache();
         String lastUpdated = servers.getLastUpdated();
 
         if (lastUpdated == null || lastUpdated.isEmpty()) {

@@ -1,7 +1,7 @@
 package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -22,7 +22,7 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
             case "show-cache" -> {
                 Logger.info("Current Lost Ark Servers cache: ");
 
-                LostArkServers servers = ServerDashboardManager.getLostArkServersCache();
+                LostArkServers servers = ServerDashboardHelper.getLostArkServersCache();
                 Logger.info("Is null? " + (servers == null));
 
                 if (servers != null) {
@@ -51,7 +51,7 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
                 Logger.info("Updating Lost Ark Servers cache...");
 
                 try {
-                    ServerDashboardManager.updateCache();
+                    ServerDashboardHelper.updateCache();
                     Logger.success("Successfully updated Lost Ark Servers cache.");
                 } catch (Exception exception) {
                     exception.printStackTrace();

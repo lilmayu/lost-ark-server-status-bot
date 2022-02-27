@@ -2,7 +2,7 @@ package dev.mayuna.lostarkbot.commands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import dev.mayuna.lostarkbot.Main;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.managers.DataManager;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -28,7 +28,7 @@ public class DebugCommand extends SlashCommand {
 
         embedBuilder.addField("Bot Information",
                               "Currently on **" + Main.getJda().getGuilds().size() + "** guilds\n" +
-                                      "There are **" + ServerDashboardManager.getDashboards().size() + "** dashboards",
+                                      "There are **" + DataManager.getDashboardCount() + "** dashboards",
                               false
         );
 
