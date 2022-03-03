@@ -1,10 +1,11 @@
 package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
-import dev.mayuna.lostarkbot.managers.DataManager;
-import dev.mayuna.lostarkbot.managers.ServerDashboardHelper;
+import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.objects.GuildData;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.mayuslibrary.utils.NumberUtils;
 
 public class LoadDataConsoleCommand extends AbstractConsoleCommand {
 
@@ -14,12 +15,17 @@ public class LoadDataConsoleCommand extends AbstractConsoleCommand {
 
     @Override
     public void execute(String arguments) {
-        switch (arguments) {
+        String[] args = arguments.split(" ");
+
+        if (args.length == 0) {
+            Logger.error("Syntax: load-data <dashboards|config>");
+            return;
+        }
+
+        switch (args[0]) {
             case "guilds" -> {
-                DataManager.load();
-            }
-            case "guild" -> {
-                // TODO: Loadnutí jedné specifické guildy (podle ID)
+                GuildDataManager.loadAll();
+                GuildDataManager.loadDashboards();
             }
             case "config" -> {
                 Logger.info("Loading config...");

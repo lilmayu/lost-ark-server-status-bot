@@ -27,7 +27,7 @@ public class ConsoleCommandManager {
         consoleCommands.add(new DebugConsoleCommand());
         consoleCommands.add(new LangConsoleCommand());
         consoleCommands.add(new LoggerConsoleCommand());
-        // TODO: Příkaz na smazání guildy z dat
+        consoleCommands.add(new GuildConsoleCommand());
 
         startCommandThread();
     }

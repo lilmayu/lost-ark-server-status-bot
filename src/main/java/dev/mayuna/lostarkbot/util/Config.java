@@ -51,6 +51,7 @@ public class Config {
 
             mayuJson.saveJson();
 
+            Logger.setLevel(logLevel);
             return true;
         } catch (Exception exception) {
             exception.printStackTrace();

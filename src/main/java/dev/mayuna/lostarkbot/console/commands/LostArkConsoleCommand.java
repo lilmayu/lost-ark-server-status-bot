@@ -1,7 +1,7 @@
 package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
-import dev.mayuna.lostarkbot.managers.ServerDashboardHelper;
+import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;

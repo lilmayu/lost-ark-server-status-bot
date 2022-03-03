@@ -1,7 +1,7 @@
 package dev.mayuna.lostarkbot.util;
 
 import com.google.gson.*;
-import dev.mayuna.lostarkbot.managers.ServerDashboardHelper;
+import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
@@ -106,7 +106,7 @@ public class Utils {
 
     public static String getOnlinePlayers() {
         try {
-            URL url = new URL("https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=1599340");
+            URL url = new URL(Constants.STEAM_API_URL);
             URLConnection request = url.openConnection();
             request.connect();
 
