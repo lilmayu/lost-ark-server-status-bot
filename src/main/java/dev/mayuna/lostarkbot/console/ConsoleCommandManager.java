@@ -26,6 +26,8 @@ public class ConsoleCommandManager {
         consoleCommands.add(new LoadDataConsoleCommand());
         consoleCommands.add(new DebugConsoleCommand());
         consoleCommands.add(new LangConsoleCommand());
+        consoleCommands.add(new LoggerConsoleCommand());
+        consoleCommands.add(new GuildConsoleCommand());
 
         startCommandThread();
     }
@@ -42,7 +44,7 @@ public class ConsoleCommandManager {
         ArgumentParser argumentParser = new ArgumentParser(command);
 
         if (!argumentParser.hasAnyArguments()) {
-            Logger.error("Unknown command.");
+            Logger.error("Unknown command '" + command + "'!");
             return;
         }
 
@@ -65,7 +67,7 @@ public class ConsoleCommandManager {
             }
         }
 
-        Logger.error("Unknown command.");
+        Logger.error("Unknown command '" + command + "'!");
     }
 
     private static void startCommandThread() {

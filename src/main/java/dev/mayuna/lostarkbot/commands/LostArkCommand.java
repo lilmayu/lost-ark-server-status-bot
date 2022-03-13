@@ -1,8 +1,8 @@
 package dev.mayuna.lostarkbot.commands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
+import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
@@ -62,12 +62,12 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is already Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
-            ServerDashboard dashboard = ServerDashboardManager.createServerDashboard(channel);
+            ServerDashboard dashboard = ServerDashboardHelper.createServerDashboard(channel);
 
             if (dashboard != null) {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully created Server Dashboard.").build())
@@ -97,12 +97,12 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
-            if (ServerDashboardManager.deleteServerDashboard(channel)) {
+            if (ServerDashboardHelper.deleteServerDashboard(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed Server Dashboard from this channel!").build()).queue();
             } else {
                 hook.editOriginalEmbeds(MessageInfo.warningEmbed("Server Dashboard was removed, however message was unable to be deleted.").build()).queue();
@@ -123,12 +123,12 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
-            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
             long id = dashboard.getManagedGuildMessage().getRawGuildID();
 
             hook.editOriginalEmbeds(MessageInfo.informationEmbed("There is Server Dashboard with message ID `" + id + "`.").build()).queue();
@@ -150,13 +150,13 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
-            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
-            ServerDashboardManager.update(dashboard);
+            ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
+            ServerDashboardHelper.updateServerDashboard(dashboard);
 
             hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard updated!").build()).queue();
         }
@@ -177,15 +177,15 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
             try {
-                ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+                ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
                 dashboard.getManagedGuildMessage().getMessage().delete().complete();
-                ServerDashboardManager.update(dashboard);
+                ServerDashboardHelper.updateServerDashboard(dashboard);
 
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard resent!").build()).queue();
             } catch (Exception exception) {
@@ -216,7 +216,7 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
@@ -231,9 +231,9 @@ public class LostArkCommand extends SlashCommand {
             String correctServerName = Utils.doesServerExist(serverOption.getAsString());
 
             if (correctServerName != null) {
-                ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+                ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
                 dashboard.getFavoriteServers().add(correctServerName);
-                ServerDashboardManager.update(dashboard);
+                ServerDashboardHelper.updateServerDashboard(dashboard);
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added server `" + correctServerName + "` into Favorite section!").build()).queue();
             } else {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Server with name `" + serverOption.getAsString() + "` does not exist!").build()).queue();
@@ -267,17 +267,17 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
             String serverName = serverOption.getAsString();
 
-            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
             if (dashboard.getFavoriteServers().contains(serverName)) {
                 dashboard.getFavoriteServers().remove(serverName);
-                ServerDashboardManager.update(dashboard);
+                ServerDashboardHelper.updateServerDashboard(dashboard);
 
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed server `" + serverName + "` from Favorite section!").build()).queue();
             } else {
@@ -318,7 +318,7 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
@@ -326,10 +326,10 @@ public class LostArkCommand extends SlashCommand {
             String correctRegion = LostArkRegion.exists(regionOption.getAsString());
 
             if (correctRegion != null) {
-                ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+                ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
                 if (!dashboard.getHiddenRegions().contains(correctRegion)) {
                     dashboard.getHiddenRegions().add(correctRegion);
-                    ServerDashboardManager.update(dashboard);
+                    ServerDashboardHelper.updateServerDashboard(dashboard);
                     hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully hide region `" + correctRegion + "`!").build()).queue();
                 } else {
                     hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + correctRegion + "` is already hidden!").build()).queue();
@@ -373,7 +373,7 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
@@ -381,10 +381,10 @@ public class LostArkCommand extends SlashCommand {
             String correctRegion = LostArkRegion.exists(regionOption.getAsString());
 
             if (correctRegion != null) {
-                ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+                ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
                 if (dashboard.getHiddenRegions().contains(correctRegion)) {
                     dashboard.getHiddenRegions().remove(correctRegion);
-                    ServerDashboardManager.update(dashboard);
+                    ServerDashboardHelper.updateServerDashboard(dashboard);
                     hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed region `" + correctRegion + "`!").build()).queue();
                 } else {
                     hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + correctRegion + "` is not hidden!").build()).queue();
@@ -411,17 +411,17 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
-            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
             dashboard.getHiddenRegions().clear();
             for (LostArkRegion region : LostArkRegion.values()) {
                 dashboard.getHiddenRegions().add(region.name());
             }
-            ServerDashboardManager.update(dashboard);
+            ServerDashboardHelper.updateServerDashboard(dashboard);
             hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully hide all regions!").build()).queue();
         }
     }
@@ -441,14 +441,14 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
-            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
             dashboard.getHiddenRegions().clear();
-            ServerDashboardManager.update(dashboard);
+            ServerDashboardHelper.updateServerDashboard(dashboard);
             hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed all regions!").build()).queue();
         }
     }
@@ -512,14 +512,14 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            if (!ServerDashboardManager.isServerDashboardInChannel(channel)) {
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
-            ServerDashboard dashboard = ServerDashboardManager.getServerDashboardByChannel(channel);
+            ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
             dashboard.setLangCode(languagePack.getLangCode());
-            ServerDashboardManager.update(dashboard);
+            ServerDashboardHelper.updateServerDashboard(dashboard);
 
             hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully changed language to **" + languagePack.getLangName() + "**!").build()).queue();
         }

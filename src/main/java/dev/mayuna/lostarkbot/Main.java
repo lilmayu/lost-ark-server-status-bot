@@ -5,12 +5,14 @@ import dev.mayuna.lostarkbot.commands.AboutCommand;
 import dev.mayuna.lostarkbot.commands.DebugCommand;
 import dev.mayuna.lostarkbot.commands.LostArkCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
+import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
+import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.PresenceManager;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
+import dev.mayuna.lostarkbot.util.LegacyDashboardsLoader;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
@@ -24,11 +26,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -46,6 +43,8 @@ public class Main {
 
         Logger.info("Starting up Lost Ark - Server Status Bot @ v" + Constants.VERSION + "...");
         Logger.info("Made by mayuna#8016");
+
+        Logger.info("Initializing Console Commands...");
         ConsoleCommandManager.init();
 
         Logger.info("Loading library settings...");
@@ -83,9 +82,17 @@ public class Main {
 
     private static void loadManagers() {
         LanguageManager.load();
-        ServerDashboardManager.load();
-        ServerDashboardManager.init();
-        PresenceManager.init();
+        PresenceManager.startPresenceTimer();
+
+        if (!GuildDataManager.loadAll()) {
+            Logger.error("There was fatal error while loading guilds! Cannot proceed.");
+            System.exit(-1);
+        }
+
+        GuildDataManager.loadDashboards();
+
+        LegacyDashboardsLoader.load();
+        ServerDashboardHelper.startDashboardUpdateTimer();
     }
 
     private static void loadCommands() {
@@ -133,11 +140,11 @@ public class Main {
                 Logger.info("Shutting down...");
 
                 if (fullyLoaded) {
-                    Logger.info("Saving config and dashboards...");
+                    Logger.info("Saving config and guilds...");
                     Config.save();
-                    ServerDashboardManager.save();
+                    GuildDataManager.saveAll();
                 } else {
-                    Logger.warn("Bot did not fully loaded! Config and dashboards won't be saved.");
+                    Logger.warn("Bot did not fully loaded! Config and guilds won't be saved.");
                 }
 
                 Logger.info("o/");

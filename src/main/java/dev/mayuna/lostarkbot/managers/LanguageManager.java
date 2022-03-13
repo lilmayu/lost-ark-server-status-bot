@@ -19,6 +19,11 @@ public class LanguageManager {
 
     private final static @Getter List<LanguagePack> loadedLanguages = new ArrayList<>();
 
+    /**
+     * Gets {@link LanguagePack} by its lang code
+     * @param langCode Lang code
+     * @return Nullable {@link LanguagePack} (null, if no language has specified lang code)
+     */
     public static LanguagePack getLanguageByCode(String langCode) {
         for (LanguagePack languagePack : loadedLanguages) {
             if (languagePack.is(langCode)) {
@@ -29,6 +34,9 @@ public class LanguageManager {
         return null;
     }
 
+    /**
+     * Loads all languages from data storage
+     */
     public static void load() {
         Logger.info("Loading languages...");
         loadedLanguages.clear();
@@ -72,6 +80,10 @@ public class LanguageManager {
         Logger.success("Loaded " + loadedLanguages.size() + " languages!");
     }
 
+    /**
+     * Gets default language pack (en) even if it does not exist
+     * @return Not-null {@link LanguagePack}
+     */
     public static LanguagePack getDefaultLanguage() {
         LanguagePack languagePack = new LanguagePack();
 

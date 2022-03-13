@@ -2,7 +2,8 @@ package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
+import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -25,13 +26,7 @@ public class GuildsConsoleCommand extends AbstractConsoleCommand {
 
         int counter = 0;
         for (Guild guild : guilds) {
-            int numberOfDashboards = 0;
-
-            for (TextChannel textChannel : guild.getTextChannels()) {
-                if (ServerDashboardManager.isServerDashboardInChannel(textChannel)) {
-                    numberOfDashboards++;
-                }
-            }
+            int numberOfDashboards = GuildDataManager.getOrCreateGuildData(guild).getLoadedServerDashboards().size();
 
             if (verbose) {
                 Logger.info("[" + counter + "]: " + guild.getIdLong() + " // " + guild.getName() + " // Dashboards: " + numberOfDashboards + " // Owner: " + guild.getOwnerIdLong() + " (" + guild.getOwner() + ")");

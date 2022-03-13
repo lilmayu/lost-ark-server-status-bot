@@ -1,9 +1,8 @@
 package dev.mayuna.lostarkbot.util;
 
 import com.google.gson.*;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
-import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
@@ -80,7 +79,7 @@ public class Utils {
      * @return Null if server does not exist
      */
     public static String doesServerExist(String serverName) {
-        for (LostArkServer server : ServerDashboardManager.getLostArkServersCache().getServers()) {
+        for (LostArkServer server : ServerDashboardHelper.getLostArkServersCache().getServers()) {
             if (server.getName().equalsIgnoreCase(serverName)) {
                 return server.getName();
             }
@@ -107,7 +106,7 @@ public class Utils {
 
     public static String getOnlinePlayers() {
         try {
-            URL url = new URL("https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=1599340");
+            URL url = new URL(Constants.STEAM_API_URL);
             URLConnection request = url.openConnection();
             request.connect();
 

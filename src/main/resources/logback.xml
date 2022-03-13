@@ -10,7 +10,7 @@
             <pattern>[%d{HH:mm:ss.SSS}][%logger{0}/%thread] %color%-5level: %color%msg %n%end_color</pattern>
         </encoder>
     </appender>
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
