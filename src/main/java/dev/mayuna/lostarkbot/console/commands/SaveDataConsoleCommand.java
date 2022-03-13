@@ -18,7 +18,7 @@ public class SaveDataConsoleCommand extends AbstractConsoleCommand {
         String[] args = arguments.split(" ");
 
         if (args.length == 0) {
-            Logger.error("Syntax: save-data <dashboards|config>");
+            Logger.error("Syntax: save-data <guilds|config>");
             return;
         }
 
@@ -30,7 +30,7 @@ public class SaveDataConsoleCommand extends AbstractConsoleCommand {
                 Config.save();
             }
             default -> {
-                Logger.error("Syntax: save-data <dashboards|config|guild <guildID>>");
+                Logger.error("Syntax: save-data <guilds|config");
             }
         }
     }

@@ -105,7 +105,7 @@ public class GuildData extends ManagedGuild {
             return null;
         }
 
-        ManagedGuildMessage managedGuildMessage = ManagedGuildMessage.create(UUID.randomUUID().toString(), textChannel.getGuild(), textChannel, null);
+        ManagedGuildMessage managedGuildMessage = new ManagedGuildMessage(UUID.randomUUID().toString(), textChannel.getGuild(), textChannel, null);
         ServerDashboard serverDashboard = new ServerDashboard(managedGuildMessage);
 
         Waiter<Boolean> waiter = ServerDashboardHelper.updateServerDashboard(serverDashboard);
