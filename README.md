@@ -35,4 +35,4 @@ you can contact me via my [Discord support server](https://discord.gg/YMs6wXPqcB
 ### NOTE
 You **should** credit this repository in your bot's About Me section (via a URL): Your application on [Discord's Developer Portal](https://discord.com/developers/applications) -> General Information -> Description
 
-**If your self-hosted bot would reach a 100 servers, you may not verify it since it is not your work**, however the choice is your.
+**If your self-hosted bot would reach a 100 servers, you may not verify it since it is not your work**, however the choice is yours.
