@@ -7,6 +7,6 @@ public class Constants {
     public static final String STEAM_API_URL = "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=1599340";
 
     public static String ALTERNATIVE_PREFIX = "lostark!";
-    public static String VERSION = "1.3";
+    public static String VERSION = "13032022b";
 
 }
