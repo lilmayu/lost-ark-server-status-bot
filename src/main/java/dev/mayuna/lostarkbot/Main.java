@@ -59,7 +59,7 @@ public class Main {
         configLoaded = true;
 
         Logger.info("Loading JDA stuff...");
-        client = new CommandClientBuilder().useDefaultGame()
+        client = new CommandClientBuilder()
                 .useHelpBuilder(false)
                 .setOwnerId(String.valueOf(Config.getOwnerID()))
                 .setActivity(Activity.playing("Loading..."))
@@ -104,9 +104,7 @@ public class Main {
         try {
             JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getToken())
                     .addEventListeners(client.build())
-                    .addEventListeners(new MayuCoreListener())
-                    .enableIntents(GatewayIntent.GUILD_PRESENCES)
-                    .enableIntents(GatewayIntent.GUILD_MEMBERS);
+                    .addEventListeners(new MayuCoreListener());
             jda = jdaBuilder.build().awaitReady();
         } catch (Exception exception) {
             exception.printStackTrace();
