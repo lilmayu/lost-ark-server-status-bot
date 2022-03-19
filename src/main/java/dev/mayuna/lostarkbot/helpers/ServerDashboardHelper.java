@@ -5,6 +5,7 @@ import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.objects.GuildData;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
+import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.Waiter;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -119,6 +120,23 @@ public class ServerDashboardHelper {
         Waiter<Boolean> waiter = new Waiter<>(false);
 
         ManagedGuildMessage managedGuildMessage = serverDashboard.getManagedGuildMessage();
+
+        try {
+            if (PermissionUtils.isMissingPermissions(managedGuildMessage.getGuild().getSelfMember(), managedGuildMessage.getTextChannel())) {
+                Logger.warn("Bot has missing permissions in channel " + managedGuildMessage.getTextChannel() + " (" + managedGuildMessage.getGuild() + ")! Dashboard will be not updated.");
+
+                waiter.setObject(false);
+                waiter.proceed();
+                return waiter;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            Logger.warn("Failed to check for permissions for Server Dashboard " + serverDashboard.getName() + "! Probably user kicked the bot.");
+
+            waiter.setObject(false);
+            waiter.proceed();
+            return waiter;
+        }
 
         managedGuildMessage.updateEntries(Main.getJda(), RestActionMethod.QUEUE, entriesSuccess -> {
             Message message = new MessageBuilder().setEmbeds(EmbedUtils.createEmbed(serverDashboard, lostArkServersCache).build()).build();

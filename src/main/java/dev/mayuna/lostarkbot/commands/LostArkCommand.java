@@ -6,6 +6,7 @@ import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
+import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.utils.MessageInfo;
@@ -62,6 +63,10 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
             if (ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is already Server Dashboard in this channel!").build()).queue();
                 return;
@@ -105,7 +110,7 @@ public class LostArkCommand extends SlashCommand {
             if (ServerDashboardHelper.deleteServerDashboard(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed Server Dashboard from this channel!").build()).queue();
             } else {
-                hook.editOriginalEmbeds(MessageInfo.warningEmbed("Server Dashboard was removed, however message was unable to be deleted.").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.warningEmbed("Server Dashboard was removed, however message was unable to be deleted. Probably this bot does not have **View Channel** permission?").build()).queue();
             }
         }
     }
@@ -122,6 +127,10 @@ public class LostArkCommand extends SlashCommand {
             Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
 
             if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
@@ -150,6 +159,10 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
             if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
@@ -176,6 +189,10 @@ public class LostArkCommand extends SlashCommand {
             Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
 
             if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
@@ -216,8 +233,7 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
-            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
-                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
                 return;
             }
 
@@ -225,6 +241,11 @@ public class LostArkCommand extends SlashCommand {
 
             if (serverOption == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `server` argument.").build()).queue();
+                return;
+            }
+
+            if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
             }
 
@@ -259,6 +280,10 @@ public class LostArkCommand extends SlashCommand {
             Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
 
             OptionMapping serverOption = event.getOption("server");
 
@@ -310,6 +335,10 @@ public class LostArkCommand extends SlashCommand {
             Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
 
             OptionMapping regionOption = event.getOption("region");
 
@@ -366,6 +395,10 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
             OptionMapping regionOption = event.getOption("region");
 
             if (regionOption == null) {
@@ -411,6 +444,10 @@ public class LostArkCommand extends SlashCommand {
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
 
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
             if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
                 return;
@@ -440,6 +477,10 @@ public class LostArkCommand extends SlashCommand {
             Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
 
             if (!ServerDashboardHelper.isServerDashboardInChannel(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no Server Dashboard in this channel!").build()).queue();
@@ -497,6 +538,10 @@ public class LostArkCommand extends SlashCommand {
             Utils.makeEphemeral(event, true);
             InteractionHook hook = event.getHook();
             TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
 
             OptionMapping languageOption = event.getOption("code");
 

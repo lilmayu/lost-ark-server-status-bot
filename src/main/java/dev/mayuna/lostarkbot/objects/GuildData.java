@@ -140,20 +140,27 @@ public class GuildData extends ManagedGuild {
         this.save();
 
         ManagedGuildMessage managedGuildMessage = serverDashboard.getManagedGuildMessage();
-        managedGuildMessage.updateEntries(Main.getJda(), RestActionMethod.QUEUE, success -> {
-            managedGuildMessage.getMessage().delete().queue(successDelete -> {
-                waiter.setObject(true);
-                waiter.proceed();
-            }, failureDelete -> {
-                Logger.warn("Failed to remove Server Dashboard's message (" + serverDashboard.getName() + ")! However, it was removed from loaded ones.");
+        try {
+            managedGuildMessage.updateEntries(Main.getJda(), RestActionMethod.QUEUE, success -> {
+                managedGuildMessage.getMessage().delete().queue(successDelete -> {
+                    waiter.setObject(true);
+                    waiter.proceed();
+                }, failureDelete -> {
+                    Logger.warn("Failed to remove Server Dashboard's message (" + serverDashboard.getName() + ")! However, it was removed from loaded ones.");
+
+                    waiter.proceed(); // Default false
+                });
+            }, failure -> {
+                Logger.warn("Failed to update entries for Server Dashboard " + serverDashboard.getName() + "! However, it was removed from loaded ones.");
 
                 waiter.proceed(); // Default false
             });
-        }, failure -> {
-            Logger.warn("Failed to update entries for Server Dashboard " + serverDashboard.getName() + "! However, it was removed from loaded ones.");
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            Logger.warn("Failed to remove Server Dashboard's message (" + serverDashboard.getName() + ")! However, it was removed from loaded ones.");
 
             waiter.proceed(); // Default false
-        });
+        }
 
         return waiter;
     }

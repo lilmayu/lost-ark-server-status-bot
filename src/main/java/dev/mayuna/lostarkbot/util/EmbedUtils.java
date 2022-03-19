@@ -38,10 +38,10 @@ public class EmbedUtils {
         String description = "";
         description += "`" + lastUpdated + "`\n";
         description += languagePack.getCurrentPlayers().replace("{players}", onlinePlayers) + "\n\n";
-        description += "<:circle_green:943546669558018139> " + languagePack.getOnline() + " ";
-        description += "<:circle_red:943546670229114911> " + languagePack.getBusy() + " ";
-        description += "<:circle_blue:943546670115848202> " + languagePack.getFull() + " ";
-        description += "<:circle_yellow:943546669688049725> " + languagePack.getMaintenance();
+        description += "<:LA_online:954727071001755668> " + languagePack.getOnline() + " ";
+        description += "<:LA_busy:954730090862882826> " + languagePack.getBusy() + " ";
+        description += "<:LA_full:954728445684879400> " + languagePack.getFull() + " ";
+        description += "<:LA_warning:954727071014322226> " + languagePack.getMaintenance();
         embedBuilder.setDescription(description);
 
         LinkedHashMap<String, String> regionFields = new LinkedHashMap<>();
@@ -103,7 +103,7 @@ public class EmbedUtils {
                 if (serverStatus != null) {
                     toAppend = Utils.getServerLine(serverName, serverStatus) + "\n";
                 } else {
-                    toAppend = "<:circle_black:943546670166188142> " + serverName + " (" + languagePack.getNotFound() + ")\n";
+                    toAppend = "<:LA_not_found:954727071026929694> " + serverName + " (" + languagePack.getNotFound() + ")\n";
                 }
 
                 if (fieldValue.length() + toAppend.length() < 1024) {

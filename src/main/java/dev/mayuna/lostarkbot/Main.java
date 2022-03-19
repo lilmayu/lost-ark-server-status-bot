@@ -24,6 +24,7 @@ import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -60,9 +61,10 @@ public class Main {
 
         Logger.info("Loading JDA stuff...");
         client = new CommandClientBuilder()
+                .setStatus(OnlineStatus.IDLE)
+                .setActivity(Activity.playing("Loading..."))
                 .useHelpBuilder(false)
                 .setOwnerId(String.valueOf(Config.getOwnerID()))
-                .setActivity(Activity.playing("Loading..."))
                 .setPrefix(Config.getPrefix())
                 .setAlternativePrefix(Constants.ALTERNATIVE_PREFIX)
                 .setListener(new CommandListener());
@@ -83,7 +85,6 @@ public class Main {
 
     private static void loadManagers() {
         LanguageManager.load();
-        PresenceManager.startPresenceTimer();
 
         if (!GuildDataManager.loadAll()) {
             Logger.error("There was fatal error while loading guilds! Cannot proceed.");
@@ -94,6 +95,7 @@ public class Main {
 
         LegacyDashboardsLoader.load();
         ServerDashboardHelper.startDashboardUpdateTimer();
+        PresenceManager.startPresenceTimer();
     }
 
     private static void loadCommands() {
