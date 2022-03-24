@@ -9,4 +9,10 @@ public class Constants {
     public static String ALTERNATIVE_PREFIX = "lostark!";
     public static String VERSION = "19032022b";
 
+    public static String ONLINE_EMOTE = "<:LA_online:954727071001755668>";
+    public static String BUSY_EMOTE = "<:LA_busy:954730090862882826>";
+    public static String FULL_EMOTE = "<:LA_full:954728445684879400>";
+    public static String WARNING_EMOTE = "<:LA_warning:954727071014322226>";
+    public static String NOT_FOUND_EMOTE = "<:LA_not_found:954727071026929694>";
+
 }

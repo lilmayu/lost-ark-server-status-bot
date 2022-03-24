@@ -51,14 +51,14 @@ public class Utils {
         String serverLine;
 
         switch (serverStatus) {
-            case GOOD -> serverLine = "<:circle_green:943546669558018139> ";
-            case BUSY -> serverLine = "<:circle_red:943546670229114911> ";
-            case FULL -> serverLine = "<:circle_blue:943546670115848202> ";
-            case MAINTENANCE -> serverLine = "<:circle_yellow:943546669688049725> ";
-            default -> serverLine = "<:circle_black:943546670166188142> ";
+            case GOOD -> serverLine = Constants.ONLINE_EMOTE;
+            case BUSY -> serverLine = Constants.BUSY_EMOTE;
+            case FULL -> serverLine = Constants.FULL_EMOTE;
+            case MAINTENANCE -> serverLine = Constants.WARNING_EMOTE;
+            default -> serverLine = Constants.NOT_FOUND_EMOTE;
         }
 
-        serverLine += serverName;
+        serverLine += " " + serverName;
 
         return serverLine;
     }
