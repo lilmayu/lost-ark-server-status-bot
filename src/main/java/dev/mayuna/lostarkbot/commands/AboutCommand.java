@@ -25,7 +25,7 @@ public class AboutCommand extends SlashCommand {
 
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setDescription("");
-        embedBuilder.setTitle("Lost Ark - Server Status Bot");
+        embedBuilder.setTitle("Mayu's Lost Ark Bot");
         embedBuilder.addField("Version", "`" + Constants.VERSION + "`", false);
         embedBuilder.addField("Source code", "[GitHub Repository](https://github.com/lilmayu/lost-ark-server-status-bot)", false);
         embedBuilder.addField("Support", "[Support server](https://discord.gg/YMs6wXPqcB)", false);

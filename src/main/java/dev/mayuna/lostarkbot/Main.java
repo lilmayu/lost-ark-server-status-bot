@@ -40,7 +40,7 @@ public class Main {
         long start = System.currentTimeMillis();
         Logger.init();
 
-        Logger.info("Starting up Lost Ark - Server Status Bot @ v" + Constants.VERSION + "...");
+        Logger.info("Starting up Mayu's Lost Ark Bot @ v" + Constants.VERSION + "...");
         Logger.info("Made by mayuna#8016");
 
         Logger.info("Initializing Console Commands...");
