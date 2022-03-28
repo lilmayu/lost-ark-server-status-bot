@@ -2,9 +2,12 @@ package dev.mayuna.lostarkbot.managers;
 
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.objects.GuildData;
+import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import lombok.Getter;
 import lombok.NonNull;
@@ -233,10 +236,10 @@ public class GuildDataManager {
     }
 
     /**
-     * Loads all {@link GuildData}'s dashboards
+     * Loads all {@link GuildData}'s dashboards and notification channels
      */
-    public static void loadDashboards() {
-        Logger.info("[GUILD-LOAD] Loading all dashboards...");
+    public static void loadAllGuildData() {
+        Logger.info("[GUILD-LOAD] Loading all dashboards and notification channels...");
         long start = System.currentTimeMillis();
 
         synchronized (loadedGuildDataList) {
@@ -247,10 +250,13 @@ public class GuildDataManager {
 
                 Logger.debug("[GUILD-LOAD] Loading dashboards for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
                 guildData.loadDashboards();
+
+                Logger.debug("[GUILD-LOAD] Loading notification channels for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                guildData.loadNotificationChannels();
             }
         }
 
-        Logger.success("[GUILD-LOAD] Loading dashboards completed, loaded " + countAllDashboards() + " dashboards. (took " + (System.currentTimeMillis() - start) + "ms)");
+        Logger.success("[GUILD-LOAD] Loading dashboards and notification channels completed, loaded " + countAllDashboards() + " dashboards and " + countAllNotificationChannels() + " notification channels. (took " + (System.currentTimeMillis() - start) + "ms)");
     }
 
     // Saving
@@ -332,5 +338,47 @@ public class GuildDataManager {
         }
 
         return counter;
+    }
+
+    /**
+     * Counts all notification channels
+     *
+     * @return Number of notification channels
+     */
+    public static int countAllNotificationChannels() {
+        int counter = 0;
+
+        synchronized (loadedGuildDataList) {
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+            while (guildDataIterator.hasNext()) {
+                counter += guildDataIterator.next().getLoadedNotificationChannels().size();
+            }
+        }
+
+        return counter;
+    }
+
+    public static void processAllGuildDataWithNotifications(Notifications notifications) {
+        synchronized (loadedGuildDataList) {
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+            while (guildDataIterator.hasNext()) {
+                guildDataIterator.next().sendUnreadNotificationsByRules(notifications);
+            }
+        }
+    }
+
+    public static void processServerStatusChange(LostArkServers previous, LostArkServers current) {
+        LostArkServersChange lostArkServersChange = new LostArkServersChange(previous, current);
+
+        if (!lostArkServersChange.hasChangedAnything()) {
+            return;
+        }
+
+        synchronized (loadedGuildDataList) {
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+            while (guildDataIterator.hasNext()) {
+                guildDataIterator.next().processServerStatusChange(lostArkServersChange);
+            }
+        }
     }
 }

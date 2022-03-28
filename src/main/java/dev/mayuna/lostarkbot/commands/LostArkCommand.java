@@ -364,7 +364,7 @@ public class LostArkCommand extends SlashCommand {
                     hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + correctRegion + "` is already hidden!").build()).queue();
                 }
             } else {
-                hook.editOriginalEmbeds(MessageInfo.successEmbed("Region `" + regionOption.getAsString() + "` does not exist!").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Region `" + regionOption.getAsString() + "` does not exist!").build()).queue();
             }
         }
     }

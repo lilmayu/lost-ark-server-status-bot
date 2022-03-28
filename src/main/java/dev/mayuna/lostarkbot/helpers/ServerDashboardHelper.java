@@ -16,6 +16,7 @@ import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
 import dev.mayuna.mayusjdautils.utils.RestActionMethod;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -28,7 +29,7 @@ import java.util.TimerTask;
 public class ServerDashboardHelper {
 
     private static @Getter Timer updateTimer;
-    private static @Getter LostArkServers lostArkServersCache;
+    private static @Getter @Setter LostArkServers lostArkServersCache;
     private static @Getter String onlinePlayersCache;
 
     public static void startDashboardUpdateTimer() {
@@ -43,7 +44,9 @@ public class ServerDashboardHelper {
                 Logger.debug("Updating " + guildsSize + " guilds...");
 
                 try {
+                    LostArkServers previousServerCache = lostArkServersCache;
                     updateCache();
+                    GuildDataManager.processServerStatusChange(previousServerCache, lostArkServersCache);
 
                     long start = System.currentTimeMillis();
                     GuildDataManager.updateAllGuildData();

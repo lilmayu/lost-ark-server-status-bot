@@ -1,15 +1,13 @@
 package dev.mayuna.lostarkbot;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import dev.mayuna.lostarkbot.commands.AboutCommand;
-import dev.mayuna.lostarkbot.commands.DebugCommand;
-import dev.mayuna.lostarkbot.commands.HelpCommand;
-import dev.mayuna.lostarkbot.commands.LostArkCommand;
+import dev.mayuna.lostarkbot.commands.*;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
+import dev.mayuna.lostarkbot.managers.NotificationsManager;
 import dev.mayuna.lostarkbot.managers.PresenceManager;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
@@ -27,7 +25,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class Main {
 
@@ -91,7 +88,8 @@ public class Main {
             System.exit(-1);
         }
 
-        GuildDataManager.loadDashboards();
+        GuildDataManager.loadAllGuildData();
+        NotificationsManager.load();
 
         LegacyDashboardsLoader.load();
         ServerDashboardHelper.startDashboardUpdateTimer();
@@ -99,7 +97,7 @@ public class Main {
     }
 
     private static void loadCommands() {
-        client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new DebugCommand(), new HelpCommand());
+        client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new DebugCommand(), new HelpCommand(), new NotificationsCommand());
     }
 
     private static void loginIntoDiscord() {

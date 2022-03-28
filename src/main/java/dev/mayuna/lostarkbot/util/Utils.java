@@ -1,13 +1,19 @@
 package dev.mayuna.lostarkbot.util;
 
 import com.google.gson.*;
+import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
+import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.LostArkServersChange;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
+import dev.mayuna.mayuslibrary.utils.ArrayUtils;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,9 +22,7 @@ import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class Utils {
 
@@ -61,6 +65,16 @@ public class Utils {
         serverLine += " " + serverName;
 
         return serverLine;
+    }
+
+    public static String getEmoteByStatus(ServerStatus serverStatus) {
+        return switch (serverStatus) {
+            case GOOD -> Constants.ONLINE_EMOTE;
+            case BUSY -> Constants.BUSY_EMOTE;
+            case FULL -> Constants.FULL_EMOTE;
+            case MAINTENANCE -> Constants.WARNING_EMOTE;
+            default -> Constants.NOT_FOUND_EMOTE;
+        };
     }
 
     public static ServerStatus getServerStatus(String serverName, LostArkServers servers) {
@@ -132,5 +146,75 @@ public class Utils {
         return new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .create();
+    }
+
+    public static OptionData getActionArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "action", "Action", true);
+        optionData.addChoice("Enable", "enable");
+        optionData.addChoice("Disable", "disable");
+        return optionData;
+    }
+
+    public static OptionData getNewsCategoryArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "category", "News category", true);
+        for (NewsCategory newsCategory : NewsCategory.values()) {
+            optionData.addChoice(newsCategory.toString(), newsCategory.name());
+        }
+        return optionData;
+    }
+
+    public static OptionData getForumsCategoryArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "category", "Forum category", true);
+        for (ForumsCategory forumsCategory : ForumsCategory.values()) {
+            optionData.addChoice(forumsCategory.toString(), forumsCategory.name());
+        }
+        return optionData;
+    }
+
+    public static OptionData getRegionArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "region", "Region", true);
+        for (LostArkRegion region : LostArkRegion.values()) {
+            optionData.addChoice(region.getFormattedName(), region.name());
+        }
+        return optionData;
+    }
+
+    public static OptionData getClearArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "clear", "Determines which notifications should be removed", true);
+        optionData.addChoice("News", "news");
+        optionData.addChoice("Forums", "forums");
+        optionData.addChoice("Status change Server", "status_server");
+        optionData.addChoice("Status change Region", "status_region");
+        return optionData;
+    }
+
+    public static boolean isLast(Object[] array, Object object) {
+        return ArrayUtils.getLast(array) == object;
+    }
+
+    public static boolean isLast(Collection<?> collection, Object object) {
+        return isLast(collection.toArray(), object);
+    }
+
+    public static LostArkServer getServerFromList(Collection<LostArkServer> servers, String serverName) {
+        for (LostArkServer lostArkServer : servers) {
+            if (lostArkServer.getName().equalsIgnoreCase(serverName)) {
+                return lostArkServer;
+            }
+        }
+
+        return null;
+    }
+
+    public static List<LostArkServersChange.Difference> getDifferencesByRegion(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences, LostArkRegion lostArkRegion) {
+        List<LostArkServersChange.Difference> differences = new LinkedList<>();
+
+        regionDifferences.forEach((difference, regionMap) -> {
+            if (regionMap == lostArkRegion) {
+                differences.add(difference);
+            }
+        });
+
+        return differences;
     }
 }

@@ -4,6 +4,7 @@ import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.util.HashUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 
 public class DebugConsoleCommand extends AbstractConsoleCommand {
@@ -20,6 +21,24 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
             GuildDataManager.updateAllGuildData();
 
             Logger.info("Done.");
+            return;
+        }
+
+        if (arguments.contains(" ")) {
+            String[] args = arguments.split(" ");
+
+            if (args.length < 2) {
+                Logger.error("Invalid syntax! Syntax: <hash> <string>");
+                return;
+            }
+
+            switch (args[0]) {
+                case "hash" -> {
+                    Logger.info("Hash of '" + args[1] + "' is '" + HashUtils.hashMD5(args[1]) +"'");
+                }
+            }
+
+
             return;
         }
 

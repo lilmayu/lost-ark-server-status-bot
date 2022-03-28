@@ -3,14 +3,17 @@ package dev.mayuna.lostarkbot.objects;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import dev.mayuna.lostarkbot.Main;
+import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.Waiter;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
 import dev.mayuna.mayusjdautils.managed.ManagedGuild;
 import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
+import dev.mayuna.mayusjdautils.managed.ManagedTextChannel;
 import dev.mayuna.mayusjdautils.utils.RestActionMethod;
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GuildData extends ManagedGuild {
 
     private @Getter @Expose @SerializedName("serverDashboards") List<ServerDashboard> loadedServerDashboards = Collections.synchronizedList(new ArrayList<>());
+    private @Getter @Expose @SerializedName("notificationChannels") List<NotificationChannel> loadedNotificationChannels = Collections.synchronizedList(new ArrayList<>());
 
     public GuildData(Guild guild) {
         super(UUID.randomUUID().toString(), guild);
@@ -37,6 +41,17 @@ public class GuildData extends ManagedGuild {
     public static File getGuildDataFile(long guildID) {
         return new File(Constants.GUILDS_FOLDER + guildID + ".json");
     }
+
+    // Saving
+
+    /**
+     * Saves current {@link GuildData}
+     */
+    public void save() {
+        GuildDataManager.saveGuildData(this);
+    }
+
+    // === Server Dashboards === //
 
     /**
      * Adds {@link ServerDashboard} into loaded server dashboards
@@ -98,7 +113,7 @@ public class GuildData extends ManagedGuild {
      *
      * @param textChannel Non-null {@link TextChannel}
      *
-     * @return Null if there already is some {@link ServerDashboard} in specified server or if bot was unable to create/edit message
+     * @return Null if there already is some {@link ServerDashboard} in specified text channel or if bot was unable to create/edit message
      */
     public ServerDashboard createServerDashboard(@NonNull TextChannel textChannel) {
         if (isServerDashboardInChannel(textChannel)) {
@@ -163,15 +178,6 @@ public class GuildData extends ManagedGuild {
         }
 
         return waiter;
-    }
-
-    // Saving
-
-    /**
-     * Saves current {@link GuildData}
-     */
-    public void save() {
-        GuildDataManager.saveGuildData(this);
     }
 
     // Updating
@@ -250,6 +256,160 @@ public class GuildData extends ManagedGuild {
             }
         }
     }
+
+    // === Server Dashboards === //
+
+    // === Notification Channels === //
+
+    /**
+     * Adds {@link NotificationChannel} into loaded notification channels
+     *
+     * @param notificationChannel Non-null {@link NotificationChannel}
+     */
+    public void addNotificationChannel(@NonNull NotificationChannel notificationChannel) {
+        synchronized (loadedNotificationChannels) {
+            loadedNotificationChannels.add(notificationChannel);
+        }
+    }
+
+    /**
+     * Removes {@link NotificationChannel} from loaded notification channels
+     *
+     * @param notificationChannel Non-null {@link NotificationChannel}
+     */
+    public void removeNotificationChannel(@NonNull NotificationChannel notificationChannel) {
+        synchronized (loadedNotificationChannels) {
+            loadedNotificationChannels.remove(notificationChannel);
+        }
+    }
+
+
+    /**
+     * Gets {@link NotificationChannel} from loaded notification channels
+     *
+     * @param textChannel Non-null {@link TextChannel}
+     *
+     * @return Null if {@link NotificationChannel} does not exist in specified Text Channel
+     */
+    public NotificationChannel getNotificationChannel(@NonNull TextChannel textChannel) {
+        synchronized (loadedNotificationChannels) {
+            Iterator<NotificationChannel> notificationChannelIterator = loadedNotificationChannels.listIterator();
+            while (notificationChannelIterator.hasNext()) {
+                NotificationChannel notificationChannel = notificationChannelIterator.next();
+
+                if (notificationChannel.getManagedTextChannel().getRawTextChannelID() == textChannel.getIdLong()) {
+                    return notificationChannel;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Determines if {@link NotificationChannel} exists in specified Text Channel
+     *
+     * @param textChannel Non-null {@link TextChannel}
+     *
+     * @return true if is, false otherwise
+     */
+    public boolean isNotificationChannelInChannel(@NonNull TextChannel textChannel) {
+        return getNotificationChannel(textChannel) != null;
+    }
+
+    /**
+     * Tries to create {@link NotificationChannel} in specified Text Channel
+     *
+     * @param textChannel Non-null {@link TextChannel}
+     *
+     * @return Null if there already is some {@link NotificationChannel} in specified text channel
+     */
+    public NotificationChannel createNotificationChannel(@NonNull TextChannel textChannel) {
+        if (isNotificationChannelInChannel(textChannel)) {
+            return null;
+        }
+
+        ManagedTextChannel managedTextChannel = new ManagedTextChannel(UUID.randomUUID().toString(), textChannel.getGuild(), textChannel);
+        NotificationChannel notificationChannel = new NotificationChannel(managedTextChannel);
+
+        addNotificationChannel(notificationChannel);
+
+        return notificationChannel;
+    }
+
+    /**
+     * Tries to delete {@link NotificationChannel} from specified {@link TextChannel}
+     *
+     * @param textChannel Non-null {@link TextChannel}
+     *
+     * @return True if {@link NotificationChannel} was removed
+     */
+    public boolean deleteNotificationChannel(@NonNull TextChannel textChannel) {
+        NotificationChannel notificationChannel = this.getNotificationChannel(textChannel);
+
+        removeNotificationChannel(notificationChannel);
+
+        return !isNotificationChannelInChannel(textChannel);
+    }
+
+    /**
+     * Loads Notification channels
+     */
+    public void loadNotificationChannels() {
+        if (loadedNotificationChannels == null) {
+            loadedNotificationChannels = new ArrayList<>();
+            return;
+        }
+
+        synchronized (this) {
+            List<NotificationChannel> notificationChannelsToRemove = new ArrayList<>(loadedNotificationChannels.size());
+
+            Iterator<NotificationChannel> notificationChannelIterator = loadedNotificationChannels.listIterator();
+            while (notificationChannelIterator.hasNext()) {
+                NotificationChannel notificationChannel = notificationChannelIterator.next();
+
+                try {
+                    notificationChannel.getManagedTextChannel().updateEntries(Main.getJda());
+
+                    Logger.debug("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+
+                    Logger.error("[GUILD-DATA] Unable to load Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Probably bot was kicked or text channel was deleted.");
+                    notificationChannelsToRemove.add(notificationChannel);
+                }
+            }
+
+            if (!notificationChannelsToRemove.isEmpty()) {
+                Logger.debug("[GUILD-DATA] Removing " + notificationChannelsToRemove.size() + " invalid Notification Channels...");
+                loadedNotificationChannels.removeAll(notificationChannelsToRemove);
+            }
+        }
+    }
+
+    public void sendUnreadNotificationsByRules(@NonNull Notifications notifications) {
+        synchronized (loadedNotificationChannels) {
+            Iterator<NotificationChannel> notificationChannelIterator = loadedNotificationChannels.listIterator();
+            while (notificationChannelIterator.hasNext()) {
+                NotificationChannel notificationChannel = notificationChannelIterator.next();
+
+                notificationChannel.sendUnreadNotificationsByRules(notifications);
+            }
+        }
+    }
+
+    public void processServerStatusChange(LostArkServersChange lostArkServersChange) {
+        synchronized (loadedNotificationChannels) {
+            Iterator<NotificationChannel> notificationChannelIterator = loadedNotificationChannels.listIterator();
+            while (notificationChannelIterator.hasNext()) {
+                NotificationChannel notificationChannel = notificationChannelIterator.next();
+
+                notificationChannel.processServerStatusChange(lostArkServersChange);
+            }
+        }
+    }
+
+    // === Notification Channels === //
 
     @Override
     public boolean equals(Object object) {

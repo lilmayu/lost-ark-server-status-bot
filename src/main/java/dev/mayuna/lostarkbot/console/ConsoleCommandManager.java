@@ -29,6 +29,8 @@ public class ConsoleCommandManager {
         consoleCommands.add(new LoggerConsoleCommand());
         consoleCommands.add(new GuildConsoleCommand());
         consoleCommands.add(new WriteDownNumberOfGuildsConsoleCommand());
+        consoleCommands.add(new ApiConsoleCommand());
+        consoleCommands.add(new NotificationsConsoleCommand());
 
         startCommandThread();
     }
