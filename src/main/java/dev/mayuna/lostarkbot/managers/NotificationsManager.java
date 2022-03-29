@@ -21,6 +21,7 @@ import dev.mayuna.lostarkbot.util.JsonUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
+import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 import lombok.Getter;
 
 import java.util.*;
@@ -46,11 +47,18 @@ public class NotificationsManager {
         notificationsUpdateWorker.schedule(new TimerTask() {
             @Override
             public void run() {
-                Logger.debug("Fetching everything from API...");
-                fetchAll();
+                try {
+                    Logger.debug("Fetching everything from API...");
+                    fetchAll();
 
-                Logger.debug("Checking if there are new notifications...");
-                processPotentialNewNotifications();
+                    Logger.debug("Checking if there are new notifications...");
+                    processPotentialNewNotifications();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                    ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), exception);
+
+                    Logger.error("Exception occurred while updating notifications!");
+                }
             }
         }, 0, 300000);
     }

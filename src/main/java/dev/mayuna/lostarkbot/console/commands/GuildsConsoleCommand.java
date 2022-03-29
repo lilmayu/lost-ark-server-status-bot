@@ -4,7 +4,9 @@ import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.objects.GuildData;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 
@@ -18,23 +20,31 @@ public class GuildsConsoleCommand extends AbstractConsoleCommand {
 
     @Override
     public void execute(String arguments) {
-        boolean verbose = arguments.contains("verbose");
-
         List<Guild> guilds = Main.getJda().getGuilds();
 
-        Logger.info("=== Connected guilds - " + guilds.size() + " ===");
-
-        int counter = 0;
+        int counter = -1;
         for (Guild guild : guilds) {
-            int numberOfDashboards = GuildDataManager.getOrCreateGuildData(guild).getLoadedServerDashboards().size();
+            counter++;
 
-            if (verbose) {
-                Logger.info("[" + counter + "]: " + guild.getIdLong() + " // " + guild.getName() + " // Dashboards: " + numberOfDashboards + " // Owner: " + guild.getOwnerIdLong() + " (" + guild.getOwner() + ")");
-            } else {
-                Logger.info("[" + counter + "]: " + guild.getIdLong() + " // " + guild.getName() + " // Dashboards: " + numberOfDashboards);
+            GuildData guildData = GuildDataManager.getGuildData(guild);
+
+            if (guildData == null) {
+                Logger.warn("[" + counter +  "]: " + guild.getIdLong() + " // Does not have GuildData");
+                continue;
             }
 
-            counter++;
+            printGuild(guildData, counter, arguments.contains("verbose"));
+        }
+
+        Logger.info("=== Connected guilds - " + guilds.size() + " ===");
+    }
+
+    private void printGuild(GuildData guildData, int counter, boolean verbose) {
+        Logger.info("[" + counter + "]: " + guildData.getRawGuildID() + " // " + guildData.getGuild().getName());
+        Logger.info(" - D: " + guildData.getLoadedServerDashboards().size() + " | N: " + guildData.getLoadedNotificationChannels().size());
+
+        if (verbose) {
+            Logger.info(" - U: " + guildData.getGuild().getMemberCount() + " | C: " + guildData.getGuild().getOwnerIdLong());
         }
     }
 }

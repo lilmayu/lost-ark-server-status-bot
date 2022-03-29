@@ -18,6 +18,7 @@ public class Config {
     private static @Getter @Setter String prefix = "la!";
     private static @Getter @Setter String token = "### YOUR TOKEN HERE ###";
     private static @Getter @Setter String logLevel = "debug";
+    private static @Getter @Setter String unofficialLostArkAPIUrl = "https://lost-ark-api.vercel.app";
     private static @Getter @Setter long exceptionMessageChannelID = 0;
     private static @Getter @Setter long ownerID = 0;
     private static @Getter @Setter boolean debug = false;

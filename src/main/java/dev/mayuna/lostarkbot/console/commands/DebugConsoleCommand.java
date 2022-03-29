@@ -46,6 +46,7 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
         Logger.info("JDA Guilds: " + Main.getJda().getGuilds().size());
         Logger.info("GuildData: " + GuildDataManager.getLoadedGuildDataList().size());
         Logger.info("Dashboards: " + GuildDataManager.countAllDashboards());
+        Logger.info("Notifications ch.: " + GuildDataManager.countAllNotificationChannels());
         Logger.info("In-game players: " + ServerDashboardHelper.getOnlinePlayersCache());
         Logger.info("");
         Logger.info("Run lost-ark command for lost-ark's debug");

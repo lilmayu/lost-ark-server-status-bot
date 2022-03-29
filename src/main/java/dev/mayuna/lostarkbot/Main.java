@@ -97,7 +97,7 @@ public class Main {
     }
 
     private static void loadCommands() {
-        client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new DebugCommand(), new HelpCommand(), new NotificationsCommand());
+        client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new HelpCommand(), new NotificationsCommand());
     }
 
     private static void loginIntoDiscord() {

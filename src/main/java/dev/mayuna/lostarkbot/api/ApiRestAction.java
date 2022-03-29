@@ -8,6 +8,7 @@ import dev.mayuna.lostarkbot.api.exceptions.HttpException;
 import dev.mayuna.lostarkbot.api.exceptions.MissingPathParametersException;
 import dev.mayuna.lostarkbot.api.misc.*;
 import dev.mayuna.lostarkbot.api.unofficial.UnofficialLostArkApi;
+import dev.mayuna.lostarkbot.util.logging.Logger;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -123,7 +124,19 @@ public class ApiRestAction<T extends ApiResponse> {
                 return null;
             }
 
-            responseBody = JsonParser.parseString(httpResponse.body()).getAsJsonObject();
+            if (httpResponse.body().contains("A server error has occurred")) {
+                apiErrorCallback.accept(new InternalServerError());
+                return null;
+            }
+
+            try {
+                responseBody = JsonParser.parseString(httpResponse.body()).getAsJsonObject();
+            } catch (Exception exception) {
+                Logger.error("Invalid JSON: " + httpResponse.body());
+
+                httpErrorCallback.accept(new HttpError(-1, exception));
+                return null;
+            }
 
             if (api instanceof UnofficialLostArkApi) {
                 Gson gson = new Gson();
