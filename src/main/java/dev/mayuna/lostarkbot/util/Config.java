@@ -38,6 +38,7 @@ public class Config {
             prefix = mayuJson.getOrCreate("prefix", new JsonPrimitive(prefix)).getAsString();
             token = mayuJson.getOrCreate("token", new JsonPrimitive(token)).getAsString();
             logLevel = mayuJson.getOrCreate("logLevel", new JsonPrimitive(logLevel)).getAsString();
+            unofficialLostArkAPIUrl = mayuJson.getOrCreate("unofficialLostArkAPIUrl", new JsonPrimitive(unofficialLostArkAPIUrl)).getAsString();
             exceptionMessageChannelID = mayuJson.getOrCreate("exceptionMessageChannelID", new JsonPrimitive(exceptionMessageChannelID)).getAsLong();
             ownerID = mayuJson.getOrCreate("ownerID", new JsonPrimitive(ownerID)).getAsLong();
             debug = mayuJson.getOrCreate("debug", new JsonPrimitive(debug)).getAsBoolean();
@@ -68,6 +69,7 @@ public class Config {
             mayuJson.add("prefix", prefix);
             mayuJson.add("token", token);
             mayuJson.add("logLevel", logLevel);
+            mayuJson.add("unofficialLostArkAPIUrl", unofficialLostArkAPIUrl);
             mayuJson.add("exceptionMessageChannelID", exceptionMessageChannelID);
             mayuJson.add("ownerID", ownerID);
             mayuJson.add("debug", debug);

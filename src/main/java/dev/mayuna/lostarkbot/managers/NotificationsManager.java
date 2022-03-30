@@ -44,7 +44,7 @@ public class NotificationsManager {
     public static void load() {
         HashCache.loadHashes();
 
-        notificationsUpdateWorker.schedule(new TimerTask() {
+        notificationsUpdateWorker.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -96,13 +96,17 @@ public class NotificationsManager {
         forumsMaintenance = fetch(api.fetchForumPosts(ForumsCategory.MAINTENANCE), "Forums Maintenance");
         forumsDowntime = fetch(api.fetchForumPosts(ForumsCategory.DOWNTIME), "Forums Downtime");
 
-        List<ForumsPostObject> toRemoveFromMaintenance = new ArrayList<>();
-        for (ForumsPostObject forumsPostObject : forumsMaintenance.getForumsPostObjects()) {
-            if (forumsPostObject.getTitle().startsWith("[Downtime]")) {
-                toRemoveFromMaintenance.add(forumsPostObject);
+        if (forumsMaintenance != null) {
+            List<ForumsPostObject> toRemoveFromMaintenance = new ArrayList<>();
+            for (ForumsPostObject forumsPostObject : forumsMaintenance.getForumsPostObjects()) {
+                if (forumsPostObject.getTitle().startsWith("[Downtime]")) {
+                    toRemoveFromMaintenance.add(forumsPostObject);
+                }
             }
+            forumsMaintenance.remove(toRemoveFromMaintenance);
+        } else {
+            Logger.warn("forumsMaintenance is null!");
         }
-        forumsMaintenance.remove(toRemoveFromMaintenance);
     }
 
     public static Notifications getUnreadNotifications() {
@@ -168,13 +172,13 @@ public class NotificationsManager {
 
             restAction.onHttpError(httpError -> {
                 httpError.getException().printStackTrace();
-                Logger.error("[REQUESTER] HTTP Error occurred while requesting " + infoType + "! Code: " + httpError.getCode());
+                Logger.error("[REQUESTER] HTTP Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + httpError.getCode());
 
                 waitTime.set(10000);
                 retries.addAndGet(1);
             });
             restAction.onApiError(apiError -> {
-                Logger.error("[REQUESTER] API Error occurred while requesting " + infoType + "! Code: " + apiError.getError());
+                Logger.error("[REQUESTER] API Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + apiError.getError());
 
                 waitTime.set(10000);
                 retries.addAndGet(1);
