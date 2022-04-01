@@ -3,9 +3,9 @@ package dev.mayuna.lostarkbot.listeners;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.utils.MessageInfo;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
-import dev.mayuna.mayuslibrary.logging.Logger;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -15,51 +15,51 @@ public class CommandListener implements com.jagrosh.jdautilities.command.Command
 
     @Override
     public void onCommand(CommandEvent event, Command command) {
-        Logger.trace("PrefixCommand @ " + event.getResponseNumber());
-        Logger.trace("- Name: '" + command.getName() + "'; Arguments: '" + event.getArgs() + "'; Full message: '" + event.getMessage().getContentRaw() + "'");
-        Logger.trace("- Author: " + event.getAuthor());
-        Logger.trace("- ChannelType: " + event.getChannelType().name());
+        Logger.flow("PrefixCommand @ " + event.getResponseNumber());
+        Logger.flow("- Name: '" + command.getName() + "'; Arguments: '" + event.getArgs() + "'; Full message: '" + event.getMessage().getContentRaw() + "'");
+        Logger.flow("- Author: " + event.getAuthor());
+        Logger.flow("- ChannelType: " + event.getChannelType().name());
         if (event.isFromType(ChannelType.TEXT)) {
-            Logger.trace("- Guild: '" + event.getGuild() + "' @ " + event.getChannel());
+            Logger.flow("- Guild: '" + event.getGuild() + "' @ " + event.getChannel());
         }
     }
 
     @Override
     public void onSlashCommand(SlashCommandEvent event, SlashCommand command) {
-        Logger.trace("SlashCommand @ " + event.getResponseNumber());
-        Logger.trace("- Name: '" + command.getName() + "'; Full: '" + event.getCommandString() + "'");
-        Logger.trace("- Author: " + event.getUser());
-        Logger.trace("- ChannelType: " + event.getChannelType().name());
+        Logger.flow("SlashCommand @ " + event.getResponseNumber());
+        Logger.flow("- Name: '" + command.getName() + "'; Full: '" + event.getCommandString() + "'");
+        Logger.flow("- Author: " + event.getUser());
+        Logger.flow("- ChannelType: " + event.getChannelType().name());
         if (event.getChannelType() == ChannelType.TEXT) {
-            Logger.trace("- Guild: '" + event.getGuild() + "' @ " + event.getChannel());
+            Logger.flow("- Guild: '" + event.getGuild() + "' @ " + event.getChannel());
         }
     }
 
     @Override
     public void onCompletedCommand(CommandEvent event, Command command) {
-        Logger.trace("PrefixCommand Completed @ " + event.getResponseNumber());
+        Logger.flow("PrefixCommand Completed @ " + event.getResponseNumber());
     }
 
     @Override
     public void onCompletedSlashCommand(SlashCommandEvent event, SlashCommand command) {
-        Logger.trace("SlashCommand Completed @ " + event.getResponseNumber());
+        Logger.flow("SlashCommand Completed @ " + event.getResponseNumber());
     }
 
     @Override
     public void onTerminatedCommand(CommandEvent event, Command command) {
-        Logger.trace("PrefixCommand Terminated @ " + event.getResponseNumber());
+        Logger.flow("PrefixCommand Terminated @ " + event.getResponseNumber());
     }
 
     @Override
     public void onTerminatedSlashCommand(SlashCommandEvent event, SlashCommand command) {
-        Logger.trace("SlashCommand Terminated @ " + event.getResponseNumber());
+        Logger.flow("SlashCommand Terminated @ " + event.getResponseNumber());
     }
 
     @Override
     public void onCommandException(CommandEvent event, Command command, Throwable throwable) {
-        Logger.warning("PrefixCommand Exception @ " + event.getResponseNumber());
-        Logger.warning(" - Full message: '" + event.getMessage().getContentRaw() + "'");
-        Logger.warning(" - Please, see errors below.");
+        Logger.warn("PrefixCommand Exception @ " + event.getResponseNumber());
+        Logger.warn(" - Full message: '" + event.getMessage().getContentRaw() + "'");
+        Logger.warn(" - Please, see errors below.");
 
         try {
             MessageInfo.Builder.create()
@@ -75,16 +75,16 @@ public class CommandListener implements com.jagrosh.jdautilities.command.Command
 
             ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), throwable);
         } catch (Exception exception) {
-            exception.printStackTrace();
-            Logger.warning("Exception occurred while editing original message from command which resulted in exception! Probably safe to ignore.");
+            Logger.throwing(exception);
+            Logger.warn("Exception occurred while editing original message from command which resulted in exception! Probably safe to ignore.");
         }
     }
 
     @Override
     public void onSlashCommandException(SlashCommandEvent event, SlashCommand command, Throwable throwable) {
-        Logger.warning("SlashCommand Exception @ " + event.getResponseNumber());
-        Logger.warning(" - Full: '" + event.getCommandString() + "'");
-        Logger.warning(" - Please, see errors below.");
+        Logger.warn("SlashCommand Exception @ " + event.getResponseNumber());
+        Logger.warn(" - Full: '" + event.getCommandString() + "'");
+        Logger.warn(" - Please, see errors below.");
 
         try {
             MessageInfo.Builder.create()
@@ -98,8 +98,8 @@ public class CommandListener implements com.jagrosh.jdautilities.command.Command
 
             ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), throwable);
         } catch (Exception exception) {
-            exception.printStackTrace();
-            Logger.warning("Exception occurred while editing original message from command which resulted in exception! Probably safe to ignore.");
+            Logger.throwing(exception);
+            Logger.warn("Exception occurred while editing original message from command which resulted in exception! Probably safe to ignore.");
         }
     }
 

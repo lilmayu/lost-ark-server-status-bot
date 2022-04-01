@@ -38,8 +38,8 @@ public class ApiConsoleCommand extends AbstractConsoleCommand {
 
                 ApiRestAction<News> apiRestAction = new UnofficialLostArkApi().fetchNews(newsCategory);
                 apiRestAction.onHttpError(httpError -> {
+                    Logger.throwing(httpError.getException());
                     Logger.warn("HTTPError: " + httpError.getCode());
-                    httpError.getException().printStackTrace();
                 });
                 apiRestAction.onApiError(apiError -> {
                     Logger.warn("APIError: " + apiError.getError());
@@ -64,8 +64,8 @@ public class ApiConsoleCommand extends AbstractConsoleCommand {
 
                 ApiRestAction<Forums> apiRestAction = new UnofficialLostArkApi().fetchForumPosts(forumsCategory);
                 apiRestAction.onHttpError(httpError -> {
+                    Logger.throwing(httpError.getException());
                     Logger.warn("HTTPError: " + httpError.getCode());
-                    httpError.getException().printStackTrace();
                 });
                 apiRestAction.onApiError(apiError -> {
                     Logger.warn("APIError: " + apiError.getError());

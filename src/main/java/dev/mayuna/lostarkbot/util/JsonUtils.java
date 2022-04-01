@@ -35,7 +35,7 @@ public class JsonUtils {
             mayuJson.saveJson();
             return true;
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
 
             Logger.error("Exception occurred while saving " + mayuJson.getFile() + " file!");
             return false;

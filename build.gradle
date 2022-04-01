@@ -25,9 +25,9 @@ dependencies {
     }
 
     // SLF4J
-    implementation group: 'org.slf4j', name:'slf4j-api', version: '1.7.32'
-    implementation group: 'ch.qos.logback', name:'logback-classic', version: '1.2.6'
-    implementation group: 'ch.qos.logback', name:'logback-core', version: '1.2.6'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
+    implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 
     // Personal libraries
     implementation 'dev.mayuna:mayus-jda-utilities:2.3.1'

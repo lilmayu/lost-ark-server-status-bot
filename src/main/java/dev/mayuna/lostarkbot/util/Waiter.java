@@ -26,7 +26,7 @@ public class Waiter<T> {
         try {
             countDownLatch.await();
         } catch (InterruptedException exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.error("Interrupted Exception while awaiting in Waiter!");
         }
     }

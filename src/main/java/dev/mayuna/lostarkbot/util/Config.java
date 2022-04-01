@@ -17,7 +17,6 @@ public class Config {
 
     private static @Getter @Setter String prefix = "la!";
     private static @Getter @Setter String token = "### YOUR TOKEN HERE ###";
-    private static @Getter @Setter String logLevel = "debug";
     private static @Getter @Setter String unofficialLostArkAPIUrl = "https://lost-ark-api.vercel.app";
     private static @Getter @Setter long exceptionMessageChannelID = 0;
     private static @Getter @Setter long ownerID = 0;
@@ -37,7 +36,6 @@ public class Config {
 
             prefix = mayuJson.getOrCreate("prefix", new JsonPrimitive(prefix)).getAsString();
             token = mayuJson.getOrCreate("token", new JsonPrimitive(token)).getAsString();
-            logLevel = mayuJson.getOrCreate("logLevel", new JsonPrimitive(logLevel)).getAsString();
             unofficialLostArkAPIUrl = mayuJson.getOrCreate("unofficialLostArkAPIUrl", new JsonPrimitive(unofficialLostArkAPIUrl)).getAsString();
             exceptionMessageChannelID = mayuJson.getOrCreate("exceptionMessageChannelID", new JsonPrimitive(exceptionMessageChannelID)).getAsLong();
             ownerID = mayuJson.getOrCreate("ownerID", new JsonPrimitive(ownerID)).getAsLong();
@@ -52,11 +50,9 @@ public class Config {
             europeWest = JsonUtils.toStringList(mayuJson.getOrCreate("europeWest", new JsonArray()).getAsJsonArray());
 
             mayuJson.saveJson();
-
-            Logger.setLevel(logLevel);
             return true;
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.error("Error occurred while loading config from path " + Constants.CONFIG_PATH + "!");
             return false;
         }
@@ -68,7 +64,6 @@ public class Config {
 
             mayuJson.add("prefix", prefix);
             mayuJson.add("token", token);
-            mayuJson.add("logLevel", logLevel);
             mayuJson.add("unofficialLostArkAPIUrl", unofficialLostArkAPIUrl);
             mayuJson.add("exceptionMessageChannelID", exceptionMessageChannelID);
             mayuJson.add("ownerID", ownerID);
@@ -86,7 +81,7 @@ public class Config {
 
             Logger.success("Successfully saved config!");
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.error("Error occurred while saving config to path " + Constants.CONFIG_PATH + "!");
         }
     }

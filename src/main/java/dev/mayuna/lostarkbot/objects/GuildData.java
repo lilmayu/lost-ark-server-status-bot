@@ -171,7 +171,7 @@ public class GuildData extends ManagedGuild {
                 waiter.proceed(); // Default false
             });
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.warn("Failed to remove Server Dashboard's message (" + serverDashboard.getName() + ")! However, it was removed from loaded ones.");
 
             waiter.proceed(); // Default false
@@ -225,7 +225,7 @@ public class GuildData extends ManagedGuild {
                         finished.countDown();
                     }, failure -> {
                         if (failure instanceof NonDiscordException nonDiscordException) {
-                            nonDiscordException.printStackTrace();
+                            Logger.throwing(nonDiscordException);
                             Logger.error("[GUILD-DATA] Non-Discord exception occurred while updating entries in Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Waiting 1000ms and retrying.");
 
                             try {
@@ -234,7 +234,7 @@ public class GuildData extends ManagedGuild {
                                 throw new RuntimeException("[GUILD-DATA] InterruptedException occurred while sleeping!", interruptedException);
                             }
                         } else {
-                            failure.printStackTrace();
+                            Logger.throwing(failure);
                             Logger.warn("[GUILD-DATA] Unable to load Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Probably bot was kicked or text channel was deleted.");
 
                             wasSuccessful.set(false);
@@ -373,7 +373,7 @@ public class GuildData extends ManagedGuild {
 
                     Logger.debug("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
 
                     Logger.error("[GUILD-DATA] Unable to load Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Probably bot was kicked or text channel was deleted.");
                     notificationChannelsToRemove.add(notificationChannel);

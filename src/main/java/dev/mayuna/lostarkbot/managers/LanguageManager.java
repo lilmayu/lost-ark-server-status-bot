@@ -72,7 +72,7 @@ public class LanguageManager {
                     Logger.error("Language file " + langFile.getName() + " has empty fields! " + languagePack);
                 }
             } catch (Exception exception) {
-                exception.printStackTrace();
+                Logger.throwing(exception);
                 Logger.error("Could not load lang file: " + langFile.getName());
             }
         }

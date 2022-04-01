@@ -28,20 +28,16 @@ import java.util.TimerTask;
 
 public class ServerDashboardHelper {
 
-    private static @Getter Timer updateTimer;
+    private static final @Getter Timer updateTimer = new Timer("LostArkServersCacheWorker");
     private static @Getter @Setter LostArkServers lostArkServersCache;
     private static @Getter String onlinePlayersCache;
 
     public static void startDashboardUpdateTimer() {
-        updateTimer = new Timer();
         updateTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Thread.currentThread().setName("LostArkServersCacheWorker");
-
                 int guildsSize = GuildDataManager.getLoadedGuildDataList().size();
-
-                Logger.debug("Updating " + guildsSize + " guilds...");
+                Logger.info("Updating " + guildsSize + " guilds...");
 
                 try {
                     LostArkServers previousServerCache = lostArkServersCache;
@@ -52,10 +48,10 @@ public class ServerDashboardHelper {
                     GuildDataManager.updateAllGuildData();
                     long took = System.currentTimeMillis() - start;
 
-                    Logger.debug("Queuing dashboard updates for " + guildsSize + " guilds took " + took + "ms " + (guildsSize != 0 ? "(avg. " + (took / guildsSize) + "ms)" : ""));
+                    Logger.info("Queuing dashboard updates for " + guildsSize + " guilds took " + took + "ms");
                 } catch (Exception exception) {
-                    exception.printStackTrace();
-                    Logger.error("Exception occurred while refreshing cache!");
+                    Logger.throwing(exception);
+                    Logger.fatal("Exception occurred while refreshing cache!");
                 }
             }
         }, 1000, 60000 * 5);
@@ -133,7 +129,7 @@ public class ServerDashboardHelper {
                 return waiter;
             }
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.warn("Failed to check for permissions for Server Dashboard " + serverDashboard.getName() + "! Probably user kicked the bot.");
 
             waiter.setObject(false);
@@ -146,12 +142,12 @@ public class ServerDashboardHelper {
 
             try {
                 managedGuildMessage.sendOrEditMessage(message, RestActionMethod.QUEUE, success -> {
-                    Logger.debug("Successfully updated dashboard " + serverDashboard.getName() + " with result " + success);
+                    Logger.flow("Successfully updated dashboard " + serverDashboard.getName() + " with result " + success);
 
                     waiter.setObject(true);
                     waiter.proceed();
                 }, exception -> {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
 
                     if (exception instanceof NonDiscordException) {
                         Logger.error("Non Discord Exception occurred while updating dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage().getRawGuildID() + "!");
@@ -163,11 +159,11 @@ public class ServerDashboardHelper {
                     waiter.proceed();
                 });
             } catch (Exception exception) {
-                exception.printStackTrace();
+                Logger.throwing(exception);
                 Logger.warn("Dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage().getRawGuildID() + " resulted in exception while updating! Probably bot was kicked, text channel deleted or bot does not have permission.");
             }
         }, failure -> {
-            failure.printStackTrace();
+            Logger.throwing(failure);
             Logger.warn("Failed to update entries for Server Dashboard " + serverDashboard.getName() + "! Probably user removed channel/kicked bot or bot does not have permissions.");
 
             waiter.setObject(false);

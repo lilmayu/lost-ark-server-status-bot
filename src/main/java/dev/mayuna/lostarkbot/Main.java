@@ -38,7 +38,6 @@ public class Main {
 
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
-        Logger.init();
 
         Logger.info("Starting up Mayu's Lost Ark Bot @ v" + Constants.VERSION + "...");
         Logger.info("Made by mayuna#8016");
@@ -51,7 +50,7 @@ public class Main {
 
         Logger.info("Loading config...");
         if (!Config.load()) {
-            Logger.error("There was fatal error while loading Config! Cannot proceed.");
+            Logger.fatal("There was fatal error while loading Config! Cannot proceed.");
             System.exit(-1);
         }
         configLoaded = true;
@@ -84,7 +83,7 @@ public class Main {
         LanguageManager.load();
 
         if (!GuildDataManager.loadAll()) {
-            Logger.error("There was fatal error while loading guilds! Cannot proceed.");
+            Logger.fatal("There was fatal error while loading guilds! Cannot proceed.");
             System.exit(-1);
         }
 
@@ -107,8 +106,8 @@ public class Main {
                     .addEventListeners(new MayuCoreListener());
             jda = jdaBuilder.build().awaitReady();
         } catch (Exception exception) {
-            exception.printStackTrace();
-            Logger.error("Error occurred while logging into Discord! Cannot proceed.");
+            Logger.throwing(exception);
+            Logger.fatal("Error occurred while logging into Discord! Cannot proceed.");
             System.exit(-1);
         }
     }
@@ -116,11 +115,10 @@ public class Main {
     private static void loadLibrarySettings() {
         ExceptionReporter.registerExceptionReporter();
         ExceptionReporter.getInstance().addListener(new ExceptionListener("default", "mayuna", exceptionReport -> {
-            exceptionReport.getThrowable().printStackTrace();
+            Logger.throwing(exceptionReport.getThrowable());
+            Logger.warn("Exception occurred! Sending it to Lost Ark Bot's exception Message channel.");
 
             if (configLoaded) {
-                Logger.error("Exception occurred! Sending it to Lost Ark Bot's exception Message channel.");
-
                 if (Main.getJda() != null && Config.getExceptionMessageChannelID() != 0) {
                     MessageChannel messageChannel = Main.getJda().getTextChannelById(Config.getExceptionMessageChannelID());
                     if (messageChannel != null) {
@@ -132,7 +130,6 @@ public class Main {
                     Logger.error("Unable to send exception to Exception message channel! (JDA is null / ExceptionMessageChannelID is not set)");
                 }
             }
-
         }));
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (configLoaded) {

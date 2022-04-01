@@ -1,17 +1,11 @@
 package dev.mayuna.lostarkbot.util.logging;
 
-import ch.qos.logback.classic.Level;
 import dev.mayuna.lostarkbot.Main;
-import lombok.Getter;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Level;
 
 public class Logger {
 
-    private static @Getter org.slf4j.Logger logger;
-
-    public static void init() {
-        logger = LoggerFactory.getLogger(Main.class);
-    }
+    private static final MayuLogger logger = MayuLogger.create(Main.class);
 
     public static void info(String msg) {
         logger.info(msg);
@@ -25,26 +19,35 @@ public class Logger {
         logger.error(msg);
     }
 
+    public static void fatal(String msg) {
+        logger.fatal(msg);
+    }
+
     public static void success(String msg) {
-        logger.info("[SUCCESS] " + msg);
+        logger.success(msg);
     }
 
     public static void debug(String msg) {
         logger.debug(msg);
     }
 
-    public static void trace(String msg) {
-        logger.trace(msg);
+    public static void flow(String msg) {
+        logger.flow(msg);
     }
 
-    public static void setLevel(String level) {
-        try {
-            ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-            root.setLevel(Level.valueOf(level));
-            Logger.success("Log level set to '" + level + "'!");
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            Logger.error("Unable to set level to '" + level + "'!");
-        }
+    public static void trace(String msg) {
+        Logger.flow(msg);
+    }
+
+    public static void throwing(Throwable throwable) {
+        logger.throwing(throwable);
+    }
+
+    public static void throwing(Level level, Throwable throwable) {
+        logger.throwing(level, throwable);
+    }
+
+    public static MayuLogger get() {
+        return logger;
     }
 }

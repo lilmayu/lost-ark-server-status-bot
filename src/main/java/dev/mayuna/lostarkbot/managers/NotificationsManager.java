@@ -18,6 +18,7 @@ import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.HashUtils;
 import dev.mayuna.lostarkbot.util.JsonUtils;
+import dev.mayuna.lostarkbot.util.ObjectUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
@@ -48,13 +49,13 @@ public class NotificationsManager {
             @Override
             public void run() {
                 try {
-                    Logger.debug("Fetching everything from API...");
+                    Logger.info("Updating Notifications..");
                     fetchAll();
 
-                    Logger.debug("Checking if there are new notifications...");
+                    Logger.flow("Checking if there are new notifications...");
                     processPotentialNewNotifications();
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
                     ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), exception);
 
                     Logger.error("Exception occurred while updating notifications!");
@@ -96,6 +97,18 @@ public class NotificationsManager {
         forumsMaintenance = fetch(api.fetchForumPosts(ForumsCategory.MAINTENANCE), "Forums Maintenance");
         forumsDowntime = fetch(api.fetchForumPosts(ForumsCategory.DOWNTIME), "Forums Downtime");
 
+        if (ObjectUtils.allNotNull(newsGeneral, newsEvents, newsReleaseNotes, newsUpdates, forumsMaintenance, forumsDowntime)) {
+            Logger.success("Successfully fetched all API objects.");
+        } else {
+            Logger.error("Some API objects are null!");
+            Logger.debug("newsGeneral: " + newsGeneral);
+            Logger.debug("newsEvents: " + newsEvents);
+            Logger.debug("newsReleaseNotes: " + newsReleaseNotes);
+            Logger.debug("newsUpdates: " + newsUpdates);
+            Logger.debug("forumsMaintenance: " + forumsMaintenance);
+            Logger.debug("forumsDowntime: " + forumsDowntime);
+        }
+
         if (forumsMaintenance != null) {
             List<ForumsPostObject> toRemoveFromMaintenance = new ArrayList<>();
             for (ForumsPostObject forumsPostObject : forumsMaintenance.getForumsPostObjects()) {
@@ -104,8 +117,6 @@ public class NotificationsManager {
                 }
             }
             forumsMaintenance.remove(toRemoveFromMaintenance);
-        } else {
-            Logger.warn("forumsMaintenance is null!");
         }
     }
 
@@ -156,7 +167,7 @@ public class NotificationsManager {
     }
 
     private static <T extends ApiResponse> T fetch(ApiRestAction<T> restAction, String infoType) {
-        Logger.debug("[REQUESTER] Requesting " + infoType + " from API...");
+        Logger.flow("[REQUESTER] Requesting " + infoType + " from API...");
 
         AtomicReference<T> atomicReference = new AtomicReference<>();
 
@@ -171,20 +182,20 @@ public class NotificationsManager {
             }
 
             restAction.onHttpError(httpError -> {
-                httpError.getException().printStackTrace();
-                Logger.error("[REQUESTER] HTTP Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + httpError.getCode());
+                Logger.throwing(httpError.getException());
+                Logger.warn("[REQUESTER] HTTP Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + httpError.getCode());
 
                 waitTime.set(10000);
                 retries.addAndGet(1);
             });
             restAction.onApiError(apiError -> {
-                Logger.error("[REQUESTER] API Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + apiError.getError());
+                Logger.warn("[REQUESTER] API Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + apiError.getError());
 
                 waitTime.set(10000);
                 retries.addAndGet(1);
             });
             restAction.onSuccess((jsonObject, response) -> {
-                Logger.success("[REQUESTER] Request for " + infoType + " was successful.");
+                Logger.info("[REQUESTER] Request for " + infoType + " was successful.");
                 atomicReference.set(response);
 
                 waitTime.set(0);
@@ -197,9 +208,9 @@ public class NotificationsManager {
                 try {
                     Thread.sleep(waitTime.get());
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
 
-                    Logger.error("Thread was interrupted while requesting.");
+                    Logger.fatal("Thread was interrupted while requesting/sleeping.");
                 }
             }
         } while (!canContinue.get());
@@ -299,9 +310,9 @@ public class NotificationsManager {
             try {
                 return JsonUtil.createOrLoadJsonFromFile(Constants.POSTS_HASHES_JSON);
             } catch (Exception exception) {
-                exception.printStackTrace();
+                Logger.throwing(exception);
 
-                Logger.error("Could not read " + Constants.POSTS_HASHES_JSON + " file!");
+                Logger.fatal("Could not read " + Constants.POSTS_HASHES_JSON + " file!");
                 return null;
             }
         }

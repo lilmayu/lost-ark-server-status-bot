@@ -2,8 +2,8 @@ package dev.mayuna.lostarkbot.console;
 
 import dev.mayuna.lostarkbot.console.commands.*;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
+import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
-import dev.mayuna.mayuslibrary.logging.Logger;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ public class ConsoleCommandManager {
         consoleCommands.add(new LoadDataConsoleCommand());
         consoleCommands.add(new DebugConsoleCommand());
         consoleCommands.add(new LangConsoleCommand());
-        consoleCommands.add(new LoggerConsoleCommand());
         consoleCommands.add(new GuildConsoleCommand());
         consoleCommands.add(new WriteDownNumberOfGuildsConsoleCommand());
         consoleCommands.add(new ApiConsoleCommand());
@@ -63,7 +62,7 @@ public class ConsoleCommandManager {
                 try {
                     abstractConsoleCommand.execute(arguments);
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
                     Logger.error("Exception occurred while executing command '" + command + "'!");
                 }
                 return;

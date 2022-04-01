@@ -131,11 +131,11 @@ public class GuildDataManager {
     public static GuildData loadGuildData(@NonNull File file) {
         try {
             if (!file.exists()) {
-                throw new IOException("File " + file.getName() + " does not exist!");
+                return null;
             }
             return Utils.getGson().fromJson(JsonUtil.createOrLoadJsonFromFile(file).getJsonObject(), GuildData.class);
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.error("Exception occurred while loading GuildData from file '" + file.getName() + "'!");
             return null;
         }
@@ -197,37 +197,37 @@ public class GuildDataManager {
         Logger.info("[GUILD-LOAD] Loading GuildData...");
         long start = System.currentTimeMillis();
 
-        Logger.debug("[GUILD-LOAD] Checking for folders...");
+        Logger.flow("[GUILD-LOAD] Checking for folders...");
         File guildsFolder = checkFolders();
         if (guildsFolder == null) {
-            Logger.error("[GUILD-LOAD] Failed to create folder for GuildData! (" + Constants.GUILDS_FOLDER + ")!");
+            Logger.fatal("[GUILD-LOAD] Failed to create folder for GuildData! (" + Constants.GUILDS_FOLDER + ")!");
             return false;
         }
 
         File[] guildsFiles = guildsFolder.listFiles();
         if (guildsFiles == null) {
-            Logger.error("[GUILD-LOAD] Unable to list files in " + Constants.GUILDS_FOLDER + " folder!");
+            Logger.fatal("[GUILD-LOAD] Unable to list files in " + Constants.GUILDS_FOLDER + " folder!");
             return false;
         }
 
-        Logger.debug("[GUILD-LOAD] Loading...");
+        Logger.flow("[GUILD-LOAD] Loading...");
         for (File file : guildsFiles) {
             GuildData guildData = loadGuildData(file);
 
             if (guildData != null) {
                 try {
                     guildData.updateEntries(Main.getJda());
-                    Logger.debug("[GUILD-LOAD] Successfully loaded GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                    Logger.flow("[GUILD-LOAD] Successfully loaded GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
 
                     synchronized (loadedGuildDataList) {
                         loadedGuildDataList.add(guildData);
                     }
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
                     Logger.warn("[GUILD-LOAD] Unable to update entries in GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")! Probably bot is not in this guild anymore.");
                 }
             } else {
-                Logger.warn("[GUILD-LOAD] Unable to load GuildData from file '" + file.getName() + "'!");
+                Logger.error("[GUILD-LOAD] Unable to load GuildData from file '" + file.getName() + "' (file does not exist)!");
             }
         }
 
@@ -248,10 +248,10 @@ public class GuildDataManager {
             while (guildDataIterator.hasNext()) {
                 GuildData guildData = guildDataIterator.next();
 
-                Logger.debug("[GUILD-LOAD] Loading dashboards for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                Logger.flow("[GUILD-LOAD] Loading dashboards for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
                 guildData.loadDashboards();
 
-                Logger.debug("[GUILD-LOAD] Loading notification channels for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                Logger.flow("[GUILD-LOAD] Loading notification channels for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
                 guildData.loadNotificationChannels();
             }
         }
@@ -273,8 +273,8 @@ public class GuildDataManager {
             JsonUtil.saveJson(Utils.getGson().toJsonTree(guildData).getAsJsonObject(), GuildData.getGuildDataFile(guildData.getRawGuildID()));
             return true;
         } catch (Exception exception) {
-            exception.printStackTrace();
-            Logger.error("Exception occurred while saving GuildData " + guildData.getRawGuildID() + "(" + guildData.getName() + ")!");
+            Logger.throwing(exception);
+            Logger.fatal("Exception occurred while saving GuildData " + guildData.getRawGuildID() + "(" + guildData.getName() + ")!");
             return false;
         }
     }
@@ -286,21 +286,21 @@ public class GuildDataManager {
         Logger.info("[GUILD-SAVE] Saving " + loadedGuildDataList.size() + " GuildData...");
         long start = System.currentTimeMillis();
 
-        Logger.debug("[GUILD-SAVE] Checking for folders...");
+        Logger.flow("[GUILD-SAVE] Checking for folders...");
         File guildsFolder = checkFolders();
         if (guildsFolder == null) {
             Logger.error("[GUILD-SAVE] Failed to create folder for GuildData! (" + Constants.GUILDS_FOLDER + ")!");
             return;
         }
 
-        Logger.debug("[GUILD-SAVE] Saving...");
+        Logger.flow("[GUILD-SAVE] Saving...");
         int successfullySaved = 0;
         for (GuildData guildData : loadedGuildDataList) {
             if (saveGuildData(guildData)) {
                 successfullySaved++;
-                Logger.debug("[GUILD-SAVE] Successfully saved GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                Logger.flow("[GUILD-SAVE] Successfully saved GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
             } else {
-                Logger.warn("[GUILD-SAVE] Unable to save GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")!");
+                Logger.error("[GUILD-SAVE] Unable to save GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")!");
             }
         }
 

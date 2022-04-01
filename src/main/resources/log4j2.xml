@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout disableAnsi="false" pattern="[%d{${LOG_DATEFORMAT_PATTERN:-HH:mm:ss.SSS}}][%style{%10.-10t}] %highlight{%5.-5p: %m}{SUCCESS=green, FATAL=Blink black BG_Red, ERROR=red, WARN=yellow bold, INFO=white, DEBUG=black bright, TRACE=blue}%n"/>
+        </Console>
+        <RollingFile name="file_logging" fileName="latest.log"
+                     filePattern="$${date:yyyy-MM}/%d{yyyy-MM-dd_HH}-%i.log.gz">
+            <PatternLayout disableAnsi="true" pattern="[%d{${LOG_DATEFORMAT_PATTERN:-dd-MM-yyyy}}][%d{${LOG_DATEFORMAT_PATTERN:-HH:mm:ss.SSS}}][%C#%M:%L][%t] %7p: %m%n"/>
+            <Policies>
+                <CronTriggeringPolicy schedule="0 0 * * * ?"/>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="ALL">
+            <AppenderRef ref="Console" level="debug"/>
+            <AppenderRef ref="file_logging" level="flow"/>
+        </Root>
+    </Loggers>
+</Configuration>

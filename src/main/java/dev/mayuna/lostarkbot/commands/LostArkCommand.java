@@ -206,7 +206,7 @@ public class LostArkCommand extends SlashCommand {
 
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard resent!").build()).queue();
             } catch (Exception exception) {
-                exception.printStackTrace();
+                Logger.throwing(exception);
                 Logger.error("Exception occurred while resending Server Dashboard!");
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Error occurred while resending Server Dashboard! Please, try again.").build()).queue();
             }

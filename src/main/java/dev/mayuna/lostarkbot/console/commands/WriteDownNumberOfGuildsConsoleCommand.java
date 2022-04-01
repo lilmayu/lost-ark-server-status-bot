@@ -35,7 +35,7 @@ public class WriteDownNumberOfGuildsConsoleCommand extends AbstractConsoleComman
             Files.writeString(Paths.get(fileName), toWrite, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             Logger.info("Wrote down '" + toWrite.replace("\n", "") + "' into file " + fileName);
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), exception);
 
             Logger.error("Exception occurred while processing write-down-number-of-guilds command!");

@@ -56,7 +56,7 @@ public class LegacyDashboardsLoader {
                             finished.countDown();
                         }, failure -> {
                             if (failure instanceof NonDiscordException nonDiscordException) {
-                                nonDiscordException.printStackTrace();
+                                Logger.throwing(nonDiscordException);
                                 Logger.error("Non-Discord exception occurred while updating entries in Server Dashboard " + name + "! Waiting 1000ms and retrying.");
 
                                 try {
@@ -65,7 +65,7 @@ public class LegacyDashboardsLoader {
                                     throw new RuntimeException("InterruptedException occurred while sleeping!", interruptedException);
                                 }
                             } else {
-                                failure.printStackTrace();
+                                Logger.throwing(failure);
                                 Logger.warn("Unable to load Server Dashboard with name " + name + "! Probably bot was kicked or text channel was deleted.");
 
                                 finished.countDown();
@@ -80,7 +80,7 @@ public class LegacyDashboardsLoader {
                         dashboards.add(serverDashboard);
                     }
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
                     Logger.warn("Unable to load JSON Server Dashboard with index " + index + "!");
                 }
 
@@ -107,7 +107,7 @@ public class LegacyDashboardsLoader {
 
             Logger.success("Successfully loaded " + dashboards.size() + " legacy Server Dashboards into guilds!");
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.error("Failed to load Server Dashboards!");
         }
     }

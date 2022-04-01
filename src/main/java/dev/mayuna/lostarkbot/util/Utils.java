@@ -108,7 +108,7 @@ public class Utils {
             ZoneId zoneId = ZoneId.of("America/Los_Angeles");
             return localDateTime.atZone(zoneId).toEpochSecond();
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.error("Cannot parse timestamp! Returning zero.");
             return 0;
         }
@@ -136,7 +136,7 @@ public class Utils {
             Logger.error("Invalid response from SteamAPI: " + rootJsonObject);
             return "Error_01";
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.throwing(exception);
             Logger.error("Could not get online players in Lost Ark from SteamAPI!");
             return "Error_02";
         }

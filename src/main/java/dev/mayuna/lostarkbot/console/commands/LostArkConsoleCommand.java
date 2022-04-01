@@ -54,7 +54,7 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
                     ServerDashboardHelper.updateCache();
                     Logger.success("Successfully updated Lost Ark Servers cache.");
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    Logger.throwing(exception);
                     Logger.error("Exception occurred while updating Lost Ark Servers cache!");
                 }
             }
