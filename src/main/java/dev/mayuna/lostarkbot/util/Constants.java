@@ -8,7 +8,7 @@ public class Constants {
     public static final String STEAM_API_URL = "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=1599340";
 
     public static String ALTERNATIVE_PREFIX = "lostark!";
-    public static String VERSION = "30032022a";
+    public static String VERSION = "01042022a";
 
     public static String ONLINE_EMOTE = "<:LA_online:954727071001755668>";
     public static String BUSY_EMOTE = "<:LA_busy:954730090862882826>";

@@ -1,5 +1,7 @@
 package dev.mayuna.lostarkbot.console.commands;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dev.mayuna.lostarkbot.api.unofficial.Forums;
 import dev.mayuna.lostarkbot.api.unofficial.News;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
@@ -59,44 +61,46 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                         Logger.success("All API objects are not null.");
                     }
 
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    
                     if (newsGeneral != null) {
                         Logger.info("NewsGeneral:");
-                        Logger.info(newsGeneral.toString());
+                        Logger.info(gson.toJson(newsGeneral));
                     } else {
                         Logger.warn("News General is null.");
                     }
 
                     if (newsEvents != null) {
                         Logger.info("NewsEvents:");
-                        Logger.info(newsEvents.toString());
+                        Logger.info(gson.toJson(newsEvents));
                     } else {
                         Logger.warn("News Events is null.");
                     }
 
                     if (newsReleaseNotes != null) {
                         Logger.info("NewsReleaseNotes:");
-                        Logger.info(newsReleaseNotes.toString());
+                        Logger.info(gson.toJson(newsReleaseNotes));
                     } else {
                         Logger.warn("News Release Notes is null.");
                     }
 
                     if (newsUpdates != null) {
                         Logger.info("NewsUpdates:");
-                        Logger.info(newsUpdates.toString());
+                        Logger.info(gson.toJson(newsUpdates));
                     } else {
                         Logger.warn("News Updates is null.");
                     }
 
                     if (forumsMaintenance != null) {
                         Logger.info("ForumsMaintenance:");
-                        Logger.info(forumsMaintenance.toString());
+                        Logger.info(gson.toJson(forumsMaintenance));
                     } else {
                         Logger.warn("Forums Maintenance is null.");
                     }
 
                     if (forumsDowntime != null) {
                         Logger.info("ForumsDowntime:");
-                        Logger.info(forumsDowntime.toString());
+                        Logger.info(gson.toJson(forumsDowntime));
                     } else {
                         Logger.warn("Forums Downtime is null.");
                     }

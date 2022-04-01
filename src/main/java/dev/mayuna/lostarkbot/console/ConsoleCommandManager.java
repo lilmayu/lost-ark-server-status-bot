@@ -51,16 +51,20 @@ public class ConsoleCommandManager {
 
         for (AbstractConsoleCommand abstractConsoleCommand : consoleCommands) {
             if (abstractConsoleCommand.name.equalsIgnoreCase(name)) {
-                try {
-                    CommandResult commandResult = abstractConsoleCommand.execute(arguments);
 
-                    if (commandResult == CommandResult.INCORRECT_SYNTAX) {
-                        Logger.error("Invalid syntax! Syntax: " + abstractConsoleCommand.name + " " + abstractConsoleCommand.syntax);
+                String finalArguments = arguments;
+                new Thread(() -> {
+                    try {
+                        CommandResult commandResult = abstractConsoleCommand.execute(finalArguments);
+
+                        if (commandResult == CommandResult.INCORRECT_SYNTAX) {
+                            Logger.error("Invalid syntax! Syntax: " + abstractConsoleCommand.name + " " + abstractConsoleCommand.syntax);
+                        }
+                    } catch (Exception exception) {
+                        Logger.throwing(exception);
+                        Logger.error("Exception occurred while executing command '" + command + "'!");
                     }
-                } catch (Exception exception) {
-                    Logger.throwing(exception);
-                    Logger.error("Exception occurred while executing command '" + command + "'!");
-                }
+                }, "ConsoleCommand#" + abstractConsoleCommand.name).start();
                 return;
             }
         }

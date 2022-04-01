@@ -218,7 +218,7 @@ public class GuildData extends ManagedGuild {
 
                 do {
                     serverDashboard.getManagedGuildMessage().updateEntries(Main.getJda(), RestActionMethod.COMPLETE, success -> {
-                        Logger.debug("[GUILD-DATA] Successfully loaded Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
+                        Logger.flow("[GUILD-DATA] Successfully loaded Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
 
                         wasSuccessful.set(true);
                         canContinue.set(true);
@@ -371,7 +371,7 @@ public class GuildData extends ManagedGuild {
                 try {
                     notificationChannel.getManagedTextChannel().updateEntries(Main.getJda());
 
-                    Logger.debug("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
+                    Logger.flow("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
                 } catch (Exception exception) {
                     Logger.throwing(exception);
 
