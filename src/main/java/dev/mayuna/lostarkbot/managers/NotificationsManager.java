@@ -100,13 +100,13 @@ public class NotificationsManager {
         if (ObjectUtils.allNotNull(newsGeneral, newsEvents, newsReleaseNotes, newsUpdates, forumsMaintenance, forumsDowntime)) {
             Logger.success("Successfully fetched all API objects.");
         } else {
-            Logger.error("Some API objects are null!");
-            Logger.debug("newsGeneral: " + newsGeneral);
-            Logger.debug("newsEvents: " + newsEvents);
-            Logger.debug("newsReleaseNotes: " + newsReleaseNotes);
-            Logger.debug("newsUpdates: " + newsUpdates);
-            Logger.debug("forumsMaintenance: " + forumsMaintenance);
-            Logger.debug("forumsDowntime: " + forumsDowntime);
+            Logger.error("Some API objects are null! true == null");
+            Logger.debug("newsGeneral: " + (newsGeneral == null));
+            Logger.debug("newsEvents: " + (newsEvents == null));
+            Logger.debug("newsReleaseNotes: " + (newsReleaseNotes == null));
+            Logger.debug("newsUpdates: " + (newsUpdates == null));
+            Logger.debug("forumsMaintenance: " + (forumsMaintenance == null));
+            Logger.debug("forumsDowntime: " + (forumsDowntime == null));
         }
 
         if (forumsMaintenance != null) {
