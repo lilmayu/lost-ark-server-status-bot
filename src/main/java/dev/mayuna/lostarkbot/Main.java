@@ -30,6 +30,8 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
+import java.io.File;
+
 public class Main {
 
     // Discord
@@ -42,6 +44,14 @@ public class Main {
 
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
+
+        File logsFolder = new File("./logs/");
+        if (!logsFolder.exists()) {
+            if (!logsFolder.mkdirs()) {
+                Logger.fatal("Could not create " + logsFolder.getAbsolutePath() + " folder!");
+                return;
+            }
+        }
 
         Logger.info("Starting up Mayu's Lost Ark Bot @ v" + Constants.VERSION + "...");
         Logger.info("Made by mayuna#8016");
