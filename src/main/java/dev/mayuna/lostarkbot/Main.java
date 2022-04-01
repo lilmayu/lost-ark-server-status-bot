@@ -1,8 +1,12 @@
 package dev.mayuna.lostarkbot;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import dev.mayuna.lostarkbot.commands.*;
+import dev.mayuna.lostarkbot.commands.AboutCommand;
+import dev.mayuna.lostarkbot.commands.HelpCommand;
+import dev.mayuna.lostarkbot.commands.LostArkCommand;
+import dev.mayuna.lostarkbot.commands.NotificationsCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
+import dev.mayuna.lostarkbot.console.commands.*;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
@@ -44,6 +48,7 @@ public class Main {
 
         Logger.info("Initializing Console Commands...");
         ConsoleCommandManager.init();
+        loadConsoleCommands();
 
         Logger.info("Loading library settings...");
         loadLibrarySettings();
@@ -97,6 +102,18 @@ public class Main {
 
     private static void loadCommands() {
         client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new HelpCommand(), new NotificationsCommand());
+    }
+
+    private static void loadConsoleCommands() {
+        ConsoleCommandManager.registerCommands(new DebugConsoleCommand(),
+                                               new GuildConsoleCommand(),
+                                               new LangConsoleCommand(),
+                                               new LoadDataConsoleCommand(),
+                                               new LostArkConsoleCommand(),
+                                               new SaveDataConsoleCommand(),
+                                               new WriteDownNumberOfGuildsConsoleCommand(),
+                                               new NotificationsConsoleCommand()
+        );
     }
 
     private static void loginIntoDiscord() {

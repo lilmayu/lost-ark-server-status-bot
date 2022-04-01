@@ -2,44 +2,36 @@ package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
+import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.util.HashUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 
 public class DebugConsoleCommand extends AbstractConsoleCommand {
 
     public DebugConsoleCommand() {
         this.name = "debug";
+        this.syntax = "[force-update]";
     }
 
     @Override
-    public void execute(String arguments) {
-        if (arguments.contains("force-update")) {
-            Logger.info("Force updating all guilds...");
+    public CommandResult execute(String arguments) {
+        ArgumentParser argumentParser = new ArgumentParser(arguments);
 
-            GuildDataManager.updateAllGuildData();
+        if (argumentParser.hasArgumentAtIndex(0)) {
+            switch (argumentParser.getArgumentAtIndex(0).getValue()) {
+                case "force-update" -> {
+                    Logger.info("Force updating all guilds...");
 
-            Logger.info("Done.");
-            return;
-        }
+                    GuildDataManager.updateAllGuildData();
 
-        if (arguments.contains(" ")) {
-            String[] args = arguments.split(" ");
-
-            if (args.length < 2) {
-                Logger.error("Invalid syntax! Syntax: <hash> <string>");
-                return;
-            }
-
-            switch (args[0]) {
-                case "hash" -> {
-                    Logger.info("Hash of '" + args[1] + "' is '" + HashUtils.hashMD5(args[1]) +"'");
+                    Logger.success("Updating done.");
                 }
             }
 
-
-            return;
+            return CommandResult.SUCCESS;
         }
 
         Logger.info("=== Debug ===");
@@ -48,7 +40,7 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
         Logger.info("Dashboards: " + GuildDataManager.countAllDashboards());
         Logger.info("Notifications ch.: " + GuildDataManager.countAllNotificationChannels());
         Logger.info("In-game players: " + ServerDashboardHelper.getOnlinePlayersCache());
-        Logger.info("");
-        Logger.info("Run lost-ark command for lost-ark's debug");
+
+        return CommandResult.SUCCESS;
     }
 }

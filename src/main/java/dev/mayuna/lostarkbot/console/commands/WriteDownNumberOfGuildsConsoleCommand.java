@@ -2,6 +2,7 @@ package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
+import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 
@@ -17,10 +18,11 @@ public class WriteDownNumberOfGuildsConsoleCommand extends AbstractConsoleComman
 
     public WriteDownNumberOfGuildsConsoleCommand() {
         this.name = "write-down-number-of-guilds";
+        this.syntax = "";
     }
 
     @Override
-    public void execute(String arguments) {
+    public CommandResult execute(String arguments) {
         String firstColumn;
         String secondColumn = String.valueOf(Main.getJda().getGuilds().size());
 
@@ -40,5 +42,7 @@ public class WriteDownNumberOfGuildsConsoleCommand extends AbstractConsoleComman
 
             Logger.error("Exception occurred while processing write-down-number-of-guilds command!");
         }
+
+        return CommandResult.SUCCESS;
     }
 }

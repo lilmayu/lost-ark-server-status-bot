@@ -1,18 +1,20 @@
 package dev.mayuna.lostarkbot.console;
 
-import dev.mayuna.lostarkbot.console.commands.*;
+import dev.mayuna.lostarkbot.console.commands.basic.HelpConsoleCommand;
+import dev.mayuna.lostarkbot.console.commands.basic.StopConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
+import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 import lombok.Getter;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ConsoleCommandManager {
 
     // Data
-    private static @Getter final List<AbstractConsoleCommand> consoleCommands = new ArrayList<>();
+    private static @Getter final List<AbstractConsoleCommand> consoleCommands = new LinkedList<>();
 
     // Runtime
     private static @Getter Thread commandThread;
@@ -20,22 +22,12 @@ public class ConsoleCommandManager {
     public static void init() {
         consoleCommands.add(new HelpConsoleCommand());
         consoleCommands.add(new StopConsoleCommand());
-        consoleCommands.add(new GuildsConsoleCommand());
-        consoleCommands.add(new LostArkConsoleCommand());
-        consoleCommands.add(new SaveDataConsoleCommand());
-        consoleCommands.add(new LoadDataConsoleCommand());
-        consoleCommands.add(new DebugConsoleCommand());
-        consoleCommands.add(new LangConsoleCommand());
-        consoleCommands.add(new GuildConsoleCommand());
-        consoleCommands.add(new WriteDownNumberOfGuildsConsoleCommand());
-        consoleCommands.add(new ApiConsoleCommand());
-        consoleCommands.add(new NotificationsConsoleCommand());
 
         startCommandThread();
     }
 
-    public static void registerCommand(AbstractConsoleCommand consoleCommand) {
-        consoleCommands.add(consoleCommand);
+    public static void registerCommands(AbstractConsoleCommand... consoleCommand) {
+        consoleCommands.addAll(List.of(consoleCommand));
     }
 
     private static void processCommand(String command) {
@@ -60,7 +52,11 @@ public class ConsoleCommandManager {
         for (AbstractConsoleCommand abstractConsoleCommand : consoleCommands) {
             if (abstractConsoleCommand.name.equalsIgnoreCase(name)) {
                 try {
-                    abstractConsoleCommand.execute(arguments);
+                    CommandResult commandResult = abstractConsoleCommand.execute(arguments);
+
+                    if (commandResult == CommandResult.INCORRECT_SYNTAX) {
+                        Logger.error("Invalid syntax! Syntax: " + abstractConsoleCommand.name + " " + abstractConsoleCommand.syntax);
+                    }
                 } catch (Exception exception) {
                     Logger.throwing(exception);
                     Logger.error("Exception occurred while executing command '" + command + "'!");

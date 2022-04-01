@@ -1,47 +1,48 @@
 package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
+import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 
 public class LangConsoleCommand extends AbstractConsoleCommand {
 
     public LangConsoleCommand() {
         this.name = "lang";
+        this.syntax = "<list|view <code>>";
     }
 
     @Override
-    public void execute(String arguments) {
-        String[] args = arguments.split(" ");
+    public CommandResult execute(String arguments) {
+        ArgumentParser argumentParser = new ArgumentParser(arguments);
 
-        if (args.length == 0) {
-            Logger.error("Invalid syntax! lang <list|load|view> [langCode]");
-            return;
-        }
+        if (argumentParser.hasArgumentAtIndex(0)) {
+            switch (argumentParser.getArgumentAtIndex(0).getValue()) {
+                case "list" -> {
+                    Logger.info("=== Loaded Languages - " + LanguageManager.getLoadedLanguages().size() + " ===");
+                    for (LanguagePack languagePack : LanguageManager.getLoadedLanguages()) {
+                        Logger.info("[" + languagePack.getLangCode() + "]: " + languagePack.getLangName());
+                    }
+                    Logger.success("Listing done.");
+                }
+                case "view" -> {
+                    if (!argumentParser.hasArgumentAtIndex(1)) {
+                        return CommandResult.INCORRECT_SYNTAX;
+                    }
 
-        switch (args[0]) {
-            case "list" -> {
-                Logger.info("=== Loaded Languages - " + LanguageManager.getLoadedLanguages().size() + " ===");
-                for (LanguagePack languagePack : LanguageManager.getLoadedLanguages()) {
-                    Logger.info("[" + languagePack.getLangCode() + "]: " + languagePack.getLangName());
+                    String langCode = argumentParser.getArgumentAtIndex(1).getValue();
+                    Logger.info("[" + langCode + "]: " + LanguageManager.getLanguageByCode(langCode));
+                }
+                default -> {
+                    return CommandResult.INCORRECT_SYNTAX;
                 }
             }
-            case "load" -> {
-                LanguageManager.load();
-            }
-            case "view" -> {
-                if (args.length < 2) {
-                    Logger.error("Invalid syntax! lang view <langCode>");
-                    return;
-                }
 
-                String langCode = args[1];
-                Logger.info("[" + langCode + "]: " + LanguageManager.getLanguageByCode(langCode));
-            }
-            default -> {
-                Logger.error("Invalid syntax! lang <list|load|view> [langCode]");
-            }
+            return CommandResult.SUCCESS;
         }
+
+        return CommandResult.INCORRECT_SYNTAX;
     }
 }

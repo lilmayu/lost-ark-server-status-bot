@@ -1,12 +1,14 @@
 package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
+import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
+import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 import dev.mayuna.mayuslibrary.console.colors.Color;
 import dev.mayuna.mayuslibrary.console.colors.Colors;
 
@@ -14,53 +16,64 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
 
     public LostArkConsoleCommand() {
         this.name = "lost-ark";
+        this.syntax = "<show-cache|update-cache>";
     }
 
     @Override
-    public void execute(String arguments) {
-        switch (arguments) {
-            case "show-cache" -> {
-                Logger.info("Current Lost Ark Servers cache: ");
+    public CommandResult execute(String arguments) {
+        ArgumentParser argumentParser = new ArgumentParser(arguments);
 
-                LostArkServers servers = ServerDashboardHelper.getLostArkServersCache();
-                Logger.info("Is null? " + (servers == null));
+        if (argumentParser.hasArgumentAtIndex(0)) {
+            switch (argumentParser.getArgumentAtIndex(0).getValue()) {
+                case "show-cache" -> {
+                    Logger.info("Current Lost Ark Servers cache: ");
 
-                if (servers != null) {
-                    Logger.info("There is " + servers.getServers().size() + " servers");
+                    LostArkServers servers = ServerDashboardHelper.getLostArkServersCache();
+                    Logger.info("Is null? " + (servers == null));
 
-                    int counter = 0;
-                    for (LostArkServer server : servers.getServers()) {
-                        LostArkRegion region = Utils.getRegionForServer(server.getName());
-                        String regionName;
+                    if (servers != null) {
+                        Logger.info("There is " + servers.getServers().size() + " servers");
 
-                        if (region == null) {
-                            regionName = new Color().setBackground(Colors.RED).setForeground(Colors.BLACK).build() + "NOT SET" + Color.RESET;
-                        } else {
-                            regionName = region.name();
+                        int counter = 0;
+                        for (LostArkServer server : servers.getServers()) {
+                            LostArkRegion region = Utils.getRegionForServer(server.getName());
+                            String regionName;
+
+                            if (region == null) {
+                                regionName = new Color().setBackground(Colors.RED).setForeground(Colors.BLACK).build() + "NOT SET" + Color.RESET;
+                            } else {
+                                regionName = region.name();
+                            }
+
+                            Logger.info("[" + counter + "]: " + server.getName() + " // " + server.getStatus().name() + " - " + regionName);
+
+                            counter++;
                         }
-
-                        Logger.info("[" + counter + "]: " + server.getName() + " // " + server.getStatus().name() + " - " + regionName);
-
-                        counter++;
                     }
-                }
 
-                Logger.info("Listing done.");
-            }
-            case "update-cache" -> {
-                Logger.info("Updating Lost Ark Servers cache...");
+                    Logger.success("Listing done.");
+                }
+                case "update-cache" -> {
+                    Logger.info("Updating Lost Ark Servers cache...");
 
-                try {
-                    ServerDashboardHelper.updateCache();
-                    Logger.success("Successfully updated Lost Ark Servers cache.");
-                } catch (Exception exception) {
-                    Logger.throwing(exception);
-                    Logger.error("Exception occurred while updating Lost Ark Servers cache!");
+                    try {
+                        ServerDashboardHelper.updateCache();
+                        Logger.success("Successfully updated Lost Ark Servers cache.");
+                    } catch (Exception exception) {
+                        Logger.throwing(exception);
+                        Logger.error("Exception occurred while updating Lost Ark Servers cache!");
+                    }
+
+                    Logger.success("Updating done.");
+                }
+                default -> {
+                    return CommandResult.INCORRECT_SYNTAX;
                 }
             }
-            default -> {
-                Logger.error("Syntax: lost-ark <show-cache|update-cache>");
-            }
+
+            return CommandResult.SUCCESS;
         }
+
+        return CommandResult.INCORRECT_SYNTAX;
     }
 }
