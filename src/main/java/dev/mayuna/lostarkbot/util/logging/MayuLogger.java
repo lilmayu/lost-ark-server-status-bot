@@ -13,16 +13,17 @@ import org.apache.logging.log4j.util.Supplier;
 
 /**
  * Extended Logger interface with convenience methods for
- * the FLOW and SUCCESS custom log levels.
+ * the FLOW, SUCCESS and MDEBUG custom log levels.
  * <p>Compatible with Log4j 2.6 or higher.</p>
  */
 public final class MayuLogger extends ExtendedLoggerWrapper {
-    private static final long serialVersionUID = 23416029248500L;
+    private static final long serialVersionUID = 12093312991200L;
     private final ExtendedLoggerWrapper logger;
 
     private static final String FQCN = MayuLogger.class.getName();
     private static final Level FLOW = Level.forName("FLOW", 550);
     private static final Level SUCCESS = Level.forName("SUCCESS", 420);
+    private static final Level MDEBUG = Level.forName("MDEBUG", 450);
 
     private MayuLogger(final Logger logger) {
         super((AbstractLogger) logger, logger.getName(), logger.getMessageFactory());
@@ -1492,6 +1493,690 @@ public final class MayuLogger extends ExtendedLoggerWrapper {
      */
     public void success(final MessageSupplier msgSupplier, final Throwable t) {
         logger.logIfEnabled(FQCN, SUCCESS, null, msgSupplier, t);
+    }
+
+    /**
+     * Logs a message with the specific Marker at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param msg the message string to be logged
+     */
+    public void mdebug(final Marker marker, final Message msg) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, msg, (Throwable) null);
+    }
+
+    /**
+     * Logs a message with the specific Marker at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param msg the message string to be logged
+     * @param t A Throwable or null.
+     */
+    public void mdebug(final Marker marker, final Message msg, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, msg, t);
+    }
+
+    /**
+     * Logs a message object with the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message object to log.
+     */
+    public void mdebug(final Marker marker, final Object message) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, (Throwable) null);
+    }
+
+    /**
+     * Logs a message CharSequence with the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message CharSequence to log.
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final CharSequence message) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, (Throwable) null);
+    }
+
+    /**
+     * Logs a message at the {@code MDEBUG} level including the stack trace of
+     * the {@link Throwable} {@code t} passed as parameter.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log.
+     * @param t the exception to log, including its stack trace.
+     */
+    public void mdebug(final Marker marker, final Object message, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, t);
+    }
+
+    /**
+     * Logs a message at the {@code MDEBUG} level including the stack trace of
+     * the {@link Throwable} {@code t} passed as parameter.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the CharSequence to log.
+     * @param t the exception to log, including its stack trace.
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final CharSequence message, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, t);
+    }
+
+    /**
+     * Logs a message object with the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message object to log.
+     */
+    public void mdebug(final Marker marker, final String message) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, (Throwable) null);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param params parameters to the message.
+     * @see #getMessageFactory()
+     */
+    public void mdebug(final Marker marker, final String message, final Object... params) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, params);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2, p3);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2, p3, p4);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2, p3, p4, p5);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2, p3, p4, p5, p6);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @param p7 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6,
+            final Object p7) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2, p3, p4, p5, p6, p7);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @param p7 parameter to the message.
+     * @param p8 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6,
+            final Object p7, final Object p8) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2, p3, p4, p5, p6, p7, p8);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @param p7 parameter to the message.
+     * @param p8 parameter to the message.
+     * @param p9 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final Marker marker, final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6,
+            final Object p7, final Object p8, final Object p9) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+    }
+
+    /**
+     * Logs a message at the {@code MDEBUG} level including the stack trace of
+     * the {@link Throwable} {@code t} passed as parameter.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log.
+     * @param t the exception to log, including its stack trace.
+     */
+    public void mdebug(final Marker marker, final String message, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, t);
+    }
+
+    /**
+     * Logs the specified Message at the {@code MDEBUG} level.
+     *
+     * @param msg the message string to be logged
+     */
+    public void mdebug(final Message msg) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, msg, (Throwable) null);
+    }
+
+    /**
+     * Logs the specified Message at the {@code MDEBUG} level.
+     *
+     * @param msg the message string to be logged
+     * @param t A Throwable or null.
+     */
+    public void mdebug(final Message msg, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, msg, t);
+    }
+
+    /**
+     * Logs a message object with the {@code MDEBUG} level.
+     *
+     * @param message the message object to log.
+     */
+    public void mdebug(final Object message) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, (Throwable) null);
+    }
+
+    /**
+     * Logs a message at the {@code MDEBUG} level including the stack trace of
+     * the {@link Throwable} {@code t} passed as parameter.
+     *
+     * @param message the message to log.
+     * @param t the exception to log, including its stack trace.
+     */
+    public void mdebug(final Object message, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, t);
+    }
+
+    /**
+     * Logs a message CharSequence with the {@code MDEBUG} level.
+     *
+     * @param message the message CharSequence to log.
+     * @since Log4j-2.6
+     */
+    public void mdebug(final CharSequence message) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, (Throwable) null);
+    }
+
+    /**
+     * Logs a CharSequence at the {@code MDEBUG} level including the stack trace of
+     * the {@link Throwable} {@code t} passed as parameter.
+     *
+     * @param message the CharSequence to log.
+     * @param t the exception to log, including its stack trace.
+     * @since Log4j-2.6
+     */
+    public void mdebug(final CharSequence message, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, t);
+    }
+
+    /**
+     * Logs a message object with the {@code MDEBUG} level.
+     *
+     * @param message the message object to log.
+     */
+    public void mdebug(final String message) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, (Throwable) null);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param params parameters to the message.
+     * @see #getMessageFactory()
+     */
+    public void mdebug(final String message, final Object... params) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, params);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2, p3);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2, p3, p4);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2, p3, p4, p5);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2, p3, p4, p5, p6);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @param p7 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6,
+            final Object p7) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2, p3, p4, p5, p6, p7);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @param p7 parameter to the message.
+     * @param p8 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6,
+            final Object p7, final Object p8) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2, p3, p4, p5, p6, p7, p8);
+    }
+
+    /**
+     * Logs a message with parameters at the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param p0 parameter to the message.
+     * @param p1 parameter to the message.
+     * @param p2 parameter to the message.
+     * @param p3 parameter to the message.
+     * @param p4 parameter to the message.
+     * @param p5 parameter to the message.
+     * @param p6 parameter to the message.
+     * @param p7 parameter to the message.
+     * @param p8 parameter to the message.
+     * @param p9 parameter to the message.
+     * @see #getMessageFactory()
+     * @since Log4j-2.6
+     */
+    public void mdebug(final String message, final Object p0, final Object p1, final Object p2,
+            final Object p3, final Object p4, final Object p5, final Object p6,
+            final Object p7, final Object p8, final Object p9) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+    }
+
+    /**
+     * Logs a message at the {@code MDEBUG} level including the stack trace of
+     * the {@link Throwable} {@code t} passed as parameter.
+     *
+     * @param message the message to log.
+     * @param t the exception to log, including its stack trace.
+     */
+    public void mdebug(final String message, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, t);
+    }
+
+    /**
+     * Logs a message which is only to be constructed if the logging level is the {@code MDEBUG}level.
+     *
+     * @param msgSupplier A function, which when called, produces the desired log message;
+     *            the format depends on the message factory.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final Supplier<?> msgSupplier) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, msgSupplier, (Throwable) null);
+    }
+
+    /**
+     * Logs a message (only to be constructed if the logging level is the {@code MDEBUG}
+     * level) including the stack trace of the {@link Throwable} <code>t</code> passed as parameter.
+     *
+     * @param msgSupplier A function, which when called, produces the desired log message;
+     *            the format depends on the message factory.
+     * @param t the exception to log, including its stack trace.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final Supplier<?> msgSupplier, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, msgSupplier, t);
+    }
+
+    /**
+     * Logs a message which is only to be constructed if the logging level is the
+     * {@code MDEBUG} level with the specified Marker.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param msgSupplier A function, which when called, produces the desired log message;
+     *            the format depends on the message factory.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final Marker marker, final Supplier<?> msgSupplier) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, msgSupplier, (Throwable) null);
+    }
+
+    /**
+     * Logs a message with parameters which are only to be constructed if the logging level is the
+     * {@code MDEBUG} level.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param message the message to log; the format depends on the message factory.
+     * @param paramSuppliers An array of functions, which when called, produce the desired log message parameters.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final Marker marker, final String message, final Supplier<?>... paramSuppliers) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, message, paramSuppliers);
+    }
+
+    /**
+     * Logs a message (only to be constructed if the logging level is the {@code MDEBUG}
+     * level) with the specified Marker and including the stack trace of the {@link Throwable}
+     * <code>t</code> passed as parameter.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param msgSupplier A function, which when called, produces the desired log message;
+     *            the format depends on the message factory.
+     * @param t A Throwable or null.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final Marker marker, final Supplier<?> msgSupplier, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, msgSupplier, t);
+    }
+
+    /**
+     * Logs a message with parameters which are only to be constructed if the logging level is
+     * the {@code MDEBUG} level.
+     *
+     * @param message the message to log; the format depends on the message factory.
+     * @param paramSuppliers An array of functions, which when called, produce the desired log message parameters.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final String message, final Supplier<?>... paramSuppliers) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, message, paramSuppliers);
+    }
+
+    /**
+     * Logs a message which is only to be constructed if the logging level is the
+     * {@code MDEBUG} level with the specified Marker. The {@code MessageSupplier} may or may
+     * not use the {@link MessageFactory} to construct the {@code Message}.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param msgSupplier A function, which when called, produces the desired log message.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final Marker marker, final MessageSupplier msgSupplier) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, msgSupplier, (Throwable) null);
+    }
+
+    /**
+     * Logs a message (only to be constructed if the logging level is the {@code MDEBUG}
+     * level) with the specified Marker and including the stack trace of the {@link Throwable}
+     * <code>t</code> passed as parameter. The {@code MessageSupplier} may or may not use the
+     * {@link MessageFactory} to construct the {@code Message}.
+     *
+     * @param marker the marker data specific to this log statement
+     * @param msgSupplier A function, which when called, produces the desired log message.
+     * @param t A Throwable or null.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final Marker marker, final MessageSupplier msgSupplier, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, marker, msgSupplier, t);
+    }
+
+    /**
+     * Logs a message which is only to be constructed if the logging level is the
+     * {@code MDEBUG} level. The {@code MessageSupplier} may or may not use the
+     * {@link MessageFactory} to construct the {@code Message}.
+     *
+     * @param msgSupplier A function, which when called, produces the desired log message.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final MessageSupplier msgSupplier) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, msgSupplier, (Throwable) null);
+    }
+
+    /**
+     * Logs a message (only to be constructed if the logging level is the {@code MDEBUG}
+     * level) including the stack trace of the {@link Throwable} <code>t</code> passed as parameter.
+     * The {@code MessageSupplier} may or may not use the {@link MessageFactory} to construct the
+     * {@code Message}.
+     *
+     * @param msgSupplier A function, which when called, produces the desired log message.
+     * @param t the exception to log, including its stack trace.
+     * @since Log4j-2.4
+     */
+    public void mdebug(final MessageSupplier msgSupplier, final Throwable t) {
+        logger.logIfEnabled(FQCN, MDEBUG, null, msgSupplier, t);
     }
 }
 

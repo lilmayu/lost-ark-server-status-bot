@@ -161,7 +161,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                 case "force-send-server-status-change" -> {
                     Logger.info("Forcing Server Status Change...");
 
-                    GuildDataManager.processServerStatusChange(ServerDashboardHelper.getLostArkServersCache(), LostArk.fetchServers());
+                    GuildDataManager.processServerStatusChange(ServerDashboardHelper.getPreviousServerCache(), ServerDashboardHelper.getLostArkServersCache());
 
                     Logger.info("Done.");
                 }

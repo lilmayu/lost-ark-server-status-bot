@@ -26,32 +26,10 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
         if (argumentParser.hasArgumentAtIndex(0)) {
             switch (argumentParser.getArgumentAtIndex(0).getValue()) {
                 case "show-cache" -> {
+                    Logger.info("Previous Lost Ark Servers cache: ");
+                    print(ServerDashboardHelper.getPreviousServerCache());
                     Logger.info("Current Lost Ark Servers cache: ");
-
-                    LostArkServers servers = ServerDashboardHelper.getLostArkServersCache();
-                    Logger.info("Is null? " + (servers == null));
-
-                    if (servers != null) {
-                        Logger.info("There is " + servers.getServers().size() + " servers");
-
-                        int counter = 0;
-                        for (LostArkServer server : servers.getServers()) {
-                            LostArkRegion region = Utils.getRegionForServer(server.getName());
-                            String regionName;
-
-                            if (region == null) {
-                                regionName = new Color().setBackground(Colors.RED).setForeground(Colors.BLACK).build() + "NOT SET" + Color.RESET;
-                            } else {
-                                regionName = region.name();
-                            }
-
-                            Logger.info("[" + counter + "]: " + server.getName() + " // " + server.getStatus().name() + " - " + regionName);
-
-                            counter++;
-                        }
-                    }
-
-                    Logger.success("Listing done.");
+                    print(ServerDashboardHelper.getLostArkServersCache());
                 }
                 case "update-cache" -> {
                     Logger.info("Updating Lost Ark Servers cache...");
@@ -75,5 +53,33 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
         }
 
         return CommandResult.INCORRECT_SYNTAX;
+    }
+
+    private void print(LostArkServers lostArkServers) {
+        Logger.info("Is null? " + (lostArkServers == null));
+
+        if (lostArkServers != null) {
+            Logger.info("There is " + lostArkServers.getServers().size() + " servers");
+
+            int counter = 0;
+            for (LostArkServer server : lostArkServers.getServers()) {
+                LostArkRegion region = Utils.getRegionForServer(server.getName());
+                String regionName;
+
+                if (region == null) {
+                    regionName = new Color().setBackground(Colors.RED).setForeground(Colors.BLACK).build() + "NOT SET" + Color.RESET;
+                } else {
+                    regionName = region.name();
+                }
+
+                Logger.info("[" + counter + "]: " + server.getName() + " // " + server.getStatus().name() + " - " + regionName);
+
+                counter++;
+            }
+        } else {
+            Logger.info("Servers are null.");
+        }
+
+        Logger.success("Listing done.");
     }
 }

@@ -17,8 +17,10 @@ import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
+import java.awt.*;
 import java.time.Instant;
 import java.util.*;
+import java.util.List;
 
 public class EmbedUtils {
 
@@ -59,7 +61,7 @@ public class EmbedUtils {
             String fieldName = languagePack.getTranslatedRegionName(region);
             StringBuilder fieldValue = new StringBuilder();
 
-            for (Map.Entry<String, ServerStatus> entry : Utils.getServersByRegion(region, servers).entrySet()) {
+            for (Map.Entry<String, ServerStatus> entry : new TreeMap<>(Utils.getServersByRegion(region, servers)).entrySet()) {
                 String toAppend = Utils.getServerLine(entry.getKey(), entry.getValue()) + "\n";
 
                 if (fieldValue.length() + toAppend.length() < 1024) {
@@ -170,10 +172,14 @@ public class EmbedUtils {
         List<EmbedBuilder> embedBuilders = new LinkedList<>();
         List<MessageEmbed.Field> fields = new LinkedList<>();
 
+        Color color = getColorBasedOnDifferences(getAllDifferences(regionDifferences, serverDifferences));
+
         fields.addAll(getServerStatusChangeField(regionDifferences));
         fields.addAll(getServerStatusChangeField(serverDifferences));
 
         EmbedBuilder currentEmbedBuilder = new EmbedBuilder();
+        currentEmbedBuilder.setColor(color);
+
         int fieldCount = 0;
         int characterCount = 0;
 
@@ -185,11 +191,13 @@ public class EmbedUtils {
 
                 embedBuilders.add(currentEmbedBuilder);
                 currentEmbedBuilder = new EmbedBuilder();
+                currentEmbedBuilder.setColor(color);
             } else if (fieldCount > 25) {
                 fieldCount = 0;
 
                 embedBuilders.add(currentEmbedBuilder);
                 currentEmbedBuilder = new EmbedBuilder();
+                currentEmbedBuilder.setColor(color);
             }
 
             currentEmbedBuilder.addField(field);
@@ -207,13 +215,17 @@ public class EmbedUtils {
         List<MessageEmbed.Field> fields = new LinkedList<>();
 
         for (LostArkRegion lostArkRegion : LostArkRegion.values()) {
-            List<LostArkServersChange.Difference> differences = Utils.getDifferencesByRegion(regionDifferences, lostArkRegion);
+            List<LostArkServersChange.Difference> differences = Utils.getDifferencesByRegion(new TreeMap<>(regionDifferences), lostArkRegion);
 
             String lines = "";
             boolean moreFieldsForOneRegion = false;
 
             for (LostArkServersChange.Difference difference : differences) {
                 String line = makeDifferenceString(difference);
+
+                if (line == null) {
+                    continue;
+                }
 
                 if ((lines + line).length() > 1024) {
                     moreFieldsForOneRegion = true;
@@ -239,12 +251,17 @@ public class EmbedUtils {
     }
 
     public static List<MessageEmbed.Field> getServerStatusChangeField(List<LostArkServersChange.Difference> differences) {
+        differences.sort(Comparator.comparing(LostArkServersChange.Difference::getServerName));
         List<MessageEmbed.Field> fields = new LinkedList<>();
 
         String lines = "";
 
         for (LostArkServersChange.Difference difference : differences) {
             String line = makeDifferenceString(difference);
+
+            if (line == null) {
+                continue;
+            }
 
             if ((lines + line).length() > 1024) {
                 fields.add(new MessageEmbed.Field("Servers", lines, false));
@@ -262,6 +279,65 @@ public class EmbedUtils {
     }
 
     private static String makeDifferenceString(LostArkServersChange.Difference difference) {
+        if (difference == null) {
+            return null;
+        }
+
         return Utils.getEmoteByStatus(difference.getOldStatus()) + " » " + Utils.getEmoteByStatus(difference.getNewStatus()) + " " + difference.getServerName();
+    }
+
+    private static List<LostArkServersChange.Difference> getAllDifferences(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences, List<LostArkServersChange.Difference> serverDifferences) {
+        List<LostArkServersChange.Difference> differences = new LinkedList<>(serverDifferences);
+        differences.addAll(regionDifferences.keySet());
+        return differences;
+    }
+
+    private static Color getColorBasedOnDifferences(List<LostArkServersChange.Difference> differences) {
+        int online = 0;
+        int busy = 0;
+        int full = 0;
+        int maintenance = 0;
+        int notFound = 0;
+
+        for (LostArkServersChange.Difference difference : differences) {
+            if (difference == null) {
+                continue;
+            }
+
+            ServerStatus newStatus = difference.getNewStatus();
+
+            if (newStatus == null) {
+                notFound++;
+            } else {
+                switch (newStatus) {
+                    case GOOD -> {
+                        online++;
+                    }
+                    case BUSY -> {
+                        busy++;
+                    }
+                    case FULL -> {
+                        full++;
+                    }
+                    case MAINTENANCE -> {
+                        maintenance++;
+                    }
+                }
+            }
+        }
+
+        if (online > Utils.countAll(busy, full, maintenance, notFound)) {
+            return new Color(171, 195, 70);
+        } else if (busy > Utils.countAll(online, full, maintenance, notFound)) {
+            return new Color(197, 46, 38);
+        } else if (full > Utils.countAll(busy, online, maintenance, notFound)) {
+            return new Color(91, 161, 201);
+        } else if (maintenance > Utils.countAll(busy, full, online, notFound)) {
+            return new Color(250, 227, 74);
+        } else if (notFound > Utils.countAll(busy, full, maintenance, online)) {
+            return new Color(41, 43, 47);
+        } else {
+            return null;
+        }
     }
 }

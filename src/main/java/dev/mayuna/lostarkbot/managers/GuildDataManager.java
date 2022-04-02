@@ -374,6 +374,8 @@ public class GuildDataManager {
             return;
         }
 
+        Logger.flow("Some servers changed their statuses.");
+
         synchronized (loadedGuildDataList) {
             Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
             while (guildDataIterator.hasNext()) {

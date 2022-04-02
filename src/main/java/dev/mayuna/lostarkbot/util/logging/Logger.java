@@ -28,7 +28,7 @@ public class Logger {
     }
 
     public static void debug(String msg) {
-        logger.debug(msg);
+        logger.mdebug(msg);
     }
 
     public static void flow(String msg) {

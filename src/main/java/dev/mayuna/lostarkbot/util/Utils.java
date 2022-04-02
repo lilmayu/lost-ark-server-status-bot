@@ -68,12 +68,15 @@ public class Utils {
     }
 
     public static String getEmoteByStatus(ServerStatus serverStatus) {
+        if (serverStatus == null) {
+            return Constants.NOT_FOUND_EMOTE;
+        }
+
         return switch (serverStatus) {
             case GOOD -> Constants.ONLINE_EMOTE;
             case BUSY -> Constants.BUSY_EMOTE;
             case FULL -> Constants.FULL_EMOTE;
             case MAINTENANCE -> Constants.WARNING_EMOTE;
-            default -> Constants.NOT_FOUND_EMOTE;
         };
     }
 
@@ -216,5 +219,18 @@ public class Utils {
         });
 
         return differences;
+    }
+
+    public static int countAll(int... numbers) {
+        if (numbers == null) {
+            return 0;
+        }
+
+        int total = 0;
+        for (int number : numbers) {
+            total += number;
+        }
+
+        return total;
     }
 }

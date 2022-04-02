@@ -30,6 +30,7 @@ public class ServerDashboardHelper {
 
     private static final @Getter Timer updateTimer = new Timer("LostArkServersCacheWorker");
     private static @Getter @Setter LostArkServers lostArkServersCache;
+    private static @Getter @Setter LostArkServers previousServerCache;
     private static @Getter String onlinePlayersCache;
 
     public static void startDashboardUpdateTimer() {
@@ -40,7 +41,6 @@ public class ServerDashboardHelper {
                 Logger.info("Updating " + guildsSize + " guilds...");
 
                 try {
-                    LostArkServers previousServerCache = lostArkServersCache;
                     updateCache();
                     GuildDataManager.processServerStatusChange(previousServerCache, lostArkServersCache);
 
@@ -178,6 +178,8 @@ public class ServerDashboardHelper {
     // Others
 
     public static void updateCache() throws IOException {
+        previousServerCache = lostArkServersCache;
+
         lostArkServersCache = LostArk.fetchServers();
         onlinePlayersCache = Utils.getOnlinePlayers();
     }
