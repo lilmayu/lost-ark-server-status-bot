@@ -156,7 +156,7 @@ public class GuildData extends ManagedGuild {
 
         ManagedGuildMessage managedGuildMessage = serverDashboard.getManagedGuildMessage();
         try {
-            managedGuildMessage.updateEntries(Main.getJda(), RestActionMethod.QUEUE, success -> {
+            managedGuildMessage.updateEntries(Main.getMayuShardManager().get(), RestActionMethod.QUEUE, success -> {
                 managedGuildMessage.getMessage().delete().queue(successDelete -> {
                     waiter.setObject(true);
                     waiter.proceed();
@@ -217,7 +217,7 @@ public class GuildData extends ManagedGuild {
                 AtomicBoolean wasSuccessful = new AtomicBoolean(false);
 
                 do {
-                    serverDashboard.getManagedGuildMessage().updateEntries(Main.getJda(), RestActionMethod.COMPLETE, success -> {
+                    serverDashboard.getManagedGuildMessage().updateEntries(Main.getMayuShardManager().get(), RestActionMethod.COMPLETE, success -> {
                         Logger.flow("[GUILD-DATA] Successfully loaded Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
 
                         wasSuccessful.set(true);
@@ -369,7 +369,7 @@ public class GuildData extends ManagedGuild {
                 NotificationChannel notificationChannel = notificationChannelIterator.next();
 
                 try {
-                    notificationChannel.getManagedTextChannel().updateEntries(Main.getJda());
+                    notificationChannel.getManagedTextChannel().updateEntries(Main.getMayuShardManager().get());
 
                     Logger.flow("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
                 } catch (Exception exception) {
@@ -410,6 +410,22 @@ public class GuildData extends ManagedGuild {
     }
 
     // === Notification Channels === //
+
+    public int getShardId() {
+        if (!isGuildValid()) {
+            try {
+                updateEntries(Main.getMayuShardManager().get());
+            } catch (Exception ignored) {
+                return -1;
+            }
+        }
+
+        try {
+            return getGuild().getJDA().getShardInfo().getShardId();
+        } catch (Exception ignored) {
+            return -1;
+        }
+    }
 
     @Override
     public boolean equals(Object object) {

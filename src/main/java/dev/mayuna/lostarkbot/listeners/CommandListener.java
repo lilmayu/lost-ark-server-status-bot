@@ -57,7 +57,7 @@ public class CommandListener implements com.jagrosh.jdautilities.command.Command
 
     @Override
     public void onCommandException(CommandEvent event, Command command, Throwable throwable) {
-        Logger.warn("PrefixCommand Exception @ " + event.getResponseNumber());
+        Logger.error("PrefixCommand Exception @ " + event.getResponseNumber());
         Logger.warn(" - Full message: '" + event.getMessage().getContentRaw() + "'");
         Logger.warn(" - Please, see errors below.");
 
@@ -82,7 +82,7 @@ public class CommandListener implements com.jagrosh.jdautilities.command.Command
 
     @Override
     public void onSlashCommandException(SlashCommandEvent event, SlashCommand command, Throwable throwable) {
-        Logger.warn("SlashCommand Exception @ " + event.getResponseNumber());
+        Logger.error("SlashCommand Exception @ " + event.getResponseNumber());
         Logger.warn(" - Full: '" + event.getCommandString() + "'");
         Logger.warn(" - Please, see errors below.");
 

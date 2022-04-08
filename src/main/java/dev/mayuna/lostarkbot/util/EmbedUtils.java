@@ -6,6 +6,7 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
@@ -35,7 +36,7 @@ public class EmbedUtils {
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setTitle(languagePack.getTitle());
 
-        String onlinePlayers = ServerDashboardHelper.getOnlinePlayersCache();
+        String onlinePlayers = ServerDashboardManager.getOnlinePlayersCache();
         String lastUpdated = servers.getLastUpdated();
 
         if (lastUpdated == null || lastUpdated.isEmpty()) {
@@ -251,7 +252,19 @@ public class EmbedUtils {
     }
 
     public static List<MessageEmbed.Field> getServerStatusChangeField(List<LostArkServersChange.Difference> differences) {
-        differences.sort(Comparator.comparing(LostArkServersChange.Difference::getServerName));
+        try {
+            differences.sort(Comparator.comparing(LostArkServersChange.Difference::getServerName));
+        } catch (Exception exception) {
+            Logger.throwing(exception);
+            Logger.warn("Unknown exception occurred while sorting by alphabet!");
+
+            for (LostArkServersChange.Difference difference : differences) {
+                Logger.warn("Name: " + difference);
+            }
+
+            Logger.warn("Was something null???");
+        }
+
         List<MessageEmbed.Field> fields = new LinkedList<>();
 
         String lines = "";

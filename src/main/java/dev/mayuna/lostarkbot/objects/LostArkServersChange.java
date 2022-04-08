@@ -6,6 +6,7 @@ import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import lombok.Getter;
+import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -48,8 +49,8 @@ public class LostArkServersChange {
 
         Difference difference = getDifference(serverName, oldServerStatus, newServerStatus);
 
-        Logger.flow("ForServer");
-        Logger.get().flow(difference);
+        Logger.get().trace("ForServer");
+        Logger.get().trace(difference);
 
         return difference;
     }
@@ -93,8 +94,8 @@ public class LostArkServersChange {
             }
         }
 
-        Logger.flow("ForRegion: " + lostArkRegion);
-        Logger.get().flow(differences);
+        Logger.get().trace("ForRegion: " + lostArkRegion);
+        Logger.get().trace(differences);
 
         return differences;
     }
@@ -106,7 +107,7 @@ public class LostArkServersChange {
         private final @Getter ServerStatus oldStatus;
         private final @Getter ServerStatus newStatus;
 
-        public Difference(String serverName, ServerStatus oldStatus, ServerStatus newStatus) {
+        public Difference(@NonNull String serverName, ServerStatus oldStatus, ServerStatus newStatus) {
             this.serverName = serverName;
             this.oldStatus = oldStatus;
             this.newStatus = newStatus;
@@ -137,7 +138,7 @@ public class LostArkServersChange {
         }
 
         @Override
-        public int compareTo(@NotNull LostArkServersChange.Difference o) {
+        public int compareTo(@NonNull LostArkServersChange.Difference o) {
             return serverName.compareTo(o.serverName);
         }
     }

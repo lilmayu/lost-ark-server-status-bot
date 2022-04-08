@@ -23,7 +23,7 @@ public class LoadDataConsoleCommand extends AbstractConsoleCommand {
         if (argumentParser.hasArgumentAtIndex(0)) {
             switch (argumentParser.getArgumentAtIndex(0).getValue()) {
                 case "guilds" -> {
-                    GuildDataManager.loadAll();
+                    GuildDataManager.loadAllFiles();
                     GuildDataManager.loadAllGuildData();
 
                     Logger.success("Loading done.");

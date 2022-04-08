@@ -30,6 +30,8 @@ public class Config {
     private static @Getter List<String> southAmerica = new ArrayList<>();
     private static @Getter List<String> europeWest = new ArrayList<>();
 
+    private static @Getter int totalShards = 1;
+
     public static boolean load() {
         try {
             MayuJson mayuJson = JsonUtil.createOrLoadJsonFromFile(Constants.CONFIG_PATH);
@@ -48,6 +50,8 @@ public class Config {
             centralEurope = JsonUtils.toStringList(mayuJson.getOrCreate("centralEurope", new JsonArray()).getAsJsonArray());
             southAmerica = JsonUtils.toStringList(mayuJson.getOrCreate("southAmerica", new JsonArray()).getAsJsonArray());
             europeWest = JsonUtils.toStringList(mayuJson.getOrCreate("europeWest", new JsonArray()).getAsJsonArray());
+
+            totalShards = mayuJson.getOrCreate("totalShards", new JsonPrimitive(totalShards)).getAsInt();
 
             mayuJson.saveJson();
             return true;
@@ -76,6 +80,8 @@ public class Config {
             mayuJson.add("centralEurope", JsonUtils.toStringJsonArray(centralEurope));
             mayuJson.add("southAmerica", JsonUtils.toStringJsonArray(southAmerica));
             mayuJson.add("europeWest", JsonUtils.toStringJsonArray(europeWest));
+
+            mayuJson.add("totalShards", totalShards);
 
             mayuJson.saveJson();
 

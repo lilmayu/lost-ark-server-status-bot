@@ -13,6 +13,7 @@ import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.NotificationsManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.Notifications;
 import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
 import dev.mayuna.lostarkbot.util.ObjectUtils;
@@ -161,7 +162,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                 case "force-send-server-status-change" -> {
                     Logger.info("Forcing Server Status Change...");
 
-                    GuildDataManager.processServerStatusChange(ServerDashboardHelper.getPreviousServerCache(), ServerDashboardHelper.getLostArkServersCache());
+                    GuildDataManager.processServerStatusChange(ServerDashboardManager.getPreviousServerCache(), ServerDashboardManager.getLostArkServersCache());
 
                     Logger.info("Done.");
                 }
@@ -183,7 +184,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                         return CommandResult.SUCCESS;
                     }
 
-                    LostArkServers lostArkServers = ServerDashboardHelper.getLostArkServersCache();
+                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCache();
                     LostArkServer lostArkServer = Utils.getServerFromList(lostArkServers.getServers(), serverName);
 
                     lostArkServers.getServers().remove(lostArkServer);
@@ -205,7 +206,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                         return CommandResult.SUCCESS;
                     }
 
-                    LostArkServers lostArkServers = ServerDashboardHelper.getLostArkServersCache();
+                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCache();
                     List<LostArkServer> servers = new LinkedList<>();
 
                     for (LostArkServer lostArkServer : lostArkServers.getServers()) {
@@ -219,7 +220,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                 }
 
                 case "clear-all-servers" -> {
-                    ServerDashboardHelper.getLostArkServersCache().getServers().clear();
+                    ServerDashboardManager.getLostArkServersCache().getServers().clear();
 
                     Logger.success("Successfully removed all servers from cache!");
                 }

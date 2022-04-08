@@ -42,7 +42,7 @@ public class GuildConsoleCommand extends AbstractConsoleCommand {
                         return CommandResult.SUCCESS;
                     }
 
-                    if (!guildData.updateEntries(Main.getJda())) {
+                    if (!guildData.updateEntries(Main.getMayuShardManager().get())) {
                         Logger.error("Could not update entries for Guild Data " + guildID + "(" + guildData.getName() + ")");
                         return CommandResult.SUCCESS;
                     }
@@ -75,7 +75,7 @@ public class GuildConsoleCommand extends AbstractConsoleCommand {
                         return CommandResult.SUCCESS;
                     }
 
-                    guildData.updateEntries(Main.getJda());
+                    guildData.updateEntries(Main.getMayuShardManager().get());
 
                     Logger.info("=== " + guildData.getRawGuildID() + " (" + guildData.getName() + ") ===");
                     Logger.info("> Dashboards: " + guildData.getLoadedServerDashboards().size());

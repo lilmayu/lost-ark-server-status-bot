@@ -10,7 +10,6 @@ import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.mayusjdautils.managed.ManagedTextChannel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -146,7 +145,8 @@ public class NotificationChannel {
         }
 
         for (MessageBuilder messageBuilder : messageBuilders) {
-            Logger.debug("[NOTIFICATIONS] Sending notification message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
+            Logger.flow("[NOTIFICATIONS] Sending notification message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
+
             managedTextChannel.getTextChannel().sendMessage(messageBuilder.build()).queue();
         }
     }
@@ -162,7 +162,13 @@ public class NotificationChannel {
         }
 
         for (String serverName : getServers()) {
+            if (serverName == null)
+                continue;
+
             LostArkServersChange.Difference difference = lostArkServersChange.getDifferenceForServer(serverName);
+
+            if (difference == null)
+                continue;
 
             if (!regionDifferences.containsKey(difference)) {
                 serverDifferences.add(difference);
@@ -180,13 +186,15 @@ public class NotificationChannel {
             description += Constants.ONLINE_EMOTE + " " + languagePack.getOnline() + " ";
             description += Constants.BUSY_EMOTE + " " + languagePack.getBusy() + " ";
             description += Constants.FULL_EMOTE + " " + languagePack.getFull() + " ";
-            description += Constants.WARNING_EMOTE + " " + languagePack.getMaintenance();
+            description += Constants.WARNING_EMOTE + " " + languagePack.getMaintenance() + " ";
+            description += Constants.NOT_FOUND_EMOTE + " Offline";
             embedBuilder.setDescription(description);
 
             embedBuilder.setFooter("Provided by Mayu's Lost Ark Bot");
             embedBuilder.setTimestamp(Instant.now());
 
-            Logger.debug("[STATUS-CHANGE] Sending status change message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
+            Logger.flow("[STATUS-CHANGE] Sending status change message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
+
             managedTextChannel.getTextChannel().sendMessage(new MessageBuilder().setEmbeds(embedBuilder.build()).build()).queue();
         }
     }

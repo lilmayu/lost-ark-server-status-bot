@@ -2,62 +2,26 @@ package dev.mayuna.lostarkbot.helpers;
 
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.GuildData;
 import dev.mayuna.lostarkbot.objects.ServerDashboard;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
 import dev.mayuna.lostarkbot.util.PermissionUtils;
-import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.Waiter;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.LostArk;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
 import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
 import dev.mayuna.mayusjdautils.utils.RestActionMethod;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class ServerDashboardHelper {
-
-    private static final @Getter Timer updateTimer = new Timer("LostArkServersCacheWorker");
-    private static @Getter @Setter LostArkServers lostArkServersCache;
-    private static @Getter @Setter LostArkServers previousServerCache;
-    private static @Getter String onlinePlayersCache;
-
-    public static void startDashboardUpdateTimer() {
-        updateTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                int guildsSize = GuildDataManager.getLoadedGuildDataList().size();
-                Logger.info("Updating " + guildsSize + " guilds...");
-
-                try {
-                    updateCache();
-                    GuildDataManager.processServerStatusChange(previousServerCache, lostArkServersCache);
-
-                    long start = System.currentTimeMillis();
-                    GuildDataManager.updateAllGuildData();
-                    long took = System.currentTimeMillis() - start;
-
-                    Logger.info("Queuing dashboard updates for " + guildsSize + " guilds took " + took + "ms");
-                } catch (Exception exception) {
-                    Logger.throwing(exception);
-                    Logger.fatal("Exception occurred while refreshing cache!");
-                }
-            }
-        }, 1000, 60000 * 5);
-    }
-
-    // Utility
 
     /**
      * Determines if {@link ServerDashboard} exists in specified {@link TextChannel}. Also, calls {@link GuildDataManager#getOrCreateGuildData(Guild)}
@@ -137,8 +101,8 @@ public class ServerDashboardHelper {
             return waiter;
         }
 
-        managedGuildMessage.updateEntries(Main.getJda(), RestActionMethod.QUEUE, entriesSuccess -> {
-            Message message = new MessageBuilder().setEmbeds(EmbedUtils.createEmbed(serverDashboard, lostArkServersCache).build()).build();
+        managedGuildMessage.updateEntries(Main.getMayuShardManager().get(), RestActionMethod.QUEUE, entriesSuccess -> {
+            Message message = new MessageBuilder().setEmbeds(EmbedUtils.createEmbed(serverDashboard, ServerDashboardManager.getLostArkServersCache()).build()).build();
 
             try {
                 managedGuildMessage.sendOrEditMessage(message, RestActionMethod.QUEUE, success -> {
@@ -174,13 +138,4 @@ public class ServerDashboardHelper {
     }
 
     // Handling
-
-    // Others
-
-    public static void updateCache() throws IOException {
-        previousServerCache = lostArkServersCache;
-
-        lostArkServersCache = LostArk.fetchServers();
-        onlinePlayersCache = Utils.getOnlinePlayers();
-    }
 }

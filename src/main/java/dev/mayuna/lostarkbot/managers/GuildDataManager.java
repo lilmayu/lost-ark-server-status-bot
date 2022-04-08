@@ -14,7 +14,6 @@ import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -63,7 +62,7 @@ public class GuildDataManager {
         if (guildData == null) {
             Logger.debug("Creating GuildData for guild " + guildID);
             guildData = new GuildData(guildID);
-            guildData.updateEntries(Main.getJda());
+            guildData.updateEntries(Main.getMayuShardManager().get());
 
             synchronized (loadedGuildDataList) {
                 loadedGuildDataList.add(guildData);
@@ -86,7 +85,7 @@ public class GuildDataManager {
         if (guildData == null) {
             Logger.debug("Creating GuildData for guild " + guild.getIdLong());
             guildData = new GuildData(guild);
-            guildData.updateEntries(Main.getJda()); // Optimized: this should just return, without any action
+            guildData.updateEntries(Main.getMayuShardManager().get()); // TODO: Optimized: this should just return, without any action
 
             synchronized (loadedGuildDataList) {
                 loadedGuildDataList.add(guildData);
@@ -103,18 +102,18 @@ public class GuildDataManager {
      *
      * @param guildData Non-null {@link GuildData}
      */
-    public static void updateGuildData(@NonNull GuildData guildData) {
+    public static void updateServerDashboardsForGuildData(@NonNull GuildData guildData) {
         guildData.updateDashboards();
     }
 
     /**
      * Updates all loaded {@link GuildData}
      */
-    public static void updateAllGuildData() {
+    public static void updateAllServerDashboards() {
         synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
             while (guildDataIterator.hasNext()) {
-                updateGuildData(guildDataIterator.next());
+                updateServerDashboardsForGuildData(guildDataIterator.next());
             }
         }
     }
@@ -189,7 +188,7 @@ public class GuildDataManager {
      *
      * @return True if successfully loaded, false otherwise
      */
-    public static boolean loadAll() {
+    public static boolean loadAllFiles() {
         synchronized (loadedGuildDataList) {
             loadedGuildDataList.clear();
         }
@@ -216,7 +215,7 @@ public class GuildDataManager {
 
             if (guildData != null) {
                 try {
-                    guildData.updateEntries(Main.getJda());
+                    guildData.updateEntries(Main.getMayuShardManager().get());
                     Logger.flow("[GUILD-LOAD] Successfully loaded GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
 
                     synchronized (loadedGuildDataList) {
@@ -239,11 +238,12 @@ public class GuildDataManager {
      * Loads all {@link GuildData}'s dashboards and notification channels
      */
     public static void loadAllGuildData() {
-        Logger.info("[GUILD-LOAD] Loading all dashboards and notification channels...");
+        Logger.info("[GUILD-LOAD] Loading all dashboards and notification channels shard by shard...");
         long start = System.currentTimeMillis();
 
+
         synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
 
             while (guildDataIterator.hasNext()) {
                 GuildData guildData = guildDataIterator.next();
@@ -274,7 +274,7 @@ public class GuildDataManager {
             return true;
         } catch (Exception exception) {
             Logger.throwing(exception);
-            Logger.fatal("Exception occurred while saving GuildData " + guildData.getRawGuildID() + "(" + guildData.getName() + ")!");
+            Logger.error("Exception occurred while saving GuildData " + guildData.getRawGuildID() + "(" + guildData.getName() + ")!");
             return false;
         }
     }
@@ -360,7 +360,7 @@ public class GuildDataManager {
 
     public static void processAllGuildDataWithNotifications(Notifications notifications) {
         synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
             while (guildDataIterator.hasNext()) {
                 guildDataIterator.next().sendUnreadNotificationsByRules(notifications);
             }
@@ -374,13 +374,22 @@ public class GuildDataManager {
             return;
         }
 
-        Logger.flow("Some servers changed their statuses.");
+        Logger.flow("[STATUS-CHANGE] Some servers changed their statuses.");
+
+        Logger.info("Queuing server status change messages to notification channels...");
+        long took;
 
         synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+            long start = System.currentTimeMillis();
+
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
             while (guildDataIterator.hasNext()) {
                 guildDataIterator.next().processServerStatusChange(lostArkServersChange);
             }
+
+            took = System.currentTimeMillis() - start;
         }
+
+        Logger.info("Queuing server status change messages done in " + took + "ms");
     }
 }

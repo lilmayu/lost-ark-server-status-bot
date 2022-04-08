@@ -1,9 +1,12 @@
 package dev.mayuna.lostarkbot.util;
 
 import com.google.gson.*;
+import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.objects.GuildData;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -14,6 +17,7 @@ import dev.mayuna.mayuslibrary.utils.ArrayUtils;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.sharding.ShardManager;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +27,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -96,7 +103,7 @@ public class Utils {
      * @return Null if server does not exist
      */
     public static String doesServerExist(String serverName) {
-        for (LostArkServer server : ServerDashboardHelper.getLostArkServersCache().getServers()) {
+        for (LostArkServer server : ServerDashboardManager.getLostArkServersCache().getServers()) {
             if (server.getName().equalsIgnoreCase(serverName)) {
                 return server.getName();
             }
@@ -232,5 +239,25 @@ public class Utils {
         }
 
         return total;
+    }
+
+    public static String getTimerWithoutMillis(long milliseconds) {
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+        String time = "";
+
+        if (minutes != 0) {
+            time += minutes + "m ";
+        }
+        seconds -= minutes * 60;
+        if (seconds != 0) {
+            time += seconds + "s";
+        }
+
+        if (time.equals("")) {
+            time = "0s";
+        }
+
+        return time;
     }
 }

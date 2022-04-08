@@ -61,7 +61,7 @@ public class NotificationsManager {
                     Logger.error("Exception occurred while updating notifications!");
                 }
             }
-        }, 0, 300000);
+        }, 2000, 300000);
     }
 
     public static void processPotentialNewNotifications() {
@@ -76,7 +76,11 @@ public class NotificationsManager {
         Logger.debug("News: " + notifications.getNews().size());
         Logger.debug("Forums: " + notifications.getForums().size());
 
+        long start = System.currentTimeMillis();
         sendToAllNotificationChannelsByRules(notifications);
+        long took = System.currentTimeMillis() - start;
+
+        Logger.info("Queuing notifications messages done in " + took + "ms.");
     }
 
     public static void sendToAllNotificationChannelsByRules(Notifications notifications) {

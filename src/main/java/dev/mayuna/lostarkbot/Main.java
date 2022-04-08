@@ -7,12 +7,9 @@ import dev.mayuna.lostarkbot.commands.LostArkCommand;
 import dev.mayuna.lostarkbot.commands.NotificationsCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.console.commands.*;
-import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
-import dev.mayuna.lostarkbot.managers.GuildDataManager;
-import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.managers.NotificationsManager;
-import dev.mayuna.lostarkbot.managers.PresenceManager;
+import dev.mayuna.lostarkbot.listeners.ShardWatcher;
+import dev.mayuna.lostarkbot.managers.*;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.LegacyDashboardsLoader;
@@ -24,18 +21,19 @@ import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionListener;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
     // Discord
-    private static @Getter JDA jda;
+    private static @Getter MayuShardManager mayuShardManager;
     private static @Getter CommandClientBuilder client;
 
     // Runtime
@@ -70,7 +68,23 @@ public class Main {
         }
         configLoaded = true;
 
-        Logger.info("Loading JDA stuff...");
+        Logger.info("Loading JDA Utilities...");
+        loadJdaUtilities();
+
+        Logger.info("Loading commands...");
+        loadCommands();
+
+        Logger.info("Loading JDA...");
+        loadJda();
+
+        Logger.info("Loading managers...");
+        loadManagers();
+
+        fullyLoaded = true;
+        Logger.success("Loading done! (took " + (System.currentTimeMillis() - start) + "ms)");
+    }
+
+    private static void loadJdaUtilities() {
         client = new CommandClientBuilder()
                 .setStatus(OnlineStatus.IDLE)
                 .setActivity(Activity.playing("Loading..."))
@@ -80,34 +94,44 @@ public class Main {
                 .setAlternativePrefix(Constants.ALTERNATIVE_PREFIX)
                 .setListener(new CommandListener());
 
-        Logger.info("Loading commands...");
-        loadCommands();
+        RestAction.setDefaultTimeout(2L, TimeUnit.MINUTES);
+    }
 
-        Logger.info("Logging into Discord...");
-        loginIntoDiscord();
-        Logger.success("Logged in!");
+    private static void loadJda() {
+        Logger.info("Building shard manager... Total shards: " + Config.getTotalShards());
 
-        Logger.info("Loading managers...");
-        loadManagers();
+        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(Config.getToken())
+                .setShardsTotal(Config.getTotalShards())
+                .setActivityProvider(PresenceManager::getActivityProvider)
+                .addEventListeners(new ShardWatcher())
+                .addEventListeners(client.build())
+                .addEventListeners(new MayuCoreListener());
 
-        fullyLoaded = true;
-        Logger.success("Loading done! (took " + (System.currentTimeMillis() - start) + "ms)");
+        try {
+            mayuShardManager = new MayuShardManager(shardBuilder.build());
+            mayuShardManager.waitOnAll();
+        } catch (Exception exception) {
+            Logger.throwing(exception);
+            Logger.fatal("Error occurred while logging into Discord! Cannot proceed.");
+            System.exit(-1);
+        }
     }
 
     private static void loadManagers() {
         LanguageManager.load();
 
-        if (!GuildDataManager.loadAll()) {
+        if (!GuildDataManager.loadAllFiles()) {
             Logger.fatal("There was fatal error while loading guilds! Cannot proceed.");
             System.exit(-1);
         }
 
         GuildDataManager.loadAllGuildData();
-        NotificationsManager.load();
 
         LegacyDashboardsLoader.load();
-        ServerDashboardHelper.startDashboardUpdateTimer();
         PresenceManager.startPresenceTimer();
+
+        NotificationsManager.load();
+        ServerDashboardManager.load();
     }
 
     private static void loadCommands() {
@@ -122,21 +146,10 @@ public class Main {
                                                new LostArkConsoleCommand(),
                                                new SaveDataConsoleCommand(),
                                                new WriteDownNumberOfGuildsConsoleCommand(),
-                                               new NotificationsConsoleCommand()
+                                               new NotificationsConsoleCommand(),
+                                               new ShardsConsoleCommand(),
+                                               new TopggConsoleCommand()
         );
-    }
-
-    private static void loginIntoDiscord() {
-        try {
-            JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getToken())
-                    .addEventListeners(client.build())
-                    .addEventListeners(new MayuCoreListener());
-            jda = jdaBuilder.build().awaitReady();
-        } catch (Exception exception) {
-            Logger.throwing(exception);
-            Logger.fatal("Error occurred while logging into Discord! Cannot proceed.");
-            System.exit(-1);
-        }
     }
 
     private static void loadLibrarySettings() {
@@ -146,8 +159,8 @@ public class Main {
             Logger.warn("Exception occurred! Sending it to Lost Ark Bot's exception Message channel.");
 
             if (configLoaded) {
-                if (Main.getJda() != null && Config.getExceptionMessageChannelID() != 0) {
-                    MessageChannel messageChannel = Main.getJda().getTextChannelById(Config.getExceptionMessageChannelID());
+                if (Main.getMayuShardManager().get() != null && Config.getExceptionMessageChannelID() != 0) {
+                    MessageChannel messageChannel = Main.getMayuShardManager().get().getTextChannelById(Config.getExceptionMessageChannelID());
                     if (messageChannel != null) {
                         MessageInfo.sendExceptionMessage(messageChannel, exceptionReport.getThrowable());
                     } else {

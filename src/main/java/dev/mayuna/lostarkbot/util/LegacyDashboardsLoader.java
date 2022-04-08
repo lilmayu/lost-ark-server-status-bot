@@ -48,7 +48,7 @@ public class LegacyDashboardsLoader {
                     String name = serverDashboard.getName();
 
                     do {
-                        serverDashboard.getManagedGuildMessage().updateEntries(Main.getJda(), RestActionMethod.COMPLETE, success -> {
+                        serverDashboard.getManagedGuildMessage().updateEntries(Main.getMayuShardManager().get(), RestActionMethod.COMPLETE, success -> {
                             Logger.debug("Successfully loaded Server Dashboard " + name);
 
                             successful.set(true);

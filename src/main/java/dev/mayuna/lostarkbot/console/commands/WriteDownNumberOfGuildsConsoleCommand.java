@@ -24,7 +24,7 @@ public class WriteDownNumberOfGuildsConsoleCommand extends AbstractConsoleComman
     @Override
     public CommandResult execute(String arguments) {
         String firstColumn;
-        String secondColumn = String.valueOf(Main.getJda().getGuilds().size());
+        String secondColumn = String.valueOf(Main.getMayuShardManager().get().getGuilds().size());
 
         if (!arguments.isEmpty()) {
             firstColumn = arguments;

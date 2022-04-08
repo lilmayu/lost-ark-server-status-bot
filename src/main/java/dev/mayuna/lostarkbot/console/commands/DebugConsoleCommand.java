@@ -5,6 +5,7 @@ import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.util.HashUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
@@ -25,9 +26,19 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
                 case "force-update" -> {
                     Logger.info("Force updating all guilds...");
 
-                    GuildDataManager.updateAllGuildData();
+                    GuildDataManager.updateAllServerDashboards();
 
                     Logger.success("Updating done.");
+                }
+
+                case "hash" -> {
+                    if (!argumentParser.hasArgumentAtIndex(1)) {
+                        return CommandResult.INCORRECT_SYNTAX;
+                    }
+
+                    String toHash = argumentParser.getAllArgumentsAfterIndex(0).toString();
+
+                    Logger.info("Hash of '" + toHash + "' is '" + HashUtils.hashMD5(toHash));
                 }
             }
 
@@ -35,11 +46,12 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
         }
 
         Logger.info("=== Debug ===");
-        Logger.info("JDA Guilds: " + Main.getJda().getGuilds().size());
+        Logger.info("Shards: " + Main.getMayuShardManager().get().getShardsTotal());
+        Logger.info("JDA Guilds: " + Main.getMayuShardManager().get().getGuilds().size());
         Logger.info("GuildData: " + GuildDataManager.getLoadedGuildDataList().size());
         Logger.info("Dashboards: " + GuildDataManager.countAllDashboards());
         Logger.info("Notifications ch.: " + GuildDataManager.countAllNotificationChannels());
-        Logger.info("In-game players: " + ServerDashboardHelper.getOnlinePlayersCache());
+        Logger.info("In-game players: " + ServerDashboardManager.getOnlinePlayersCache());
 
         return CommandResult.SUCCESS;
     }
