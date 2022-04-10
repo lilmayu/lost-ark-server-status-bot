@@ -1,4 +1,4 @@
-package dev.mayuna.lostarkbot.objects;
+package dev.mayuna.lostarkbot.objects.core;
 
 import com.google.gson.annotations.Expose;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
@@ -7,6 +7,9 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
+import dev.mayuna.lostarkbot.objects.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -147,7 +150,7 @@ public class NotificationChannel {
         for (MessageBuilder messageBuilder : messageBuilders) {
             Logger.flow("[NOTIFICATIONS] Sending notification message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
 
-            managedTextChannel.getTextChannel().sendMessage(messageBuilder.build()).queue();
+            managedTextChannel.getTextChannel().sendMessage(messageBuilder.build()).complete();
         }
     }
 
@@ -195,7 +198,7 @@ public class NotificationChannel {
 
             Logger.flow("[STATUS-CHANGE] Sending status change message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
 
-            managedTextChannel.getTextChannel().sendMessage(new MessageBuilder().setEmbeds(embedBuilder.build()).build()).queue();
+            managedTextChannel.getTextChannel().sendMessage(new MessageBuilder().setEmbeds(embedBuilder.build()).build()).complete();
         }
     }
 }

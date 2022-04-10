@@ -2,7 +2,7 @@ package dev.mayuna.lostarkbot.managers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.mayuna.lostarkbot.objects.LanguagePack;
+import dev.mayuna.lostarkbot.objects.core.LanguagePack;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjsonutils.JsonUtil;

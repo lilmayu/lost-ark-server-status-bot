@@ -3,8 +3,8 @@ package dev.mayuna.lostarkbot.helpers;
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
-import dev.mayuna.lostarkbot.objects.GuildData;
-import dev.mayuna.lostarkbot.objects.ServerDashboard;
+import dev.mayuna.lostarkbot.objects.core.GuildData;
+import dev.mayuna.lostarkbot.objects.core.ServerDashboard;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
 import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Waiter;
@@ -17,9 +17,6 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ServerDashboardHelper {
 
@@ -86,7 +83,7 @@ public class ServerDashboardHelper {
 
         try {
             if (PermissionUtils.isMissingPermissions(managedGuildMessage.getGuild().getSelfMember(), managedGuildMessage.getTextChannel())) {
-                Logger.warn("Bot has missing permissions in channel " + managedGuildMessage.getTextChannel() + " (" + managedGuildMessage.getGuild() + ")! Dashboard will be not updated.");
+                Logger.flow("Bot has missing permissions in channel " + managedGuildMessage.getTextChannel() + " (" + managedGuildMessage.getGuild() + ")! Dashboard will be not updated.");
 
                 waiter.setObject(false);
                 waiter.proceed();

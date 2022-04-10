@@ -1,15 +1,15 @@
-package dev.mayuna.lostarkbot.objects;
+package dev.mayuna.lostarkbot.objects.core;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import dev.mayuna.lostarkbot.Main;
-import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.Waiter;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
 import dev.mayuna.mayusjdautils.managed.ManagedGuild;
 import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
@@ -411,6 +411,15 @@ public class GuildData extends ManagedGuild {
 
     // === Notification Channels === //
 
+    public void updateEntries() {
+        updateEntries(Main.getMayuShardManager().get());
+    }
+
+    /**
+     * Gets ShardId from {@link Guild}
+     *
+     * @return -1 if there was error
+     */
     public int getShardId() {
         if (!isGuildValid()) {
             try {

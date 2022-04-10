@@ -1,12 +1,13 @@
-package dev.mayuna.lostarkbot.util;
+package dev.mayuna.lostarkbot.util.legacy;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
-import dev.mayuna.lostarkbot.objects.GuildData;
-import dev.mayuna.lostarkbot.objects.ServerDashboard;
+import dev.mayuna.lostarkbot.objects.core.GuildData;
+import dev.mayuna.lostarkbot.objects.core.ServerDashboard;
+import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
 import dev.mayuna.mayusjdautils.utils.RestActionMethod;

@@ -12,7 +12,7 @@ import dev.mayuna.lostarkbot.listeners.ShardWatcher;
 import dev.mayuna.lostarkbot.managers.*;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
-import dev.mayuna.lostarkbot.util.LegacyDashboardsLoader;
+import dev.mayuna.lostarkbot.util.legacy.LegacyDashboardsLoader;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
@@ -26,8 +26,14 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.SessionControllerAdapter;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import net.dv8tion.jda.internal.requests.RateLimiter;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
@@ -77,6 +83,8 @@ public class Main {
         Logger.info("Loading JDA...");
         loadJda();
 
+        ShardExecutorManager.initExecutorService();
+
         Logger.info("Loading managers...");
         loadManagers();
 
@@ -102,14 +110,24 @@ public class Main {
 
         DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(Config.getToken())
                 .setShardsTotal(Config.getTotalShards())
+                .setStatusProvider(shardId -> OnlineStatus.IDLE)
                 .setActivityProvider(PresenceManager::getActivityProvider)
-                .addEventListeners(new ShardWatcher())
+                .setSessionController(new SessionControllerAdapter() {
+                    @Override
+                    public long getGlobalRatelimit() {
+                        Logger.debug("Rate limit is: " + super.getGlobalRatelimit());
+
+                        return super.getGlobalRatelimit();
+                    }
+                })
                 .addEventListeners(client.build())
+                .addEventListeners(new ShardWatcher())
                 .addEventListeners(new MayuCoreListener());
 
         try {
             mayuShardManager = new MayuShardManager(shardBuilder.build());
             mayuShardManager.waitOnAll();
+
         } catch (Exception exception) {
             Logger.throwing(exception);
             Logger.fatal("Error occurred while logging into Discord! Cannot proceed.");
@@ -119,6 +137,8 @@ public class Main {
 
     private static void loadManagers() {
         LanguageManager.load();
+
+        GuildDataManager.init(mayuShardManager.get().getShardsTotal());
 
         if (!GuildDataManager.loadAllFiles()) {
             Logger.fatal("There was fatal error while loading guilds! Cannot proceed.");

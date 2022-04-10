@@ -3,12 +3,9 @@ package dev.mayuna.lostarkbot.console.commands;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
-import dev.mayuna.lostarkbot.managers.NotificationsManager;
-import dev.mayuna.lostarkbot.objects.GuildData;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
-import dev.mayuna.mayuslibrary.utils.NumberUtils;
 
 public class SaveDataConsoleCommand extends AbstractConsoleCommand {
 

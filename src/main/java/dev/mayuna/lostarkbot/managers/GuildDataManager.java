@@ -1,29 +1,49 @@
 package dev.mayuna.lostarkbot.managers;
 
 import dev.mayuna.lostarkbot.Main;
-import dev.mayuna.lostarkbot.objects.GuildData;
+import dev.mayuna.lostarkbot.objects.core.GuildData;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
 import dev.mayuna.lostarkbot.objects.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
+import dev.mayuna.lostarkbot.util.UpdateType;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.mayusjsonutils.JsonUtil;
-import lombok.Getter;
 import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GuildDataManager {
 
-    private static final @Getter List<GuildData> loadedGuildDataList = Collections.synchronizedList(new LinkedList<>());
+    private static Map<Integer, List<GuildData>> loadedGuildDataMap;
+
+    public static void init(int totalShards) {
+        Logger.debug("Initializing GuildData storage...");
+
+        loadedGuildDataMap = Collections.synchronizedMap(new HashMap<>(totalShards));
+
+        for (int x = 0; x < totalShards; x++) {
+            loadedGuildDataMap.put(x, Collections.synchronizedList(new LinkedList<>()));
+        }
+
+        Logger.info("Initialized GuildData storage for " + totalShards + " shards");
+    }
 
     // Getters
+
+    public static List<GuildData> getLoadedGuildDataListByShard(int shardId) {
+        synchronized (loadedGuildDataMap) {
+            if (shardId >= 0 && shardId < loadedGuildDataMap.size()) {
+                return loadedGuildDataMap.get(shardId);
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Gets {@link GuildData} by guild's ID
@@ -33,9 +53,17 @@ public class GuildDataManager {
      * @return Nullable {@link GuildData} (null if not found)
      */
     public static GuildData getGuildData(long guildID) {
-        synchronized (loadedGuildDataList) {
-            return loadedGuildDataList.stream().filter(guildData -> guildData.getRawGuildID() == guildID).findFirst().orElse(null);
+        synchronized (loadedGuildDataMap) {
+            for (Map.Entry<Integer, List<GuildData>> entry : loadedGuildDataMap.entrySet()) {
+                GuildData guildData = entry.getValue().stream().filter(guildDataStreamed -> guildDataStreamed.getRawGuildID() == guildID).findFirst().orElse(null);
+
+                if (guildData != null) {
+                    return guildData;
+                }
+            }
         }
+
+        return null;
     }
 
     /**
@@ -46,7 +74,16 @@ public class GuildDataManager {
      * @return Nullable {@link GuildData} (null if not found)
      */
     public static GuildData getGuildData(@NonNull Guild guild) {
-        return getGuildData(guild.getIdLong());
+        var loadedGuildDataList = getLoadedGuildDataListByShard(guild.getJDA().getShardInfo().getShardId());
+
+        if (loadedGuildDataList == null) {
+            Logger.error("Incorrect ShardId in core method get: " + guild.getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            return null;
+        }
+
+        synchronized (loadedGuildDataList) {
+            return loadedGuildDataList.stream().filter(guildDataStreamed -> guildDataStreamed.getRawGuildID() == guild.getIdLong()).findFirst().orElse(null);
+        }
     }
 
     /**
@@ -63,6 +100,32 @@ public class GuildDataManager {
             Logger.debug("Creating GuildData for guild " + guildID);
             guildData = new GuildData(guildID);
             guildData.updateEntries(Main.getMayuShardManager().get());
+
+            if (guildData.getShardId() == -1) {
+                Logger.error("GuildData has -1 ShardId even after updating it's entries! Putting it into ShardId 0 batch...");
+                var loadedGuildDataList = getLoadedGuildDataListByShard(0);
+
+                synchronized (loadedGuildDataList) {
+                    loadedGuildDataList.add(guildData);
+                }
+
+                return guildData;
+            }
+
+            var loadedGuildDataList = getLoadedGuildDataListByShard(guildData.getShardId());
+
+            if (loadedGuildDataList == null) {
+                Logger.error("Incorrect ShardId in core method getOrCreate(long): " + guildData.getGuild().getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+                Logger.error("Putting it into ShardId 0 batch...");
+
+                loadedGuildDataList = getLoadedGuildDataListByShard(0);
+
+                synchronized (loadedGuildDataList) {
+                    loadedGuildDataList.add(guildData);
+                }
+
+                return guildData;
+            }
 
             synchronized (loadedGuildDataList) {
                 loadedGuildDataList.add(guildData);
@@ -87,6 +150,32 @@ public class GuildDataManager {
             guildData = new GuildData(guild);
             guildData.updateEntries(Main.getMayuShardManager().get()); // TODO: Optimized: this should just return, without any action
 
+            if (guildData.getShardId() == -1) {
+                Logger.error("GuildData has -1 ShardId even after updating it's entries! Putting it into ShardId 0 batch...");
+                var loadedGuildDataList = getLoadedGuildDataListByShard(0);
+
+                synchronized (loadedGuildDataList) {
+                    loadedGuildDataList.add(guildData);
+                }
+
+                return guildData;
+            }
+
+            var loadedGuildDataList = getLoadedGuildDataListByShard(guildData.getShardId());
+
+            if (loadedGuildDataList == null) {
+                Logger.error("Incorrect ShardId in core method getOrCreate(Guild): " + guildData.getGuild().getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+                Logger.error("Putting it into ShardId 0 batch...");
+
+                loadedGuildDataList = getLoadedGuildDataListByShard(0);
+
+                synchronized (loadedGuildDataList) {
+                    loadedGuildDataList.add(guildData);
+                }
+
+                return guildData;
+            }
+
             synchronized (loadedGuildDataList) {
                 loadedGuildDataList.add(guildData);
             }
@@ -107,15 +196,117 @@ public class GuildDataManager {
     }
 
     /**
-     * Updates all loaded {@link GuildData}
+     * Updates all loaded @{@link GuildData} regardless of shard ID
      */
+    @Deprecated
     public static void updateAllServerDashboards() {
+        int size;
+
+        synchronized (loadedGuildDataMap) {
+            size = loadedGuildDataMap.size();
+        }
+
+        for (int shardId = 0; shardId < size; shardId++) {
+            updateAllServerDashboards(shardId);
+        }
+    }
+
+    /**
+     * Updates all loaded {@link GuildData} for specified shard id
+     * @param shardId Shard ID
+     */
+    public static void updateAllServerDashboards(int shardId) {
+        var loadedGuildDataList = getLoadedGuildDataListByShard(shardId);
+
+        if (loadedGuildDataList == null) {
+            Logger.error("Incorrect ShardId in core method updateAllServerDashboards: " + shardId + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            return;
+        }
+
         synchronized (loadedGuildDataList) {
             Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
             while (guildDataIterator.hasNext()) {
+                Utils.waitByConfigValue(UpdateType.SERVER_DASHBOARD);
                 updateServerDashboardsForGuildData(guildDataIterator.next());
             }
         }
+    }
+
+    @Deprecated
+    public static void processAllGuildDataWithNotifications(Notifications notifications) {
+        int size;
+
+        synchronized (loadedGuildDataMap) {
+            size = loadedGuildDataMap.size();
+        }
+
+        for (int shardId = 0; shardId < size; shardId++) {
+            processAllGuildDataWithNotifications(shardId, notifications);
+        }
+    }
+
+    public static void processAllGuildDataWithNotifications(int shardId, Notifications notifications) {
+        var loadedGuildDataList = getLoadedGuildDataListByShard(shardId);
+
+        if (loadedGuildDataList == null) {
+            Logger.error("Incorrect ShardId in core method processAllGuildDataWithNotifications: " + shardId + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            return;
+        }
+
+        synchronized (loadedGuildDataList) {
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
+            while (guildDataIterator.hasNext()) {
+                Utils.waitByConfigValue(UpdateType.NOTIFICATIONS);
+                guildDataIterator.next().sendUnreadNotificationsByRules(notifications);
+            }
+        }
+    }
+
+    @Deprecated
+    public static void processServerStatusChange(LostArkServers previous, LostArkServers current) {
+        int size;
+
+        synchronized (loadedGuildDataMap) {
+            size = loadedGuildDataMap.size();
+        }
+
+        for (int shardId = 0; shardId < size; shardId++) {
+            processServerStatusChange(shardId, previous, current);
+        }
+    }
+
+    public static void processServerStatusChange(int shardId, LostArkServers previous, LostArkServers current) {
+        LostArkServersChange lostArkServersChange = new LostArkServersChange(previous, current);
+
+        if (!lostArkServersChange.hasChangedAnything()) {
+            return;
+        }
+
+        Logger.flow("[STATUS-CHANGE] Some servers changed their statuses.");
+
+        Logger.info("Queuing server status change messages to notification channels...");
+        long took;
+
+        var loadedGuildDataList = getLoadedGuildDataListByShard(shardId);
+
+        if (loadedGuildDataList == null) {
+            Logger.error("Incorrect ShardId in core method processServerStatusChange: " + shardId + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            return;
+        }
+
+        synchronized (loadedGuildDataList) {
+            long start = System.currentTimeMillis();
+
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
+            while (guildDataIterator.hasNext()) {
+                Utils.waitByConfigValue(UpdateType.SERVER_STATUS);
+                guildDataIterator.next().processServerStatusChange(lostArkServersChange);
+            }
+
+            took = System.currentTimeMillis() - start;
+        }
+
+        Logger.info("Queuing server status change messages done in " + took + "ms");
     }
 
     // Loading
@@ -148,6 +339,13 @@ public class GuildDataManager {
      * @return Non-null {@link GuildData}
      */
     public static GuildData addOrReplaceGuildData(@NonNull GuildData guildData) {
+        var loadedGuildDataList = getLoadedGuildDataListByShard(guildData.getShardId());
+
+        if (loadedGuildDataList == null) {
+            Logger.error("Incorrect ShardId in core method addOrReplaceGuildData: " + guildData.getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            return guildData;
+        }
+
         synchronized (loadedGuildDataList) {
             loadedGuildDataList.remove(guildData);
             loadedGuildDataList.add(guildData);
@@ -156,13 +354,40 @@ public class GuildDataManager {
     }
 
     /**
+     * Removes specified guild via {@link Guild} object from loaded {@link GuildData}
+     *
+     * @param guild {@link Guild} object
+     */
+    public static void removeGuildData(Guild guild) {
+        var loadedGuildDataList = getLoadedGuildDataListByShard(guild.getJDA().getShardInfo().getShardId());
+
+        if (loadedGuildDataList == null) {
+            Logger.error("Incorrect ShardId in core method removeGuildData: " + guild.getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            return;
+        }
+
+        synchronized (loadedGuildDataList) {
+            loadedGuildDataList.removeIf(guildData -> guildData.getRawGuildID() == guild.getIdLong());
+        }
+    }
+
+    /**
      * Removes specified guild via ID from loaded {@link GuildData}
      *
      * @param guildID Guild's ID
      */
     public static void removeGuildData(long guildID) {
-        synchronized (loadedGuildDataList) {
-            loadedGuildDataList.removeIf(guildData -> guildData.getRawGuildID() == guildID);
+        GuildData guildData = getGuildData(guildID);
+
+        if (guildData == null) {
+            return;
+        }
+
+        try {
+            guildData.updateEntries();
+
+            removeGuildData(guildData.getGuild());
+        } catch (Exception ignored) {
         }
     }
 
@@ -189,8 +414,12 @@ public class GuildDataManager {
      * @return True if successfully loaded, false otherwise
      */
     public static boolean loadAllFiles() {
-        synchronized (loadedGuildDataList) {
-            loadedGuildDataList.clear();
+        synchronized (loadedGuildDataMap) {
+            for (List<GuildData> loadedGuildDataList : loadedGuildDataMap.values()) {
+                synchronized (loadedGuildDataList) {
+                    loadedGuildDataList.clear();
+                }
+            }
         }
 
         Logger.info("[GUILD-LOAD] Loading GuildData...");
@@ -218,8 +447,10 @@ public class GuildDataManager {
                     guildData.updateEntries(Main.getMayuShardManager().get());
                     Logger.flow("[GUILD-LOAD] Successfully loaded GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
 
-                    synchronized (loadedGuildDataList) {
-                        loadedGuildDataList.add(guildData);
+                    if (guildData.getShardId() == -1) {
+                        Logger.error("Incorrect ShardId in core method loadAllFiles: " + guildData.getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)... However, you should not see this ever.");
+                    } else {
+                        addOrReplaceGuildData(guildData);
                     }
                 } catch (Exception exception) {
                     Logger.throwing(exception);
@@ -230,7 +461,7 @@ public class GuildDataManager {
             }
         }
 
-        Logger.success("[GUILD-LOAD] Loading completed, loaded " + loadedGuildDataList.size() + " out of " + guildsFiles.length + " files. (took " + (System.currentTimeMillis() - start) + "ms)");
+        Logger.success("[GUILD-LOAD] Loading completed, loaded " + countGuildDataSize() + " out of " + guildsFiles.length + " files. (took " + (System.currentTimeMillis() - start) + "ms)");
         return true;
     }
 
@@ -241,19 +472,25 @@ public class GuildDataManager {
         Logger.info("[GUILD-LOAD] Loading all dashboards and notification channels shard by shard...");
         long start = System.currentTimeMillis();
 
+        synchronized (loadedGuildDataMap) {
+            loadedGuildDataMap.forEach((shardId, loadedGuildDataList) -> {
+                // TODO: Psát tady ETA také
+                Logger.info("Loading GuildData within Shard ID " + shardId);
 
-        synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
+                synchronized (loadedGuildDataList) {
+                    Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
 
-            while (guildDataIterator.hasNext()) {
-                GuildData guildData = guildDataIterator.next();
+                    while (guildDataIterator.hasNext()) {
+                        GuildData guildData = guildDataIterator.next();
 
-                Logger.flow("[GUILD-LOAD] Loading dashboards for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
-                guildData.loadDashboards();
+                        Logger.flow("[GUILD-LOAD] Loading dashboards for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                        guildData.loadDashboards();
 
-                Logger.flow("[GUILD-LOAD] Loading notification channels for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
-                guildData.loadNotificationChannels();
-            }
+                        Logger.flow("[GUILD-LOAD] Loading notification channels for GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                        guildData.loadNotificationChannels();
+                    }
+                }
+            });
         }
 
         Logger.success("[GUILD-LOAD] Loading dashboards and notification channels completed, loaded " + countAllDashboards() + " dashboards and " + countAllNotificationChannels() + " notification channels. (took " + (System.currentTimeMillis() - start) + "ms)");
@@ -283,7 +520,7 @@ public class GuildDataManager {
      * Saves all currently loaded {@link GuildData} into their files
      */
     public static void saveAll() {
-        Logger.info("[GUILD-SAVE] Saving " + loadedGuildDataList.size() + " GuildData...");
+        Logger.info("[GUILD-SAVE] Saving " + countGuildDataSize() + " GuildData...");
         long start = System.currentTimeMillis();
 
         Logger.flow("[GUILD-SAVE] Checking for folders...");
@@ -294,17 +531,26 @@ public class GuildDataManager {
         }
 
         Logger.flow("[GUILD-SAVE] Saving...");
-        int successfullySaved = 0;
-        for (GuildData guildData : loadedGuildDataList) {
-            if (saveGuildData(guildData)) {
-                successfullySaved++;
-                Logger.flow("[GUILD-SAVE] Successfully saved GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
-            } else {
-                Logger.error("[GUILD-SAVE] Unable to save GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")!");
-            }
+        AtomicInteger successfullySaved = new AtomicInteger();
+
+        synchronized (loadedGuildDataMap) {
+            loadedGuildDataMap.forEach((shardId, loadedGuildDataList) -> {
+                Logger.info("Loading data for GuildData within Shard ID " + shardId);
+
+                synchronized (loadedGuildDataList) {
+                    for (GuildData guildData : loadedGuildDataList) {
+                        if (saveGuildData(guildData)) {
+                            successfullySaved.getAndIncrement();
+                            Logger.flow("[GUILD-SAVE] Successfully saved GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")");
+                        } else {
+                            Logger.error("[GUILD-SAVE] Unable to save GuildData " + guildData.getRawGuildID() + " (" + guildData.getName() + ")!");
+                        }
+                    }
+                }
+            });
         }
 
-        Logger.success("[GUILD-SAVE] Saving completed, saved " + successfullySaved + " out of " + loadedGuildDataList.size() + " GuildData. (took " + (System.currentTimeMillis() - start) + "ms)");
+        Logger.success("[GUILD-SAVE] Saving completed, saved " + successfullySaved + " out of " + countGuildDataSize() + " GuildData. (took " + (System.currentTimeMillis() - start) + "ms)");
     }
 
     // Others
@@ -322,22 +568,49 @@ public class GuildDataManager {
         return guildsFolder;
     }
 
+    public static int countGuildDataSize() {
+        if (loadedGuildDataMap == null) {
+            return -1;
+        }
+
+        AtomicInteger value = new AtomicInteger();
+
+        synchronized (loadedGuildDataMap) {
+            loadedGuildDataMap.forEach((shardId, loadedGuildDataList) -> {
+                synchronized (loadedGuildDataList) {
+                    value.addAndGet(loadedGuildDataList.size());
+                }
+            });
+        }
+
+        return value.get();
+    }
+
     /**
      * Counts all dashboards
      *
      * @return Number of dashboards
      */
     public static int countAllDashboards() {
-        int counter = 0;
-
-        synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
-            while (guildDataIterator.hasNext()) {
-                counter += guildDataIterator.next().getLoadedServerDashboards().size();
-            }
+        if (loadedGuildDataMap == null) {
+            return -1;
         }
 
-        return counter;
+        AtomicInteger counter = new AtomicInteger();
+
+        synchronized (loadedGuildDataMap) {
+            loadedGuildDataMap.forEach((shardId, loadedGuildDataList) -> {
+                synchronized (loadedGuildDataList) {
+                    Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+                    while (guildDataIterator.hasNext()) {
+                        counter.addAndGet(guildDataIterator.next().getLoadedServerDashboards().size());
+                    }
+                }
+
+            });
+        }
+
+        return counter.get();
     }
 
     /**
@@ -346,50 +619,23 @@ public class GuildDataManager {
      * @return Number of notification channels
      */
     public static int countAllNotificationChannels() {
-        int counter = 0;
-
-        synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
-            while (guildDataIterator.hasNext()) {
-                counter += guildDataIterator.next().getLoadedNotificationChannels().size();
-            }
+        if (loadedGuildDataMap == null) {
+            return -1;
         }
 
-        return counter;
-    }
+        AtomicInteger counter = new AtomicInteger();
 
-    public static void processAllGuildDataWithNotifications(Notifications notifications) {
-        synchronized (loadedGuildDataList) {
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
-            while (guildDataIterator.hasNext()) {
-                guildDataIterator.next().sendUnreadNotificationsByRules(notifications);
-            }
-        }
-    }
-
-    public static void processServerStatusChange(LostArkServers previous, LostArkServers current) {
-        LostArkServersChange lostArkServersChange = new LostArkServersChange(previous, current);
-
-        if (!lostArkServersChange.hasChangedAnything()) {
-            return;
+        synchronized (loadedGuildDataMap) {
+            loadedGuildDataMap.forEach((shardId, loadedGuildDataList) -> {
+                synchronized (loadedGuildDataList) {
+                    Iterator<GuildData> guildDataIterator = loadedGuildDataList.listIterator();
+                    while (guildDataIterator.hasNext()) {
+                        counter.addAndGet(guildDataIterator.next().getLoadedNotificationChannels().size());
+                    }
+                }
+            });
         }
 
-        Logger.flow("[STATUS-CHANGE] Some servers changed their statuses.");
-
-        Logger.info("Queuing server status change messages to notification channels...");
-        long took;
-
-        synchronized (loadedGuildDataList) {
-            long start = System.currentTimeMillis();
-
-            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
-            while (guildDataIterator.hasNext()) {
-                guildDataIterator.next().processServerStatusChange(lostArkServersChange);
-            }
-
-            took = System.currentTimeMillis() - start;
-        }
-
-        Logger.info("Queuing server status change messages done in " + took + "ms");
+        return counter.get();
     }
 }

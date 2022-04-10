@@ -1,12 +1,10 @@
 package dev.mayuna.lostarkbot.util;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
-import dev.mayuna.mayuslibrary.logging.LogPrefix;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,6 +29,11 @@ public class Config {
     private static @Getter List<String> europeWest = new ArrayList<>();
 
     private static @Getter int totalShards = 1;
+    private static @Getter int totalUpdateThreadPool = 2;
+
+    private static @Getter long waitTimeBetweenDashboardUpdates = 50;
+    private static @Getter long waitTimeBetweenServerStatusMessages = 50;
+    private static @Getter long waitTimeBetweenNotificationMessages = 50;
 
     public static boolean load() {
         try {
@@ -52,6 +55,11 @@ public class Config {
             europeWest = JsonUtils.toStringList(mayuJson.getOrCreate("europeWest", new JsonArray()).getAsJsonArray());
 
             totalShards = mayuJson.getOrCreate("totalShards", new JsonPrimitive(totalShards)).getAsInt();
+            totalUpdateThreadPool = mayuJson.getOrCreate("totalUpdateThreadPool", new JsonPrimitive(totalUpdateThreadPool)).getAsInt();
+
+            waitTimeBetweenDashboardUpdates = mayuJson.getOrCreate("waitTimeBetweenDashboardUpdates", new JsonPrimitive(waitTimeBetweenDashboardUpdates)).getAsLong();
+            waitTimeBetweenServerStatusMessages = mayuJson.getOrCreate("waitTimeBetweenServerStatusMessages", new JsonPrimitive(waitTimeBetweenServerStatusMessages)).getAsLong();
+            waitTimeBetweenNotificationMessages = mayuJson.getOrCreate("waitTimeBetweenNotificationMessages", new JsonPrimitive(waitTimeBetweenNotificationMessages)).getAsLong();
 
             mayuJson.saveJson();
             return true;
@@ -82,6 +90,11 @@ public class Config {
             mayuJson.add("europeWest", JsonUtils.toStringJsonArray(europeWest));
 
             mayuJson.add("totalShards", totalShards);
+            mayuJson.add("totalUpdateThreadPool", totalUpdateThreadPool);
+
+            mayuJson.add("waitTimeBetweenDashboardUpdates", waitTimeBetweenDashboardUpdates);
+            mayuJson.add("waitTimeBetweenServerStatusMessages", waitTimeBetweenServerStatusMessages);
+            mayuJson.add("waitTimeBetweenNotificationMessages", waitTimeBetweenNotificationMessages);
 
             mayuJson.saveJson();
 

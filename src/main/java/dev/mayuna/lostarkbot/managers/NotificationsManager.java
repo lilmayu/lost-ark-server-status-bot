@@ -13,12 +13,8 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.objects.Notifications;
-import dev.mayuna.lostarkbot.objects.Result;
+import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
-import dev.mayuna.lostarkbot.util.Constants;
-import dev.mayuna.lostarkbot.util.HashUtils;
-import dev.mayuna.lostarkbot.util.JsonUtils;
-import dev.mayuna.lostarkbot.util.ObjectUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
@@ -80,14 +76,16 @@ public class NotificationsManager {
         sendToAllNotificationChannelsByRules(notifications);
         long took = System.currentTimeMillis() - start;
 
-        Logger.info("Queuing notifications messages done in " + took + "ms.");
+        HashCache.setAsSent(notifications.getForums().keySet().toArray(new Hashable[0]));
+        HashCache.setAsSent(notifications.getNews().keySet().toArray(new Hashable[0]));
+
+        Logger.info("Queuing notifications messages for all shards done in " + took + "ms.");
     }
 
     public static void sendToAllNotificationChannelsByRules(Notifications notifications) {
-        GuildDataManager.processAllGuildDataWithNotifications(notifications);
-
-        HashCache.setAsSent(notifications.getForums().keySet().toArray(new Hashable[0]));
-        HashCache.setAsSent(notifications.getNews().keySet().toArray(new Hashable[0]));
+        ShardExecutorManager.submitForEachShard(UpdateType.NOTIFICATIONS, shardId -> {
+            GuildDataManager.processAllGuildDataWithNotifications(shardId, notifications);
+        });
     }
 
     public static void fetchAll() {

@@ -3,7 +3,7 @@ package dev.mayuna.lostarkbot.console.commands;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.objects.LanguagePack;
+import dev.mayuna.lostarkbot.objects.core.LanguagePack;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 

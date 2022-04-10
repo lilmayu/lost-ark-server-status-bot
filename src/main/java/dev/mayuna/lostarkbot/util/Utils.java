@@ -1,12 +1,9 @@
 package dev.mayuna.lostarkbot.util;
 
 import com.google.gson.*;
-import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
-import dev.mayuna.lostarkbot.objects.GuildData;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -17,7 +14,6 @@ import dev.mayuna.mayuslibrary.utils.ArrayUtils;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.sharding.ShardManager;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,8 +24,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -259,5 +253,37 @@ public class Utils {
         }
 
         return time;
+    }
+
+    public static void waitByConfigValue(UpdateType updateType) {
+        try {
+            switch (updateType) {
+                case SERVER_DASHBOARD -> {
+                    long waitTime = Config.getWaitTimeBetweenDashboardUpdates();
+
+                    if (waitTime != 0) {
+                        Thread.sleep(waitTime);
+                    }
+                }
+                case NOTIFICATIONS -> {
+                    long waitTime = Config.getWaitTimeBetweenNotificationMessages();
+
+                    if (waitTime != 0) {
+                        Thread.sleep(waitTime);
+                    }
+                }
+                case SERVER_STATUS -> {
+                    long waitTime = Config.getWaitTimeBetweenServerStatusMessages();
+
+                    if (waitTime != 0) {
+                        Thread.sleep(waitTime);
+                    }
+                }
+            }
+        } catch (Exception exception) {
+            Logger.throwing(exception);
+
+            Logger.error("Exception occurred while waiting config value for type " + updateType.name() + "!");
+        }
     }
 }

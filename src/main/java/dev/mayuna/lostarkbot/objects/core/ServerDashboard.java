@@ -1,4 +1,4 @@
-package dev.mayuna.lostarkbot.objects;
+package dev.mayuna.lostarkbot.objects.core;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

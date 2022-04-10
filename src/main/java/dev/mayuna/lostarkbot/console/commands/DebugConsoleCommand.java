@@ -3,9 +3,9 @@ package dev.mayuna.lostarkbot.console.commands;
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
-import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.managers.ShardExecutorManager;
 import dev.mayuna.lostarkbot.util.HashUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
@@ -48,10 +48,11 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
         Logger.info("=== Debug ===");
         Logger.info("Shards: " + Main.getMayuShardManager().get().getShardsTotal());
         Logger.info("JDA Guilds: " + Main.getMayuShardManager().get().getGuilds().size());
-        Logger.info("GuildData: " + GuildDataManager.getLoadedGuildDataList().size());
+        Logger.info("GuildData: " + GuildDataManager.countGuildDataSize());
         Logger.info("Dashboards: " + GuildDataManager.countAllDashboards());
         Logger.info("Notifications ch.: " + GuildDataManager.countAllNotificationChannels());
         Logger.info("In-game players: " + ServerDashboardManager.getOnlinePlayersCache());
+        Logger.info("Currently running tasks: " + ShardExecutorManager.getCurrentlyRunningTasks());
 
         return CommandResult.SUCCESS;
     }

@@ -1,5 +1,6 @@
 package dev.mayuna.lostarkbot.managers;
 
+import dev.mayuna.lostarkbot.util.UpdateType;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.LostArk;
@@ -35,21 +36,26 @@ public class ServerDashboardManager {
                     return;
                 }
 
-                int guildsSize = GuildDataManager.getLoadedGuildDataList().size();
+                int guildsSize = GuildDataManager.countGuildDataSize();
                 Logger.info("Queuing server dashboard updates for " + guildsSize + " guilds...");
 
                 long start = System.currentTimeMillis();
                 queueUpdatesForAllGuildData();
                 long took = System.currentTimeMillis() - start;
 
-                Logger.info("Queuing server dashboard updates for " + guildsSize + " done in " + took + "ms");
+                Logger.info("Queuing server dashboard updates on all shards for " + guildsSize + " done in " + took + "ms");
             }
         }, 0, 300000);
     }
 
     public static void queueUpdatesForAllGuildData() {
-        GuildDataManager.processServerStatusChange(previousServerCache, lostArkServersCache);
-        GuildDataManager.updateAllServerDashboards();
+        ShardExecutorManager.submitForEachShard(UpdateType.SERVER_DASHBOARD, shardId -> {
+            GuildDataManager.updateAllServerDashboards(shardId);
+        });
+
+        ShardExecutorManager.submitForEachShard(UpdateType.SERVER_STATUS, shardId -> {
+            GuildDataManager.processServerStatusChange(shardId, previousServerCache, lostArkServersCache);
+        });
     }
 
     public static void updateCache() throws IOException {

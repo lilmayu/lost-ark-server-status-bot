@@ -1,32 +1,11 @@
 package dev.mayuna.lostarkbot.helpers;
 
-import dev.mayuna.lostarkbot.Main;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
-import dev.mayuna.lostarkbot.objects.GuildData;
-import dev.mayuna.lostarkbot.objects.NotificationChannel;
-import dev.mayuna.lostarkbot.objects.Notifications;
-import dev.mayuna.lostarkbot.objects.ServerDashboard;
-import dev.mayuna.lostarkbot.util.EmbedUtils;
-import dev.mayuna.lostarkbot.util.PermissionUtils;
-import dev.mayuna.lostarkbot.util.Waiter;
-import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
-import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
-import dev.mayuna.mayusjdautils.utils.RestActionMethod;
-import lombok.Getter;
+import dev.mayuna.lostarkbot.objects.core.GuildData;
+import dev.mayuna.lostarkbot.objects.core.NotificationChannel;
 import lombok.NonNull;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-
-import java.util.*;
 
 public class NotificationChannelHelper {
 
