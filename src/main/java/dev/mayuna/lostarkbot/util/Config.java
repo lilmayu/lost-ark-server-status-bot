@@ -34,6 +34,12 @@ public class Config {
     private static @Getter long waitTimeBetweenDashboardUpdates = 50;
     private static @Getter long waitTimeBetweenServerStatusMessages = 50;
     private static @Getter long waitTimeBetweenNotificationMessages = 50;
+    private static @Getter long waitTimeBetweenTweets = 50;
+
+    private static @Getter @Setter String twitterAPIKey = "### YOUR TWITTER API KEY HERE ###";
+    private static @Getter @Setter String twitterAPIKeySecret = "### YOUR TWITTER API KEY SECRET HERE ###";
+    private static @Getter @Setter String twitterAccessToken = "### YOUR TWITTER ACCESS TOKEN HERE ###";
+    private static @Getter @Setter String twitterAccessTokenSecret = "### YOUR TWITTER ACCESS TOKEN SECRET HERE ###";
 
     public static boolean load() {
         try {
@@ -60,6 +66,12 @@ public class Config {
             waitTimeBetweenDashboardUpdates = mayuJson.getOrCreate("waitTimeBetweenDashboardUpdates", new JsonPrimitive(waitTimeBetweenDashboardUpdates)).getAsLong();
             waitTimeBetweenServerStatusMessages = mayuJson.getOrCreate("waitTimeBetweenServerStatusMessages", new JsonPrimitive(waitTimeBetweenServerStatusMessages)).getAsLong();
             waitTimeBetweenNotificationMessages = mayuJson.getOrCreate("waitTimeBetweenNotificationMessages", new JsonPrimitive(waitTimeBetweenNotificationMessages)).getAsLong();
+            waitTimeBetweenTweets = mayuJson.getOrCreate("waitTimeBetweenTweets", new JsonPrimitive(waitTimeBetweenTweets)).getAsLong();
+
+            twitterAPIKey = mayuJson.getOrCreate("twitterAPIKey", new JsonPrimitive(twitterAPIKey)).getAsString();
+            twitterAPIKeySecret = mayuJson.getOrCreate("twitterAPIKeySecret", new JsonPrimitive(twitterAPIKeySecret)).getAsString();
+            twitterAccessToken = mayuJson.getOrCreate("twitterAccessToken", new JsonPrimitive(twitterAccessToken)).getAsString();
+            twitterAccessTokenSecret = mayuJson.getOrCreate("twitterAccessTokenSecret", new JsonPrimitive(twitterAccessTokenSecret)).getAsString();
 
             mayuJson.saveJson();
             return true;
@@ -95,6 +107,12 @@ public class Config {
             mayuJson.add("waitTimeBetweenDashboardUpdates", waitTimeBetweenDashboardUpdates);
             mayuJson.add("waitTimeBetweenServerStatusMessages", waitTimeBetweenServerStatusMessages);
             mayuJson.add("waitTimeBetweenNotificationMessages", waitTimeBetweenNotificationMessages);
+            mayuJson.add("waitTimeBetweenTweets", waitTimeBetweenTweets);
+
+            mayuJson.add("twitterAPIKey", twitterAPIKey);
+            mayuJson.add("twitterAPIKeySecret", twitterAPIKeySecret);
+            mayuJson.add("twitterAccessToken", twitterAccessToken);
+            mayuJson.add("twitterAccessTokenSecret", twitterAccessTokenSecret);
 
             mayuJson.saveJson();
 

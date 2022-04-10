@@ -46,7 +46,7 @@ public class Main {
     private static boolean configLoaded = false;
     private static boolean fullyLoaded = false;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         long start = System.currentTimeMillis();
 
         File logsFolder = new File("./logs/");
@@ -144,6 +144,8 @@ public class Main {
 
         NotificationsManager.load();
         ServerDashboardManager.load();
+
+        TwitterManager.initStream();
     }
 
     private static void loadCommands() {
@@ -160,7 +162,8 @@ public class Main {
                                                new WriteDownNumberOfGuildsConsoleCommand(),
                                                new NotificationsConsoleCommand(),
                                                new ShardsConsoleCommand(),
-                                               new TopggConsoleCommand()
+                                               new TopggConsoleCommand(),
+                                               new TwitterConsoleCommand()
         );
     }
 

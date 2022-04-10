@@ -8,6 +8,7 @@ import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -104,10 +105,10 @@ public class LostArkServersChange {
 
         private final @Getter String serverName;
 
-        private final @Getter ServerStatus oldStatus;
-        private final @Getter ServerStatus newStatus;
+        private final @Getter @Nullable ServerStatus oldStatus; // null = Offline
+        private final @Getter @Nullable ServerStatus newStatus; // null = Offline
 
-        public Difference(@NonNull String serverName, ServerStatus oldStatus, ServerStatus newStatus) {
+        public Difference(@NonNull String serverName, @Nullable ServerStatus oldStatus, @Nullable ServerStatus newStatus) {
             this.serverName = serverName;
             this.oldStatus = oldStatus;
             this.newStatus = newStatus;

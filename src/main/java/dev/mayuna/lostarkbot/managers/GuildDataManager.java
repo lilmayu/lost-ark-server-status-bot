@@ -1,6 +1,7 @@
 package dev.mayuna.lostarkbot.managers;
 
 import dev.mayuna.lostarkbot.Main;
+import dev.mayuna.lostarkbot.objects.MayuTweet;
 import dev.mayuna.lostarkbot.objects.core.GuildData;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
 import dev.mayuna.lostarkbot.objects.Notifications;
@@ -284,7 +285,7 @@ public class GuildDataManager {
 
         Logger.flow("[STATUS-CHANGE] Some servers changed their statuses.");
 
-        Logger.info("Queuing server status change messages to notification channels...");
+        Logger.info("Sending server status change messages to notification channels...");
         long took;
 
         var loadedGuildDataList = getLoadedGuildDataListByShard(shardId);
@@ -306,7 +307,46 @@ public class GuildDataManager {
             took = System.currentTimeMillis() - start;
         }
 
-        Logger.info("Queuing server status change messages done in " + took + "ms");
+        Logger.info("Sending server status change messages done in " + took + "ms");
+    }
+
+    @Deprecated
+    public static void processMayuTweet(MayuTweet mayuTweet) {
+        int size;
+
+        synchronized (loadedGuildDataMap) {
+            size = loadedGuildDataMap.size();
+        }
+
+        for (int shardId = 0; shardId < size; shardId++) {
+            processMayuTweet(shardId, mayuTweet);
+        }
+    }
+
+    public static void processMayuTweet(int shardId, MayuTweet mayuTweet) {
+        Logger.info("Sending tweet " + mayuTweet.getId() + " to notification channels...");
+        long took;
+
+        var loadedGuildDataList = getLoadedGuildDataListByShard(shardId);
+
+        if (loadedGuildDataList == null) {
+            Logger.error("Incorrect ShardId in core method processMayuTweet: " + shardId + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            return;
+        }
+
+        synchronized (loadedGuildDataList) {
+            long start = System.currentTimeMillis();
+
+            Iterator<GuildData> guildDataIterator = loadedGuildDataList.iterator();
+            while (guildDataIterator.hasNext()) {
+                Utils.waitByConfigValue(UpdateType.TWITTER);
+                guildDataIterator.next().processMayuTweet(mayuTweet);
+            }
+
+            took = System.currentTimeMillis() - start;
+        }
+
+        Logger.info("Sending tweet done in " + took + "ms");
     }
 
     // Loading
@@ -535,7 +575,7 @@ public class GuildDataManager {
 
         synchronized (loadedGuildDataMap) {
             loadedGuildDataMap.forEach((shardId, loadedGuildDataList) -> {
-                Logger.info("Loading data for GuildData within Shard ID " + shardId);
+                Logger.info("Saving data for GuildData within Shard ID " + shardId);
 
                 synchronized (loadedGuildDataList) {
                     for (GuildData guildData : loadedGuildDataList) {

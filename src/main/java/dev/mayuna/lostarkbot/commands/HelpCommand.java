@@ -77,7 +77,7 @@ public class HelpCommand extends SlashCommand {
                                       `/lost-ark language-list` - Showes list of currently supported languages
                                       `/lost-ark language` - Sets language on Server dashboard""", false
         );
-        embedBuilder.addField("• Command `/notifications`",
+        embedBuilder.addField("• Command `/notifications` (1/2)",
                               """
                                       These commands are used for creating and editing [Notification channels](https://i.imgur.com/yGVdhLX.png).
 
@@ -85,11 +85,17 @@ public class HelpCommand extends SlashCommand {
                                       `/notifications remove` - Unmarks current channel as a Notification channel
                                       `/notifications news` - Enables or disables News category
                                       `/notifications forums` - Enables or disables Forums category
+                                      `/notifications twitter` - Enables or disables Twitter notifications
+                                      `/notifications twitter-filter` - Filters specified keywords in tweets
                                       `/notifications status-server` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for server
-                                      `/notifications status-region` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for region
-                                      `/notifications status` - Shows you which notifications you have enabled
-                                      `/notifications clear` - Disables specified notifications""", false
+                                      `/notifications status-region` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for region""", false
         );
+        embedBuilder.addField("• Command `/notifications` (2/2)",
+                              """
+                                      `/notifications status-whitelist` - Adds or removes whitelisted statuses
+                                      `/notifications status-ping` - Adds or removes roles to ping
+                                      `/notifications status` - Shows you which notifications you have enabled
+                                      `/notifications clear` - Disables/clears specified notifications/lists""", false);
 
         messageBuilder.setEmbeds(embedBuilder.build());
         message.setMessageBuilder(messageBuilder);

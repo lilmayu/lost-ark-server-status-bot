@@ -11,6 +11,7 @@ import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayuslibrary.utils.ArrayUtils;
+import dev.mayuna.mayuslibrary.utils.StringUtils;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -152,10 +153,35 @@ public class Utils {
                 .create();
     }
 
-    public static OptionData getActionArgument() {
+    public static OptionData getEnableDisableArgument() {
         OptionData optionData = new OptionData(OptionType.STRING, "action", "Action", true);
         optionData.addChoice("Enable", "enable");
         optionData.addChoice("Disable", "disable");
+        return optionData;
+    }
+
+    public static OptionData getAddRemoveArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "action", "Action", true);
+        optionData.addChoice("Add", "add");
+        optionData.addChoice("Remove", "remove");
+        return optionData;
+    }
+
+    public static OptionData getStatusArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "status", "Status", true);
+        for (ServerStatus serverStatus : ServerStatus.values()) {
+            if (serverStatus == ServerStatus.GOOD) {
+                optionData.addChoice("Online", serverStatus.name());
+            } else {
+                optionData.addChoice(StringUtils.prettyString(serverStatus.name()), serverStatus.name());
+            }
+        }
+        return optionData;
+    }
+
+    public static OptionData getStatusWithOfflineArgument() {
+        OptionData optionData = getStatusArgument();
+        optionData.addChoice("Offline", "OFFLINE");
         return optionData;
     }
 
@@ -189,6 +215,9 @@ public class Utils {
         optionData.addChoice("Forums", "forums");
         optionData.addChoice("Status change Server", "status_server");
         optionData.addChoice("Status change Region", "status_region");
+        optionData.addChoice("Status whitelist", "status_whitelist");
+        optionData.addChoice("Ping roles", "ping_roles");
+        optionData.addChoice("Twitter Filter", "twitter_filter");
         return optionData;
     }
 
@@ -279,11 +308,52 @@ public class Utils {
                         Thread.sleep(waitTime);
                     }
                 }
+                case TWITTER -> {
+                    long waitTime = Config.getWaitTimeBetweenTweets();
+
+                    if (waitTime != 0) {
+                        Thread.sleep(waitTime);
+                    }
+                }
             }
         } catch (Exception exception) {
             Logger.throwing(exception);
 
             Logger.error("Exception occurred while waiting config value for type " + updateType.name() + "!");
         }
+    }
+
+    public static boolean isOnWhitelist(LostArkServersChange.Difference difference, List<String> statusWhitelist) {
+        if (statusWhitelist.isEmpty()) {
+            return true;
+        }
+
+        if (difference.getNewStatus() == null) {
+            if (statusWhitelist.contains("OFFLINE")) {
+                return true;
+            }
+        }
+
+        if (difference.getOldStatus() == null) {
+            if (statusWhitelist.contains("OFFLINE")) {
+                return true;
+            }
+        }
+
+        for (ServerStatus serverStatus : ServerStatus.values()) {
+            if (serverStatus == difference.getNewStatus()) {
+                if (statusWhitelist.contains(serverStatus.name())) {
+                    return true;
+                }
+            }
+
+            if (serverStatus == difference.getOldStatus()) {
+                if (statusWhitelist.contains(serverStatus.name())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

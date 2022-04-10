@@ -6,6 +6,7 @@ import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.MayuTweet;
 import dev.mayuna.lostarkbot.objects.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.Waiter;
@@ -405,6 +406,17 @@ public class GuildData extends ManagedGuild {
                 NotificationChannel notificationChannel = notificationChannelIterator.next();
 
                 notificationChannel.processServerStatusChange(lostArkServersChange);
+            }
+        }
+    }
+
+    public void processMayuTweet(MayuTweet mayuTweet) {
+        synchronized (loadedNotificationChannels) {
+            Iterator<NotificationChannel> notificationChannelIterator = loadedNotificationChannels.listIterator();
+            while (notificationChannelIterator.hasNext()) {
+                NotificationChannel notificationChannel = notificationChannelIterator.next();
+
+                notificationChannel.processMayuTweet(mayuTweet);
             }
         }
     }

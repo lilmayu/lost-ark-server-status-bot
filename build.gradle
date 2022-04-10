@@ -43,6 +43,10 @@ dependencies {
     // GSON
     implementation 'com.google.code.gson:gson:2.8.9'
 
+    // Twitter4j
+    implementation 'org.twitter4j:twitter4j-core:4.0.7'
+    implementation 'org.twitter4j:twitter4j-stream:4.0.7'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'

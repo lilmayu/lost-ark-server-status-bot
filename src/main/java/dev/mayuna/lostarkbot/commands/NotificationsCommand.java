@@ -8,10 +8,13 @@ import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.core.NotificationChannel;
 import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import dev.mayuna.mayusjdautils.utils.MessageInfo;
+import dev.mayuna.mayuslibrary.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -20,6 +23,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class NotificationsCommand extends SlashCommand {
@@ -35,7 +39,11 @@ public class NotificationsCommand extends SlashCommand {
                 new ForumsCommand(),
                 new StatusServerCommand(),
                 new StatusRegionCommand(),
-                new ClearCommand()
+                new ClearCommand(),
+                new StatusWhitelistCommand(),
+                new StatusPingCommand(),
+                new TwitterCommand(),
+                new TwitterFilterCommand()
         };
     }
 
@@ -176,7 +184,6 @@ public class NotificationsCommand extends SlashCommand {
                     if (!Utils.isLast(notificationChannel.getRegions(), lostArkRegion)) {
                         regions += ",\n";
                     }
-
                 }
             }
 
@@ -190,7 +197,73 @@ public class NotificationsCommand extends SlashCommand {
                     if (!Utils.isLast(notificationChannel.getServers(), serverName)) {
                         servers += ",\n";
                     }
+                }
+            }
 
+            String statusWhitelist = "";
+            if (notificationChannel.getStatusWhitelist().isEmpty()) {
+                statusWhitelist = "Status whitelist is empty.";
+            } else {
+                for (String status : notificationChannel.getStatusWhitelist()) {
+                    if (statusWhitelist.equals("GOOD")) {
+                        statusWhitelist += "Online";
+                    } else {
+                        statusWhitelist += StringUtils.prettyString(status);
+                    }
+
+                    if (!Utils.isLast(notificationChannel.getStatusWhitelist(), status)) {
+                        statusWhitelist += ", ";
+                    }
+                }
+            }
+
+            String pingRoles = "";
+            if (notificationChannel.getRoleIds().isEmpty()) {
+                pingRoles = "No roles to ping on server status change.";
+            } else {
+                List<String> roleIdsToRemove = new LinkedList<>();
+                for (String roleId : notificationChannel.getRoleIds()) {
+                    Role role = notificationChannel.getManagedTextChannel().getGuild().getRoleById(roleId);
+
+                    if (role != null) {
+                        if ((pingRoles + role.getAsMention()).length() > 2000) {
+                            continue;
+                        }
+
+                        pingRoles += role.getAsMention();
+                    } else {
+                        roleIdsToRemove.add(roleId);
+                    }
+
+
+                    if (!Utils.isLast(notificationChannel.getRoleIds(), roleId)) {
+                        pingRoles += ", ";
+                    }
+                }
+                notificationChannel.getRoleIds().removeAll(roleIdsToRemove);
+
+                if (pingRoles.isEmpty()) {
+                    pingRoles = "No roles to ping on server status change.";
+                }
+            }
+
+            String twitter = "";
+            if (!notificationChannel.isTwitterEnabled()) {
+                twitter += "Twitter notifications are **disabled**.";
+            } else {
+                twitter += "Twitter notifications are **enabled**.";
+            }
+
+            if (notificationChannel.getTwitterKeywords().isEmpty()) {
+                twitter += "\nThere are no filtering keywords.";
+            } else {
+                twitter += "\nFiltered keywords: ";
+                for (String keyword : notificationChannel.getTwitterKeywords()) {
+                    twitter += keyword;
+
+                    if (!Utils.isLast(notificationChannel.getTwitterKeywords(), keyword)) {
+                        twitter += ", ";
+                    }
                 }
             }
 
@@ -199,6 +272,11 @@ public class NotificationsCommand extends SlashCommand {
             embedBuilder.addBlankField(false);
             embedBuilder.addField("Enabled Region status changes", regions, true);
             embedBuilder.addField("Enabled Server status changes", servers, true);
+            embedBuilder.addBlankField(false);
+            embedBuilder.addField("Status whitelist", statusWhitelist, true);
+            embedBuilder.addField("Ping roles", pingRoles, true);
+            embedBuilder.addBlankField(false);
+            embedBuilder.addField("Twitter", twitter, true);
 
             hook.editOriginalEmbeds(embedBuilder.build()).queue();
         }
@@ -212,7 +290,7 @@ public class NotificationsCommand extends SlashCommand {
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
             List<OptionData> options = new ArrayList<>(2);
-            options.add(Utils.getActionArgument());
+            options.add(Utils.getEnableDisableArgument());
             options.add(Utils.getNewsCategoryArgument());
             this.options = options;
         }
@@ -278,7 +356,7 @@ public class NotificationsCommand extends SlashCommand {
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
             List<OptionData> options = new ArrayList<>(2);
-            options.add(Utils.getActionArgument());
+            options.add(Utils.getEnableDisableArgument());
             options.add(Utils.getForumsCategoryArgument());
             this.options = options;
         }
@@ -336,6 +414,128 @@ public class NotificationsCommand extends SlashCommand {
         }
     }
 
+    protected static class TwitterCommand extends SlashCommand {
+
+        public TwitterCommand() {
+            this.name = "twitter";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+
+            List<OptionData> options = new ArrayList<>(2);
+            options.add(Utils.getEnableDisableArgument());
+            this.options = options;
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            OptionMapping actionOption = event.getOption("action");
+
+            if (actionOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `action` argument.").build()).queue();
+                return;
+            }
+
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
+            if (!NotificationChannelHelper.isNotificationChannelInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("This channel isn't marked as Notification Channel!").build()).queue();
+                return;
+            }
+
+            NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(channel);
+
+            switch (actionOption.getAsString()) {
+                case "enable" -> {
+                    notificationChannel.setTwitterEnabled(true);
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications from Twitter!\n\nUse `/notifications twitter-filter` command for keyword filtering.").build()).queue();
+                    notificationChannel.save();
+                }
+                case "disable" -> {
+                    notificationChannel.setTwitterEnabled(false);
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications from Twitter!").build()).queue();
+                    notificationChannel.save();
+                }
+            }
+        }
+    }
+
+    protected static class TwitterFilterCommand extends SlashCommand {
+
+        public TwitterFilterCommand() {
+            this.name = "twitter-filter";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+
+            List<OptionData> options = new ArrayList<>(2);
+            options.add(Utils.getAddRemoveArgument());
+            options.add(new OptionData(OptionType.STRING, "keyword", "Keyword to filter within tweets (non case sensitive)", true));
+            this.options = options;
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            OptionMapping actionOption = event.getOption("action");
+            OptionMapping keywordOption = event.getOption("keyword");
+
+            if (actionOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `action` argument.").build()).queue();
+                return;
+            }
+
+            if (keywordOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `keyword` argument.").build()).queue();
+                return;
+            }
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
+            if (!NotificationChannelHelper.isNotificationChannelInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("This channel isn't marked as Notification Channel!").build()).queue();
+                return;
+            }
+
+            NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(channel);
+            String keyword = keywordOption.getAsString();
+
+            switch (actionOption.getAsString()) {
+                case "add" -> {
+                    if (notificationChannel.getTwitterKeywords().size() == 30) {
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Maximum number of filtering keywords is **30**.").build()).queue();
+                        return;
+                    }
+
+                    if (notificationChannel.addToTwitterKeywords(keywordOption.getAsString())) {
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added keyword **" + keyword + "** into filter.").build()).queue();
+                        notificationChannel.save();
+                    } else {
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Keyword **" + keyword + "** is already in filter!").build()).queue();
+                    }
+                }
+                case "remove" -> {
+                    if (notificationChannel.removeFromTwitterKeywords(keywordOption.getAsString())) {
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed keyword **" + keyword + "** from filter.").build()).queue();
+                        notificationChannel.save();
+                    } else {
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Keyword **" + keyword + "** is not on the filter!").build()).queue();
+                    }
+                }
+            }
+        }
+    }
+
     protected static class StatusServerCommand extends SlashCommand {
 
         public StatusServerCommand() {
@@ -344,7 +544,7 @@ public class NotificationsCommand extends SlashCommand {
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
             List<OptionData> options = new ArrayList<>(2);
-            options.add(Utils.getActionArgument());
+            options.add(Utils.getEnableDisableArgument());
             options.add(new OptionData(OptionType.STRING, "server", "Server name", true));
             this.options = options;
         }
@@ -416,7 +616,7 @@ public class NotificationsCommand extends SlashCommand {
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
             List<OptionData> options = new ArrayList<>(2);
-            options.add(Utils.getActionArgument());
+            options.add(Utils.getEnableDisableArgument());
             options.add(Utils.getRegionArgument());
             this.options = options;
         }
@@ -483,6 +683,148 @@ public class NotificationsCommand extends SlashCommand {
         }
     }
 
+    protected static class StatusWhitelistCommand extends SlashCommand {
+
+        public StatusWhitelistCommand() {
+            this.name = "status-whitelist";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+
+            List<OptionData> options = new ArrayList<>(2);
+            options.add(Utils.getAddRemoveArgument());
+            options.add(Utils.getStatusWithOfflineArgument());
+            this.options = options;
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            OptionMapping actionOption = event.getOption("action");
+            OptionMapping statusOption = event.getOption("status");
+
+            if (actionOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `action` argument.").build()).queue();
+                return;
+            }
+
+            if (statusOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `status` argument.").build()).queue();
+                return;
+            }
+
+            ServerStatus serverStatus = null;
+
+            try {
+                serverStatus = ServerStatus.valueOf(statusOption.getAsString());
+            } catch (Exception ignored) {
+                if (!statusOption.getAsString().equalsIgnoreCase("OFFLINE")) {
+                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("Invalid `status` argument.").build()).queue();
+                    return;
+                }
+            }
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
+            if (!NotificationChannelHelper.isNotificationChannelInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("This channel isn't marked as Notification Channel!").build()).queue();
+                return;
+            }
+
+            NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(channel);
+            String status = statusOption.getAsString();
+
+            switch (actionOption.getAsString()) {
+                case "add" -> {
+                    if (notificationChannel.addToWhitelist(status)) {
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added to server status change whitelist **" + status + "** status!").build()).queue();
+                        notificationChannel.save();
+                    } else {
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Status **" + status + "** is already whitelisted!").build()).queue();
+                    }
+                }
+                case "remove" -> {
+                    if (notificationChannel.removeFromWhitelist(status)) {
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed from server status change whitelist **" + status + "** status!").build()).queue();
+                        notificationChannel.save();
+                    } else {
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Status **" + status + "** is not on the whitelist!").build()).queue();
+                    }
+                }
+            }
+        }
+    }
+
+    protected static class StatusPingCommand extends SlashCommand {
+
+        public StatusPingCommand() {
+            this.name = "status-ping";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+
+            List<OptionData> options = new ArrayList<>(2);
+            options.add(Utils.getAddRemoveArgument());
+            options.add(new OptionData(OptionType.ROLE, "role", "Role to ping on servers status change", true));
+            this.options = options;
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            OptionMapping actionOption = event.getOption("action");
+            OptionMapping roleOption = event.getOption("role");
+
+            if (actionOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `action` argument.").build()).queue();
+                return;
+            }
+
+            if (roleOption == null) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Missing `role` argument.").build()).queue();
+                return;
+            }
+
+            Role role = roleOption.getAsRole();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
+            if (!NotificationChannelHelper.isNotificationChannelInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("This channel isn't marked as Notification Channel!").build()).queue();
+                return;
+            }
+
+            NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(channel);
+
+            switch (actionOption.getAsString()) {
+                case "add" -> {
+                    if (notificationChannel.addToRoleIds(role)) {
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added role "+ role.getAsMention() + " to roles, which will be pinged on Server status change!").build()).queue();
+                        notificationChannel.save();
+                    } else {
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Role " + role.getAsMention() + " is already added!").build()).queue();
+                    }
+                }
+                case "remove" -> {
+                    if (notificationChannel.removeFromRoleIds(role)) {
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed role "+ role.getAsMention() + " from roles, which will be pinged on Server status change!").build()).queue();
+                        notificationChannel.save();
+                    } else {
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no role " + role.getAsMention() + "!").build()).queue();
+                    }
+                }
+            }
+        }
+    }
+
     protected static class ClearCommand extends SlashCommand {
 
         public ClearCommand() {
@@ -536,6 +878,18 @@ public class NotificationsCommand extends SlashCommand {
                 case "status_region" -> {
                     notificationChannel.getRegions().clear();
                     hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Region change status notifications!").build()).queue();
+                }
+                case "status_whitelist" -> {
+                    notificationChannel.getStatusWhitelist().clear();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Status whitelist!").build()).queue();
+                }
+                case "ping_roles" -> {
+                    notificationChannel.getRoleIds().clear();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Ping roles!").build()).queue();
+                }
+                case "twitter_filter" -> {
+                    notificationChannel.getTwitterKeywords().clear();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Twitter Filter keywords!").build()).queue();
                 }
             }
 

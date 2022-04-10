@@ -9,17 +9,21 @@ import dev.mayuna.lostarkbot.managers.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.MayuTweet;
 import dev.mayuna.lostarkbot.objects.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
+import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.managed.ManagedTextChannel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.time.Instant;
@@ -33,9 +37,17 @@ public class NotificationChannel {
     private @Getter @Expose List<NewsCategory> newsCategories = new ArrayList<>();
     private @Getter @Expose List<ForumsCategory> forumsCategories = new ArrayList<>();
 
+    // Twitter
+    private @Getter @Setter @Expose boolean twitterEnabled = false;
+    private @Getter @Expose List<String> twitterKeywords = new ArrayList<>();
+
     // Server / region change
     private @Getter @Expose List<String> servers = new ArrayList<>();
     private @Getter @Expose List<LostArkRegion> regions = new ArrayList<>();
+
+    // Status server changes
+    private @Getter @Expose List<String> statusWhitelist = new ArrayList<>(); // Possible values: ONLINE, BUSY, FULL, MAINTENANCE, OFFLINE
+    private @Getter @Expose List<String> roleIds = new ArrayList<>();
 
     public NotificationChannel() {
     }
@@ -105,6 +117,51 @@ public class NotificationChannel {
         return regions.remove(lostArkRegion);
     }
 
+    public boolean addToWhitelist(String status) {
+        if (!statusWhitelist.contains(status)) {
+            statusWhitelist.add(status);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeFromWhitelist(String status) {
+        return statusWhitelist.remove(status);
+    }
+
+    public boolean addToRoleIds(Role role) {
+        String roleId = role.getId();
+
+        if (!roleIds.contains(roleId)) {
+            roleIds.add(roleId);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeFromRoleIds(String roleId) {
+        return roleIds.remove(roleId);
+    }
+
+    public boolean removeFromRoleIds(Role role) {
+        return removeFromRoleIds(role.getId());
+    }
+
+    public boolean addToTwitterKeywords(String keyword) {
+        if (!twitterKeywords.contains(keyword)) {
+            twitterKeywords.add(keyword);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeFromTwitterKeywords(String keyword) {
+        return twitterKeywords.remove(keyword);
+    }
+
     /**
      * Sends all unread notifications to specified {@link TextChannel} (if there is a NotificationChannel). Also, calls {@link GuildDataManager#getOrCreateGuildData(Guild)}
      *
@@ -160,7 +217,9 @@ public class NotificationChannel {
 
         for (LostArkRegion lostArkRegion : getRegions()) {
             lostArkServersChange.getDifferenceForWholeRegion(lostArkRegion).forEach(difference -> {
-                regionDifferences.put(difference, lostArkRegion);
+                if (Utils.isOnWhitelist(difference, statusWhitelist) && difference != null) {
+                    regionDifferences.put(difference, lostArkRegion);
+                }
             });
         }
 
@@ -174,9 +233,29 @@ public class NotificationChannel {
                 continue;
 
             if (!regionDifferences.containsKey(difference)) {
-                serverDifferences.add(difference);
+                if (Utils.isOnWhitelist(difference, statusWhitelist)) {
+                    serverDifferences.add(difference);
+                }
             }
         }
+
+        String content = "";
+
+        List<String> roleIdsToRemove = new LinkedList<>();
+        for (String roleId : roleIds) {
+            Role role = managedTextChannel.getGuild().getRoleById(roleId);
+
+            if (role != null) {
+                if ((content + role.getAsMention()).length() > 2000) {
+                    continue;
+                }
+
+                content += role.getAsMention() + " ";
+            } else {
+                roleIdsToRemove.add(roleId);
+            }
+        }
+        roleIds.removeAll(roleIdsToRemove);
 
         List<EmbedBuilder> embedBuilders = EmbedUtils.createEmbeds(regionDifferences, serverDifferences);
 
@@ -198,7 +277,19 @@ public class NotificationChannel {
 
             Logger.flow("[STATUS-CHANGE] Sending status change message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
 
-            managedTextChannel.getTextChannel().sendMessage(new MessageBuilder().setEmbeds(embedBuilder.build()).build()).complete();
+            managedTextChannel.getTextChannel().sendMessage(new MessageBuilder(content).setEmbeds(embedBuilder.build()).build()).complete();
         }
+    }
+
+    public void processMayuTweet(MayuTweet mayuTweet) {
+        if (!twitterEnabled) {
+            return;
+        }
+
+        if (!mayuTweet.doesMatchKeywords(twitterKeywords)) {
+            return;
+        }
+
+        managedTextChannel.getTextChannel().sendMessage(mayuTweet.getUrl()).complete();
     }
 }
