@@ -112,14 +112,6 @@ public class Main {
                 .setShardsTotal(Config.getTotalShards())
                 .setStatusProvider(shardId -> OnlineStatus.IDLE)
                 .setActivityProvider(PresenceManager::getActivityProvider)
-                .setSessionController(new SessionControllerAdapter() {
-                    @Override
-                    public long getGlobalRatelimit() {
-                        Logger.debug("Rate limit is: " + super.getGlobalRatelimit());
-
-                        return super.getGlobalRatelimit();
-                    }
-                })
                 .addEventListeners(client.build())
                 .addEventListeners(new ShardWatcher())
                 .addEventListeners(new MayuCoreListener());
