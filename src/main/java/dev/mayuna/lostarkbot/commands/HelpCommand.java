@@ -87,11 +87,12 @@ public class HelpCommand extends SlashCommand {
                                       `/notifications forums` - Enables or disables Forums category
                                       `/notifications twitter` - Enables or disables Twitter notifications
                                       `/notifications twitter-filter` - Filters specified keywords in tweets
-                                      `/notifications status-server` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for server
-                                      `/notifications status-region` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for region""", false
+                                      `/notifications twitter-settings` - Twitter settings
+                                      `/notifications status-server` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for server""", false
         );
         embedBuilder.addField("• Command `/notifications` (2/2)",
                               """
+                                      `/notifications status-region` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for region
                                       `/notifications status-whitelist` - Adds or removes whitelisted statuses
                                       `/notifications status-ping` - Adds or removes roles to ping
                                       `/notifications status` - Shows you which notifications you have enabled

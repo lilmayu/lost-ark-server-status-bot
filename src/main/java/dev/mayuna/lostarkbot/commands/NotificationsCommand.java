@@ -9,10 +9,13 @@ import dev.mayuna.lostarkbot.objects.core.NotificationChannel;
 import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
+import dev.mayuna.mayusjdautils.interactive.InteractiveMessage;
+import dev.mayuna.mayusjdautils.interactive.objects.Interaction;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import dev.mayuna.mayusjdautils.utils.MessageInfo;
 import dev.mayuna.mayuslibrary.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -21,7 +24,9 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +48,8 @@ public class NotificationsCommand extends SlashCommand {
                 new StatusWhitelistCommand(),
                 new StatusPingCommand(),
                 new TwitterCommand(),
-                new TwitterFilterCommand()
+                new TwitterFilterCommand(),
+                new TwitterSettingsCommand()
         };
     }
 
@@ -533,6 +539,90 @@ public class NotificationsCommand extends SlashCommand {
                     }
                 }
             }
+        }
+    }
+
+    protected static class TwitterSettingsCommand extends SlashCommand {
+
+        public TwitterSettingsCommand() {
+            this.name = "twitter-settings";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
+            if (!NotificationChannelHelper.isNotificationChannelInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("This channel isn't marked as Notification Channel!").build()).queue();
+                return;
+            }
+
+            NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(channel);
+            getBaseMessage(notificationChannel).editOriginal(hook);
+        }
+
+        private InteractiveMessage getBaseMessage(NotificationChannel notificationChannel) {
+            EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
+
+            embedBuilder.setColor(new Color(29, 161, 242));
+            embedBuilder.setTitle("Twitter Settings");
+
+            String description = "";
+
+            description += "Twitter notifications: **" + (notificationChannel.isTwitterEnabled() ? "Enabled" : "Disabled") + "**\n";
+            description += "Fancy embeds: **" + (notificationChannel.isTwitterFancyEmbeds() ? "Enabled" : "Disabled") + "**\n";
+            description += "Send retweets: **" + (notificationChannel.isTwitterRetweets() ? "Enabled" : "Disabled") + "**\n";
+            description += "Send replies: **" + (notificationChannel.isTwitterReplies() ? "Enabled" : "Disabled") + "**\n";
+            description += "Send quotes: **" + (notificationChannel.isTwitterQuotes() ? "Enabled" : "Disabled") + "**\n";
+
+            embedBuilder.setDescription(description);
+
+            InteractiveMessage message = InteractiveMessage.create(new MessageBuilder().setEmbeds(embedBuilder.build()));
+
+            message.addInteraction(Interaction.asButton(DiscordUtils.generateButton((notificationChannel.isTwitterEnabled() ? ButtonStyle.SECONDARY : ButtonStyle.PRIMARY),
+                                                                                    notificationChannel.isTwitterEnabled() ? "Disable Twitter" : "Enable Twitter"
+            )), interactionEvent -> {
+                notificationChannel.setTwitterEnabled(!notificationChannel.isTwitterEnabled());
+                getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+            });
+
+            message.addInteraction(Interaction.asButton(DiscordUtils.generateButton((notificationChannel.isTwitterFancyEmbeds() ? ButtonStyle.SECONDARY : ButtonStyle.PRIMARY),
+                                                                                    notificationChannel.isTwitterFancyEmbeds() ? "Disable fancy embeds" : "Enable fancy embeds"
+            )), interactionEvent -> {
+                notificationChannel.setTwitterFancyEmbeds(!notificationChannel.isTwitterFancyEmbeds());
+                getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+            });
+
+            message.addInteraction(Interaction.asButton(DiscordUtils.generateButton((notificationChannel.isTwitterRetweets() ? ButtonStyle.SECONDARY : ButtonStyle.PRIMARY),
+                                                                                    notificationChannel.isTwitterRetweets() ? "Disable retweets" : "Enable retweets"
+            )), interactionEvent -> {
+                notificationChannel.setTwitterRetweets(!notificationChannel.isTwitterRetweets());
+                getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+            });
+
+            message.addInteraction(Interaction.asButton(DiscordUtils.generateButton((notificationChannel.isTwitterReplies() ? ButtonStyle.SECONDARY : ButtonStyle.PRIMARY),
+                                                                                    notificationChannel.isTwitterReplies() ? "Disable replies" : "Enable replies"
+            )), interactionEvent -> {
+                notificationChannel.setTwitterReplies(!notificationChannel.isTwitterReplies());
+                getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+            });
+
+            message.addInteraction(Interaction.asButton(DiscordUtils.generateButton((notificationChannel.isTwitterQuotes() ? ButtonStyle.SECONDARY : ButtonStyle.PRIMARY),
+                                                                                    notificationChannel.isTwitterQuotes() ? "Disable quotes" : "Enable quotes"
+            )), interactionEvent -> {
+                notificationChannel.setTwitterQuotes(!notificationChannel.isTwitterQuotes());
+                getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+            });
+
+            return message;
         }
     }
 

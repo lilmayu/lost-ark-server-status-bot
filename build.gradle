@@ -50,6 +50,10 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    // JUnit
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
 }
 
 tasks.withType(JavaCompile) {
@@ -64,4 +68,8 @@ shadowJar {
     }
 }
 
-build.dependsOn shadowJar
+shadowJar.dependsOn test
+
+test {
+    useJUnit();
+}

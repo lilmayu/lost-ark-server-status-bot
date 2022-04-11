@@ -324,7 +324,7 @@ public class GuildDataManager {
     }
 
     public static void processMayuTweet(int shardId, MayuTweet mayuTweet) {
-        Logger.info("Sending tweet " + mayuTweet.getId() + " to notification channels...");
+        Logger.info("Sending tweet " + mayuTweet.getTweetId() + " to notification channels...");
         long took;
 
         var loadedGuildDataList = getLoadedGuildDataListByShard(shardId);

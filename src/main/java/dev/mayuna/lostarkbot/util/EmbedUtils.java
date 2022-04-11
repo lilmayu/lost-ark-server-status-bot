@@ -6,21 +6,23 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
-import dev.mayuna.lostarkbot.objects.core.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.MayuTweet;
+import dev.mayuna.lostarkbot.objects.core.LanguagePack;
 import dev.mayuna.lostarkbot.objects.core.ServerDashboard;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class EmbedUtils {
 
@@ -351,5 +353,57 @@ public class EmbedUtils {
         } else {
             return null;
         }
+    }
+
+    public static MessageBuilder createTweetMessage(MayuTweet mayuTweet) {
+        MessageBuilder messageBuilder = new MessageBuilder();
+        EmbedBuilder baseEmbedBuilder = DiscordUtils.getDefaultEmbed();
+        List<MessageEmbed> finalEmbeds = new ArrayList<>(4);
+
+        baseEmbedBuilder.setColor(new Color(29, 161, 242));
+        baseEmbedBuilder.setFooter("Twitter", Constants.TWITTER_LOGO_URL);
+
+        baseEmbedBuilder.setAuthor(mayuTweet.getUserName() + " (@" + mayuTweet.getUserTag() + ")", mayuTweet.getProfileUrl(), mayuTweet.getProfilePictureUrl());
+
+        String description = "";
+        if (mayuTweet.isReply()) {
+            description = "*Replied*\n";
+        } else if (mayuTweet.isRetweet()) {
+            description = "*Retweeted*\n";
+        } else if (mayuTweet.isQuoted()) {
+            description = "*Quoted*\n";
+        } else {
+            description = "*Tweeted*\n";
+        }
+
+        description += mayuTweet.getFormattedText() + "\n\n";
+
+        if (mayuTweet.isQuoted()) {
+            description += "*Quoted tweet*\n";
+
+            MayuTweet quotedMayuTweet = new MayuTweet(mayuTweet.getQuotedStatus());
+            description += "[@" + quotedMayuTweet.getUserTag()+ "](" + quotedMayuTweet.getProfileUrl() + "): " + quotedMayuTweet.getFormattedText() + "\n\n";
+        }
+
+        description += "[See more](" + mayuTweet.getTweetUrl() + ")";
+        baseEmbedBuilder.setDescription(description);
+
+        if (mayuTweet.hasMoreMedia()) {
+            baseEmbedBuilder.setTitle("\u200E", mayuTweet.getProfileUrl());
+
+            String[] imageUrls = mayuTweet.getMediaUrls();
+            baseEmbedBuilder.setImage(imageUrls[0]);
+
+            for (int x = 1; x < imageUrls.length; x++) {
+                finalEmbeds.add(new EmbedBuilder().setTitle("\u200E", mayuTweet.getProfileUrl()).setImage(imageUrls[x]).build());
+            }
+        } else {
+            baseEmbedBuilder.setImage(mayuTweet.getMediaUrl());
+        }
+
+        finalEmbeds.add(0, baseEmbedBuilder.build());
+        messageBuilder.setEmbeds(finalEmbeds);
+
+        return messageBuilder;
     }
 }

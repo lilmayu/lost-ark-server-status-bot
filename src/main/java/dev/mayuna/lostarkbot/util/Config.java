@@ -41,6 +41,8 @@ public class Config {
     private static @Getter @Setter String twitterAccessToken = "### YOUR TWITTER ACCESS TOKEN HERE ###";
     private static @Getter @Setter String twitterAccessTokenSecret = "### YOUR TWITTER ACCESS TOKEN SECRET HERE ###";
 
+    private static @Getter @Setter boolean twitterTestMode = false;
+
     public static boolean load() {
         try {
             MayuJson mayuJson = JsonUtil.createOrLoadJsonFromFile(Constants.CONFIG_PATH);
@@ -51,6 +53,7 @@ public class Config {
             exceptionMessageChannelID = mayuJson.getOrCreate("exceptionMessageChannelID", new JsonPrimitive(exceptionMessageChannelID)).getAsLong();
             ownerID = mayuJson.getOrCreate("ownerID", new JsonPrimitive(ownerID)).getAsLong();
             debug = mayuJson.getOrCreate("debug", new JsonPrimitive(debug)).getAsBoolean();
+            twitterTestMode = mayuJson.getOrCreate("twitterTestMode", new JsonPrimitive(twitterTestMode)).getAsBoolean();
 
             contributors = JsonUtils.toStringList(mayuJson.getOrCreate("contributors", new JsonArray()).getAsJsonArray());
 
@@ -92,6 +95,7 @@ public class Config {
             mayuJson.add("exceptionMessageChannelID", exceptionMessageChannelID);
             mayuJson.add("ownerID", ownerID);
             mayuJson.add("debug", debug);
+            mayuJson.add("twitterTestMode", twitterTestMode);
 
             mayuJson.add("contributors", JsonUtils.toStringJsonArray(contributors));
 

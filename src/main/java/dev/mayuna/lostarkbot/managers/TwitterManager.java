@@ -1,13 +1,8 @@
 package dev.mayuna.lostarkbot.managers;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import dev.mayuna.lostarkbot.objects.MayuTweet;
 import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.mayusjsonutils.JsonUtil;
-import dev.mayuna.mayusjsonutils.objects.MayuJson;
 import lombok.Getter;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
@@ -18,6 +13,7 @@ public class TwitterManager {
 
     private static @Getter TwitterStream twitterStream;
     private static final FilterQuery filterQuery = new FilterQuery();
+    private static long[] followingUsers;
 
     private static @Getter final Timer twitterFetchTimer = new Timer("TwitterWorker");
 
@@ -32,12 +28,20 @@ public class TwitterManager {
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance();
         twitterStream.addListener(new TweetListener());
 
-        filterQuery.follow(Constants.TWITTER_USERS);
+        if (!Config.isTwitterTestMode()) {
+            followingUsers = Constants.TWITTER_USERS;
+        } else {
+            followingUsers = Utils.concatenate(Constants.TWITTER_USERS, Constants.TWITTER_USERS_TEST);
+        }
+
+        filterQuery.follow(followingUsers);
 
         twitterStream.filter(filterQuery);
     }
 
     public static void processTweet(MayuTweet mayuTweet) {
+        mayuTweet.preProcessMessage();
+
         ShardExecutorManager.submitForEachShard(UpdateType.TWITTER, shardId -> {
             GuildDataManager.processMayuTweet(shardId, mayuTweet);
         });
@@ -49,16 +53,16 @@ public class TwitterManager {
         public void onStatus(Status status) {
             MayuTweet mayuTweet = new MayuTweet(status);
 
-            Logger.debug("[Twitter] Received status: " + status.getId() + " (" + mayuTweet.getUrl() + ")");
-
-            for (long twitterUserId : Constants.TWITTER_USERS) {
+            for (long twitterUserId : followingUsers) {
                 if (status.getUser().getId() == twitterUserId) {
+                    Logger.debug("[Twitter] Processing status: " + status.getId() + " url: " + mayuTweet.getTweetUrl());
+
                     processTweet(mayuTweet);
                     return;
                 }
             }
 
-            Logger.debug("[Twitter] Ignoring status: " + status.getId() + " (" + mayuTweet.getUrl() + ") since it is from different user...");
+            Logger.debug("[Twitter] Ignoring status: " + status.getId() + " url: " + mayuTweet.getTweetUrl() + " - since it is from different user...");
         }
 
         @Override

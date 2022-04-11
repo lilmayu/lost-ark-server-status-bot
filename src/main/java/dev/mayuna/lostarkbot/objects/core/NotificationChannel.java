@@ -39,6 +39,10 @@ public class NotificationChannel {
 
     // Twitter
     private @Getter @Setter @Expose boolean twitterEnabled = false;
+    private @Getter @Setter @Expose boolean twitterReplies = true;
+    private @Getter @Setter @Expose boolean twitterRetweets = true;
+    private @Getter @Setter @Expose boolean twitterQuotes = true;
+    private @Getter @Setter @Expose boolean twitterFancyEmbeds = true;
     private @Getter @Expose List<String> twitterKeywords = new ArrayList<>();
 
     // Server / region change
@@ -290,6 +294,22 @@ public class NotificationChannel {
             return;
         }
 
-        managedTextChannel.getTextChannel().sendMessage(mayuTweet.getUrl()).complete();
+        if (mayuTweet.isRetweet() && !twitterRetweets) {
+            return;
+        }
+
+        if (mayuTweet.isReply() && !twitterReplies) {
+            return;
+        }
+
+        if (mayuTweet.isQuoted() && !twitterQuotes) {
+            return;
+        }
+
+        if (!twitterFancyEmbeds) {
+            managedTextChannel.getTextChannel().sendMessage(mayuTweet.getTweetUrl()).complete();
+        } else {
+            managedTextChannel.getTextChannel().sendMessage(mayuTweet.getMessage()).complete();
+        }
     }
 }
