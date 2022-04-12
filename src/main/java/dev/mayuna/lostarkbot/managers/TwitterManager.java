@@ -1,21 +1,24 @@
 package dev.mayuna.lostarkbot.managers;
 
 import dev.mayuna.lostarkbot.objects.MayuTweet;
-import dev.mayuna.lostarkbot.util.*;
+import dev.mayuna.lostarkbot.util.Config;
+import dev.mayuna.lostarkbot.util.Constants;
+import dev.mayuna.lostarkbot.util.UpdateType;
+import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
-import java.util.*;
+import java.util.Timer;
 
 public class TwitterManager {
 
-    private static @Getter TwitterStream twitterStream;
     private static final FilterQuery filterQuery = new FilterQuery();
-    private static long[] followingUsers;
-
     private static @Getter final Timer twitterFetchTimer = new Timer("TwitterWorker");
+
+    private static @Getter TwitterStream twitterStream;
+    private static long[] followingUsers;
 
     public static void initStream() {
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();

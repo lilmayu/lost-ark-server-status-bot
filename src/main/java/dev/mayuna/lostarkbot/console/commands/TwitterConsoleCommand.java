@@ -7,7 +7,9 @@ import dev.mayuna.lostarkbot.objects.MayuTweet;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
-import twitter4j.*;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterConsoleCommand extends AbstractConsoleCommand {

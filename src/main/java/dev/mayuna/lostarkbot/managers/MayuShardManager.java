@@ -44,7 +44,7 @@ public class MayuShardManager {
             counter++;
 
             Thread.sleep(1000);
-        } while(!areAllShardsConnected());
+        } while (!areAllShardsConnected());
 
         Logger.success("All shards are connected. Proceeding...");
     }

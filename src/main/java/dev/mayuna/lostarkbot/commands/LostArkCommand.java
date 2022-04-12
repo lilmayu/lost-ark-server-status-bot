@@ -3,8 +3,8 @@ package dev.mayuna.lostarkbot.commands;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.objects.core.LanguagePack;
 import dev.mayuna.lostarkbot.objects.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.core.LanguagePack;
 import dev.mayuna.lostarkbot.objects.core.ServerDashboard;
 import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
@@ -26,6 +26,7 @@ public class LostArkCommand extends SlashCommand {
 
     public LostArkCommand() {
         this.name = "lost-ark";
+        this.help = "Root command of Lost Ark's server dashboard system";
 
         this.children = new SlashCommand[]{
                 new DashboardCreateCommand(),
@@ -79,9 +80,12 @@ public class LostArkCommand extends SlashCommand {
                         .queue();
             } else {
                 if (!channel.canTalk()) {
-                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("Bot cannot send messages in this channel. Please, check bot's permissions in your server! (Write Messages and View Channel permissions)").build()).queue();
+                    hook.editOriginalEmbeds(MessageInfo.errorEmbed(
+                                    "Bot cannot send messages in this channel. Please, check bot's permissions in your server! (Write Messages and View Channel permissions)").build())
+                            .queue();
                 } else {
-                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while creating Server Dashboard. Please, try again. Check if bot has View Channel permission!").build()).queue();
+                    hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while creating Server Dashboard. Please, try again. Check if bot has View Channel permission!")
+                                                    .build()).queue();
                 }
             }
         }
@@ -110,7 +114,8 @@ public class LostArkCommand extends SlashCommand {
             if (ServerDashboardHelper.deleteServerDashboard(channel)) {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed Server Dashboard from this channel!").build()).queue();
             } else {
-                hook.editOriginalEmbeds(MessageInfo.warningEmbed("Server Dashboard was removed, however message was unable to be deleted. Probably this bot does not have **View Channel** permission?").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.warningEmbed(
+                        "Server Dashboard was removed, however message was unable to be deleted. Probably this bot does not have **View Channel** permission?").build()).queue();
             }
         }
     }
@@ -171,7 +176,7 @@ public class LostArkCommand extends SlashCommand {
             ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
             ServerDashboardHelper.updateServerDashboard(dashboard);
 
-            hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard updated!").build()).queue();
+            hook.editOriginalEmbeds(MessageInfo.successEmbed("Server Dashboard updated!\n\nNote: The server dashboard updates itself every 5 minute.").build()).queue();
         }
     }
 
@@ -553,7 +558,8 @@ public class LostArkCommand extends SlashCommand {
             LanguagePack languagePack = LanguageManager.getLanguageByCode(languageOption.getAsString());
 
             if (languagePack == null) {
-                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Invalid language code `" + languageOption.getAsString() + "`.\n\nYou can see all languages via `/lost-ark language-list` command").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("Invalid language code `" + languageOption.getAsString() + "`.\n\nYou can see all languages via `/lost-ark language-list` command")
+                                                .build()).queue();
                 return;
             }
 

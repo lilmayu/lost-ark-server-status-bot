@@ -14,7 +14,7 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
 
     public DebugConsoleCommand() {
         this.name = "debug";
-        this.syntax = "[force-update]";
+        this.syntax = "[force-update|hash <to_hash>]";
     }
 
     @Override
@@ -36,7 +36,7 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
                         return CommandResult.INCORRECT_SYNTAX;
                     }
 
-                    String toHash = argumentParser.getAllArgumentsAfterIndex(0).toString();
+                    String toHash = argumentParser.getAllArgumentsAfterIndex(1).toString();
 
                     Logger.info("Hash of '" + toHash + "' is '" + HashUtils.hashMD5(toHash));
                 }

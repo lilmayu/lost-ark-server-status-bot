@@ -5,7 +5,6 @@ import dev.mayuna.lostarkbot.api.ApiRestAction;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.util.Config;
-import dev.mayuna.lostarkbot.util.Constants;
 
 public class UnofficialLostArkApi implements Api {
 

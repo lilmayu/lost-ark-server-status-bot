@@ -7,10 +7,12 @@ import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import lombok.Getter;
 import lombok.NonNull;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class LostArkServersChange {
 
@@ -46,7 +48,7 @@ public class LostArkServersChange {
         LostArkServer newServer = Utils.getServerFromList(currentServers.getServers(), serverName);
 
         ServerStatus oldServerStatus = oldServer == null ? null : oldServer.getStatus();
-        ServerStatus newServerStatus = newServer == null ? null : newServer.getStatus();;
+        ServerStatus newServerStatus = newServer == null ? null : newServer.getStatus();
 
         Difference difference = getDifference(serverName, oldServerStatus, newServerStatus);
 

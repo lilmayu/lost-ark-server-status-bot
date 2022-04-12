@@ -61,7 +61,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                     }
 
                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    
+
                     if (newsGeneral != null) {
                         Logger.info("NewsGeneral:");
                         Logger.info(gson.toJson(newsGeneral));

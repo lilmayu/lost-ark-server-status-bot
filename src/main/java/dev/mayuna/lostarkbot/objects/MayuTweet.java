@@ -3,7 +3,6 @@ package dev.mayuna.lostarkbot.objects;
 import dev.mayuna.lostarkbot.util.EmbedUtils;
 import dev.mayuna.lostarkbot.util.StringUtils;
 import lombok.Getter;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import twitter4j.MediaEntity;
 import twitter4j.Status;

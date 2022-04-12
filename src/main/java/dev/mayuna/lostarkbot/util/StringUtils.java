@@ -1,8 +1,5 @@
 package dev.mayuna.lostarkbot.util;
 
-import dev.mayuna.lostarkbot.util.logging.Logger;
-import twitter4j.Twitter;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

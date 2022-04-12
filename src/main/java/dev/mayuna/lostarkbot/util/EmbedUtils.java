@@ -300,7 +300,8 @@ public class EmbedUtils {
         return Utils.getEmoteByStatus(difference.getOldStatus()) + " » " + Utils.getEmoteByStatus(difference.getNewStatus()) + " " + difference.getServerName();
     }
 
-    private static List<LostArkServersChange.Difference> getAllDifferences(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences, List<LostArkServersChange.Difference> serverDifferences) {
+    private static List<LostArkServersChange.Difference> getAllDifferences(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences,
+            List<LostArkServersChange.Difference> serverDifferences) {
         List<LostArkServersChange.Difference> differences = new LinkedList<>(serverDifferences);
         differences.addAll(regionDifferences.keySet());
         return differences;
@@ -382,7 +383,7 @@ public class EmbedUtils {
             description += "*Quoted tweet*\n";
 
             MayuTweet quotedMayuTweet = new MayuTweet(mayuTweet.getQuotedStatus());
-            description += "[@" + quotedMayuTweet.getUserTag()+ "](" + quotedMayuTweet.getProfileUrl() + "): " + quotedMayuTweet.getFormattedText() + "\n\n";
+            description += "[@" + quotedMayuTweet.getUserTag() + "](" + quotedMayuTweet.getProfileUrl() + "): " + quotedMayuTweet.getFormattedText() + "\n\n";
         }
 
         description += "[See more](" + mayuTweet.getTweetUrl() + ")";

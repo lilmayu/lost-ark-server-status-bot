@@ -12,7 +12,6 @@ import dev.mayuna.lostarkbot.listeners.ShardWatcher;
 import dev.mayuna.lostarkbot.managers.*;
 import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
-import dev.mayuna.lostarkbot.util.legacy.LegacyDashboardsLoader;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
@@ -26,14 +25,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.dv8tion.jda.api.utils.SessionControllerAdapter;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.dv8tion.jda.internal.requests.RateLimiter;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
@@ -139,7 +132,6 @@ public class Main {
 
         GuildDataManager.loadAllGuildData();
 
-        LegacyDashboardsLoader.load();
         PresenceManager.startPresenceTimer();
 
         NotificationsManager.load();

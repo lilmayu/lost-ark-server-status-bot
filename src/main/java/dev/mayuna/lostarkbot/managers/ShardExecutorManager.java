@@ -6,7 +6,8 @@ import dev.mayuna.lostarkbot.util.UpdateType;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class ShardExecutorManager {

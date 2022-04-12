@@ -16,6 +16,13 @@ public class News extends ApiResponse {
 
     private @Getter @SerializedName("data") NewsObject[] newsObjects;
 
+    @Override
+    public String toString() {
+        return "News{" +
+                "newsObjects=" + Arrays.toString(newsObjects) +
+                '}';
+    }
+
     public static class Request implements ApiRequest {
 
         private final @Getter NewsCategory newsCategory;
@@ -45,12 +52,5 @@ public class News extends ApiResponse {
         public JsonObject getRequestBody() {
             return null;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "News{" +
-                "newsObjects=" + Arrays.toString(newsObjects) +
-                '}';
     }
 }

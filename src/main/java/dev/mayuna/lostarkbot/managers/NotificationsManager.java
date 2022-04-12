@@ -13,8 +13,8 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.objects.Notifications;
-import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
+import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class NotificationsManager {
 
-    private static @Getter Timer notificationsUpdateWorker = new Timer("NotificationsUpdateWorker");
+    private static final @Getter Timer notificationsUpdateWorker = new Timer("NotificationsUpdateWorker");
 
     private static @Getter News newsGeneral;
     private static @Getter News newsEvents;
@@ -185,13 +185,13 @@ public class NotificationsManager {
 
             restAction.onHttpError(httpError -> {
                 Logger.throwing(httpError.getException());
-                Logger.warn("[REQUESTER] HTTP Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + httpError.getCode());
+                Logger.warn("[REQUESTER] HTTP Error occurred while requesting " + infoType + "! (retry " + retries.get() + ") Code: " + httpError.getCode());
 
                 waitTime.set(10000);
                 retries.addAndGet(1);
             });
             restAction.onApiError(apiError -> {
-                Logger.warn("[REQUESTER] API Error occurred while requesting " + infoType + "! (retry " + retries.get() +") Code: " + apiError.getError());
+                Logger.warn("[REQUESTER] API Error occurred while requesting " + infoType + "! (retry " + retries.get() + ") Code: " + apiError.getError());
 
                 waitTime.set(10000);
                 retries.addAndGet(1);

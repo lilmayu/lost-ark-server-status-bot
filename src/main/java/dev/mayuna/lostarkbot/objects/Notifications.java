@@ -6,12 +6,15 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class Notifications {
 
-    private @Getter Map<NewsObject, NewsCategory> news = new HashMap<>();
-    private @Getter Map<ForumsPostObject, ForumsCategory> forums = new HashMap<>();
+    private final @Getter Map<NewsObject, NewsCategory> news = new HashMap<>();
+    private final @Getter Map<ForumsPostObject, ForumsCategory> forums = new HashMap<>();
 
     public Notifications() {
     }

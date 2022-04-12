@@ -35,6 +35,7 @@ public class NotificationsCommand extends SlashCommand {
 
     public NotificationsCommand() {
         this.name = "notifications";
+        this.help = "Root command for bot's notifications system";
 
         this.children = new SlashCommand[]{
                 new CreateCommand(),
@@ -87,7 +88,9 @@ public class NotificationsCommand extends SlashCommand {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully marked this channel as Notification Channel.").build()).queue();
                 notificationChannel.save();
             } else {
-                hook.editOriginalEmbeds(MessageInfo.errorEmbed("There was error while marking this channel as Notification Channel. Please, try again. Check if bot has all necessary permissions. However, you should not see this message ever.").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed(
+                                "There was error while marking this channel as Notification Channel. Please, try again. Check if bot has all necessary permissions. However, you should not see this message ever.")
+                                                .build()).queue();
             }
         }
     }
@@ -118,7 +121,8 @@ public class NotificationsCommand extends SlashCommand {
                 hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully unmarked this channel as Notification Channel.").build()).queue();
                 notificationChannel.save();
             } else {
-                hook.editOriginalEmbeds(MessageInfo.warningEmbed("Notification channel could not be unmarked. Please, try again. However, you should not see this message ever.").build()).queue();
+                hook.editOriginalEmbeds(MessageInfo.warningEmbed("Notification channel could not be unmarked. Please, try again. However, you should not see this message ever.")
+                                                .build()).queue();
             }
         }
     }
@@ -127,7 +131,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public StatusCommand() {
             this.name = "status";
-            this.help = "Checks if current Text Channel is marked as Notification Channel";
+            this.help = "Shows you information about current notification channel";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
         }
@@ -292,6 +296,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public NewsCommand() {
             this.name = "news";
+            this.help = "Allows you to enable/disable specific news categories";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -358,6 +363,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public ForumsCommand() {
             this.name = "forums";
+            this.help = "Allows you to enable/disable specific forums categories";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -424,6 +430,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public TwitterCommand() {
             this.name = "twitter";
+            this.help = "Allows you to enable/disable Twitter notifications";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -460,7 +467,8 @@ public class NotificationsCommand extends SlashCommand {
             switch (actionOption.getAsString()) {
                 case "enable" -> {
                     notificationChannel.setTwitterEnabled(true);
-                    hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications from Twitter!\n\nUse `/notifications twitter-filter` command for keyword filtering.").build()).queue();
+                    hook.editOriginalEmbeds(MessageInfo.successEmbed(
+                            "Successfully enabled notifications from Twitter!\n\nUse `/notifications twitter-filter` command for keyword filtering.").build()).queue();
                     notificationChannel.save();
                 }
                 case "disable" -> {
@@ -476,6 +484,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public TwitterFilterCommand() {
             this.name = "twitter-filter";
+            this.help = "Allows you to set-up filter keywords for tweets";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -546,6 +555,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public TwitterSettingsCommand() {
             this.name = "twitter-settings";
+            this.help = "Allows you to change Twitter settings in the current notification channel";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
         }
@@ -630,6 +640,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public StatusServerCommand() {
             this.name = "status-server";
+            this.help = "Allows you to enable/disable server status change notifications per-server";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -680,18 +691,22 @@ public class NotificationsCommand extends SlashCommand {
             switch (actionOption.getAsString()) {
                 case "enable" -> {
                     if (notificationChannel.enable(correctServerName)) {
-                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Server **" + correctServerName + "** status change!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Server **" + correctServerName + "** status change!").build())
+                                .queue();
                         notificationChannel.save();
                     } else {
-                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + correctServerName + "** status change are already enabled!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + correctServerName + "** status change are already enabled!").build())
+                                .queue();
                     }
                 }
                 case "disable" -> {
                     if (notificationChannel.disable(correctServerName)) {
-                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Server **" + correctServerName + "** status change!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Server **" + correctServerName + "** status change!").build())
+                                .queue();
                         notificationChannel.save();
                     } else {
-                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + correctServerName + "** status change are already disabled!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + correctServerName + "** status change are already disabled!").build())
+                                .queue();
                     }
                 }
             }
@@ -702,6 +717,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public StatusRegionCommand() {
             this.name = "status-region";
+            this.help = "Allows you to enable/disable server status change notifications per-region";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -755,7 +771,8 @@ public class NotificationsCommand extends SlashCommand {
             switch (actionOption.getAsString()) {
                 case "enable" -> {
                     if (notificationChannel.enable(lostArkRegion)) {
-                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Region **" + formattedRegion + "** status change!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Region **" + formattedRegion + "** status change!").build())
+                                .queue();
                         notificationChannel.save();
                     } else {
                         hook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Region **" + formattedRegion + "** status change are already enabled!").build()).queue();
@@ -763,7 +780,8 @@ public class NotificationsCommand extends SlashCommand {
                 }
                 case "disable" -> {
                     if (notificationChannel.disable(lostArkRegion)) {
-                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Region **" + formattedRegion + "** status change!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Region **" + formattedRegion + "** status change!").build())
+                                .queue();
                         notificationChannel.save();
                     } else {
                         hook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Region **" + formattedRegion + "** status change are already disabled!").build()).queue();
@@ -777,6 +795,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public StatusWhitelistCommand() {
             this.name = "status-whitelist";
+            this.help = "Allows you to whitelist specific statuses in the current notification channel";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -853,6 +872,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public StatusPingCommand() {
             this.name = "status-ping";
+            this.help = "Allows you to add/remove roles which will be pinged on server status change";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -897,7 +917,8 @@ public class NotificationsCommand extends SlashCommand {
             switch (actionOption.getAsString()) {
                 case "add" -> {
                     if (notificationChannel.addToRoleIds(role)) {
-                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added role "+ role.getAsMention() + " to roles, which will be pinged on Server status change!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added role " + role.getAsMention() + " to roles, which will be pinged on Server status change!")
+                                                        .build()).queue();
                         notificationChannel.save();
                     } else {
                         hook.editOriginalEmbeds(MessageInfo.errorEmbed("Role " + role.getAsMention() + " is already added!").build()).queue();
@@ -905,7 +926,8 @@ public class NotificationsCommand extends SlashCommand {
                 }
                 case "remove" -> {
                     if (notificationChannel.removeFromRoleIds(role)) {
-                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed role "+ role.getAsMention() + " from roles, which will be pinged on Server status change!").build()).queue();
+                        hook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed role " + role.getAsMention() + " from roles, which will be pinged on Server status change!")
+                                                        .build()).queue();
                         notificationChannel.save();
                     } else {
                         hook.editOriginalEmbeds(MessageInfo.errorEmbed("There is no role " + role.getAsMention() + "!").build()).queue();
@@ -919,6 +941,7 @@ public class NotificationsCommand extends SlashCommand {
 
         public ClearCommand() {
             this.name = "clear";
+            this.help = "Allows you to clear specific notifications or setting in the current notification channel";
 
             this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 

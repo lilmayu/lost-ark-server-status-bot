@@ -111,9 +111,11 @@ public class ServerDashboardHelper {
                     Logger.throwing(exception);
 
                     if (exception instanceof NonDiscordException) {
-                        Logger.error("Non Discord Exception occurred while updating dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage().getRawGuildID() + "!");
+                        Logger.error("Non Discord Exception occurred while updating dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage()
+                                .getRawGuildID() + "!");
                     } else {
-                        Logger.warn("Dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage().getRawGuildID() + " resulted in exception while updating! Probably bot was kicked, text channel deleted or bot does not have permission.");
+                        Logger.warn("Dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage()
+                                .getRawGuildID() + " resulted in exception while updating! Probably bot was kicked, text channel deleted or bot does not have permission.");
                     }
 
                     waiter.setObject(false);
@@ -121,7 +123,8 @@ public class ServerDashboardHelper {
                 });
             } catch (Exception exception) {
                 Logger.throwing(exception);
-                Logger.warn("Dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage().getRawGuildID() + " resulted in exception while updating! Probably bot was kicked, text channel deleted or bot does not have permission.");
+                Logger.warn("Dashboard " + serverDashboard.getName() + " in guild " + serverDashboard.getManagedGuildMessage()
+                        .getRawGuildID() + " resulted in exception while updating! Probably bot was kicked, text channel deleted or bot does not have permission.");
             }
         }, failure -> {
             Logger.throwing(failure);

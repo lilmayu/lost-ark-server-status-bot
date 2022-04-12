@@ -5,7 +5,6 @@ import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.sharding.ShardManager;
 
 import java.util.Timer;
 import java.util.TimerTask;

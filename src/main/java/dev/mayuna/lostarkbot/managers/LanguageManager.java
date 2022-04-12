@@ -21,7 +21,9 @@ public class LanguageManager {
 
     /**
      * Gets {@link LanguagePack} by its lang code
+     *
      * @param langCode Lang code
+     *
      * @return Nullable {@link LanguagePack} (null, if no language has specified lang code)
      */
     public static LanguagePack getLanguageByCode(String langCode) {
@@ -82,6 +84,7 @@ public class LanguageManager {
 
     /**
      * Gets default language pack (en) even if it does not exist
+     *
      * @return Not-null {@link LanguagePack}
      */
     public static LanguagePack getDefaultLanguage() {

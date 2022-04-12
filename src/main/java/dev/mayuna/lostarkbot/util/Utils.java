@@ -1,6 +1,9 @@
 package dev.mayuna.lostarkbot.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
@@ -95,7 +98,9 @@ public class Utils {
 
     /**
      * Checks if server exists. If exists, returns correct, possibly same as specified server name, server name.
+     *
      * @param serverName Server name
+     *
      * @return Null if server does not exist
      */
     public static String doesServerExist(String serverName) {

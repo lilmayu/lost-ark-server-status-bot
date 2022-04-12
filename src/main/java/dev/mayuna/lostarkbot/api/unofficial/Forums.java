@@ -8,8 +8,6 @@ import dev.mayuna.lostarkbot.api.misc.HttpRequestType;
 import dev.mayuna.lostarkbot.api.misc.PathParameter;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
-import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -25,6 +23,13 @@ public class Forums extends ApiResponse {
         List<ForumsPostObject> list = new ArrayList<>(Arrays.stream(this.forumsPostObjects).toList());
         list.removeAll(forumsPostObjects);
         this.forumsPostObjects = list.toArray(new ForumsPostObject[0]);
+    }
+
+    @Override
+    public String toString() {
+        return "Forums{" +
+                "forumsPostObjects=" + Arrays.toString(forumsPostObjects) +
+                '}';
     }
 
     public static class Request implements ApiRequest {
@@ -56,12 +61,5 @@ public class Forums extends ApiResponse {
         public JsonObject getRequestBody() {
             return null;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Forums{" +
-                "forumsPostObjects=" + Arrays.toString(forumsPostObjects) +
-                '}';
     }
 }

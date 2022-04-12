@@ -1,10 +1,10 @@
 package dev.mayuna.lostarkbot.managers;
 
 import dev.mayuna.lostarkbot.Main;
-import dev.mayuna.lostarkbot.objects.MayuTweet;
-import dev.mayuna.lostarkbot.objects.core.GuildData;
 import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.MayuTweet;
 import dev.mayuna.lostarkbot.objects.Notifications;
+import dev.mayuna.lostarkbot.objects.core.GuildData;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.UpdateType;
 import dev.mayuna.lostarkbot.util.Utils;
@@ -78,7 +78,9 @@ public class GuildDataManager {
         var loadedGuildDataList = getLoadedGuildDataListByShard(guild.getJDA().getShardInfo().getShardId());
 
         if (loadedGuildDataList == null) {
-            Logger.error("Incorrect ShardId in core method get: " + guild.getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            Logger.error("Incorrect ShardId in core method get: " + guild.getJDA()
+                    .getShardInfo()
+                    .getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
             return null;
         }
 
@@ -116,7 +118,10 @@ public class GuildDataManager {
             var loadedGuildDataList = getLoadedGuildDataListByShard(guildData.getShardId());
 
             if (loadedGuildDataList == null) {
-                Logger.error("Incorrect ShardId in core method getOrCreate(long): " + guildData.getGuild().getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+                Logger.error("Incorrect ShardId in core method getOrCreate(long): " + guildData.getGuild()
+                        .getJDA()
+                        .getShardInfo()
+                        .getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
                 Logger.error("Putting it into ShardId 0 batch...");
 
                 loadedGuildDataList = getLoadedGuildDataListByShard(0);
@@ -165,7 +170,10 @@ public class GuildDataManager {
             var loadedGuildDataList = getLoadedGuildDataListByShard(guildData.getShardId());
 
             if (loadedGuildDataList == null) {
-                Logger.error("Incorrect ShardId in core method getOrCreate(Guild): " + guildData.getGuild().getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+                Logger.error("Incorrect ShardId in core method getOrCreate(Guild): " + guildData.getGuild()
+                        .getJDA()
+                        .getShardInfo()
+                        .getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
                 Logger.error("Putting it into ShardId 0 batch...");
 
                 loadedGuildDataList = getLoadedGuildDataListByShard(0);
@@ -214,6 +222,7 @@ public class GuildDataManager {
 
     /**
      * Updates all loaded {@link GuildData} for specified shard id
+     *
      * @param shardId Shard ID
      */
     public static void updateAllServerDashboards(int shardId) {
@@ -402,7 +411,9 @@ public class GuildDataManager {
         var loadedGuildDataList = getLoadedGuildDataListByShard(guild.getJDA().getShardInfo().getShardId());
 
         if (loadedGuildDataList == null) {
-            Logger.error("Incorrect ShardId in core method removeGuildData: " + guild.getJDA().getShardInfo().getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
+            Logger.error("Incorrect ShardId in core method removeGuildData: " + guild.getJDA()
+                    .getShardInfo()
+                    .getShardId() + " (there are only " + loadedGuildDataMap.size() + " map entries!) (list is null)");
             return;
         }
 

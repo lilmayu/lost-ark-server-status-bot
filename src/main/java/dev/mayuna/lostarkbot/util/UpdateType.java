@@ -4,5 +4,5 @@ public enum UpdateType {
     SERVER_DASHBOARD,
     NOTIFICATIONS,
     SERVER_STATUS,
-    TWITTER;
+    TWITTER
 }

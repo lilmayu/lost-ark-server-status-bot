@@ -22,7 +22,7 @@ public class Constants {
             1291477342624210944L // @playlostark
     };
 
-    public static final long[] TWITTER_USERS_TEST = new long[] {
+    public static final long[] TWITTER_USERS_TEST = new long[]{
             1067457730439462912L
     };
 }

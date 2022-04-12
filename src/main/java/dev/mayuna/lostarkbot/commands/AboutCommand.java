@@ -8,8 +8,6 @@ import dev.mayuna.mayuslibrary.utils.ArrayUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import java.util.Arrays;
-
 public class AboutCommand extends SlashCommand {
 
     public AboutCommand() {

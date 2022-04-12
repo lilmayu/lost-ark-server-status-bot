@@ -14,6 +14,7 @@ public class HelpCommand extends SlashCommand {
 
     public HelpCommand() {
         this.name = "help";
+        this.help = "Shows you command list and tutorials";
 
         this.guildOnly = false;
     }
@@ -38,10 +39,18 @@ public class HelpCommand extends SlashCommand {
         messageBuilder.setEmbeds(embedBuilder.build());
         message.setMessageBuilder(messageBuilder);
 
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Command List")), interactionEvent -> getCommandListMessage().editOriginal(interactionEvent.getInteractionHook()));
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Server Dashboards")), interactionEvent -> getServerDashboardsMessage().editOriginal(interactionEvent.getInteractionHook()));
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Notifications")), interactionEvent -> getNotificationsMessage().editOriginal(interactionEvent.getInteractionHook()));
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.SECONDARY, "Official Support")), interactionEvent -> getOfficialSupportMessage().editOriginal(interactionEvent.getInteractionHook()));
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Command List")),
+                               interactionEvent -> getCommandListMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Server Dashboards")),
+                               interactionEvent -> getServerDashboardsMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Notifications")),
+                               interactionEvent -> getNotificationsMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.SECONDARY, "Official Support")),
+                               interactionEvent -> getOfficialSupportMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
 
         return message;
     }
@@ -96,12 +105,15 @@ public class HelpCommand extends SlashCommand {
                                       `/notifications status-whitelist` - Adds or removes whitelisted statuses
                                       `/notifications status-ping` - Adds or removes roles to ping
                                       `/notifications status` - Shows you which notifications you have enabled
-                                      `/notifications clear` - Disables/clears specified notifications/lists""", false);
+                                      `/notifications clear` - Disables/clears specified notifications/lists""", false
+        );
 
         messageBuilder.setEmbeds(embedBuilder.build());
         message.setMessageBuilder(messageBuilder);
 
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")), interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook()));
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")),
+                               interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
 
         return message;
     }
@@ -143,7 +155,9 @@ public class HelpCommand extends SlashCommand {
         messageBuilder.setEmbeds(embedBuilder.build());
         message.setMessageBuilder(messageBuilder);
 
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")), interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook()));
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")),
+                               interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
 
         return message;
     }
@@ -192,7 +206,9 @@ public class HelpCommand extends SlashCommand {
         messageBuilder.setEmbeds(embedBuilder.build());
         message.setMessageBuilder(messageBuilder);
 
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")), interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook()));
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")),
+                               interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
 
         return message;
     }
@@ -204,12 +220,15 @@ public class HelpCommand extends SlashCommand {
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
 
         embedBuilder.setTitle("Mayu's Lost Ark Bot | Official Support");
-        embedBuilder.setDescription("You can get official support on my [support server](https://discord.gg/YMs6wXPqcB). You can ask questions there about anything related to this bot.");
+        embedBuilder.setDescription(
+                "You can get official support on my [support server](https://discord.gg/YMs6wXPqcB). You can ask questions there about anything related to this bot.");
 
         messageBuilder.setEmbeds(embedBuilder.build());
         message.setMessageBuilder(messageBuilder);
 
-        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")), interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook()));
+        message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Back")),
+                               interactionEvent -> getMainMenuMessage().editOriginal(interactionEvent.getInteractionHook())
+        );
 
         return message;
     }

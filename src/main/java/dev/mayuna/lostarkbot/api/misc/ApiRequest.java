@@ -6,12 +6,14 @@ public interface ApiRequest {
 
     /**
      * Endpoint's URL after "https://api.hetzner.cloud/v1"
+     *
      * @return Endpoint's URL
      */
     String getURL();
 
     /**
      * HTTP Request method of Endpoint
+     *
      * @return {@link HttpRequestType}
      */
     HttpRequestType getRequestMethod();
