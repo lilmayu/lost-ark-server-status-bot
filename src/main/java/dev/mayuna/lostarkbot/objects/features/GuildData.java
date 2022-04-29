@@ -1,16 +1,16 @@
-package dev.mayuna.lostarkbot.objects.core;
+package dev.mayuna.lostarkbot.objects.features;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import dev.mayuna.lostarkbot.Main;
-import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
-import dev.mayuna.lostarkbot.managers.GuildDataManager;
-import dev.mayuna.lostarkbot.objects.LostArkServersChange;
-import dev.mayuna.lostarkbot.objects.MayuTweet;
-import dev.mayuna.lostarkbot.objects.Notifications;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
+import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.other.MayuTweet;
+import dev.mayuna.lostarkbot.objects.other.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.Waiter;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.mayusjdautils.exceptions.InvalidTextChannelIDException;
 import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
 import dev.mayuna.mayusjdautils.managed.ManagedGuild;
 import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
@@ -20,6 +20,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.io.File;
 import java.util.*;
@@ -124,7 +126,7 @@ public class GuildData extends ManagedGuild {
         ManagedGuildMessage managedGuildMessage = new ManagedGuildMessage(UUID.randomUUID().toString(), textChannel.getGuild(), textChannel, null);
         ServerDashboard serverDashboard = new ServerDashboard(managedGuildMessage);
 
-        Waiter<Boolean> waiter = ServerDashboardHelper.updateServerDashboard(serverDashboard);
+        Waiter<Boolean> waiter = serverDashboard.update();
         waiter.await();
 
         if (waiter.getObject()) {
@@ -190,7 +192,7 @@ public class GuildData extends ManagedGuild {
         synchronized (loadedServerDashboards) {
             Iterator<ServerDashboard> serverDashboardIterator = loadedServerDashboards.listIterator();
             while (serverDashboardIterator.hasNext()) {
-                ServerDashboardHelper.updateServerDashboard(serverDashboardIterator.next());
+                serverDashboardIterator.next().update();
             }
         }
     }
@@ -235,8 +237,14 @@ public class GuildData extends ManagedGuild {
                                 throw new RuntimeException("[GUILD-DATA] InterruptedException occurred while sleeping!", interruptedException);
                             }
                         } else {
-                            Logger.throwing(failure);
-                            Logger.warn("[GUILD-DATA] Unable to load Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Probably bot was kicked or text channel was deleted.");
+                            if (failure instanceof PermissionException || failure instanceof ErrorResponseException || failure instanceof InvalidTextChannelIDException) {
+                                Logger.get().flow(failure);
+                                Logger.warn("[GUILD-DATA] Unable to load Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Bot was kicked or the text channel was deleted. (Permission or ErrorResponse Exception)");
+                            } else {
+                                Logger.throwing(failure);
+                                Logger.error("[GUILD-DATA] Unable to load Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Bot was kicked or the text channel was deleted. (Unknown Exception)");
+
+                            }
 
                             wasSuccessful.set(false);
                             canContinue.set(true);
@@ -246,14 +254,15 @@ public class GuildData extends ManagedGuild {
                 } while (!canContinue.get());
 
                 if (!wasSuccessful.get()) {
-                    Logger.debug("[GUILD-DATA] Server Dashboard could not be loaded - removing it from loaded Server Dashboards");
+                    Logger.debug("[GUILD-DATA] Server Dashboard " + serverDashboard.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ") could not be loaded - it will be removed from loaded Server Dashboards");
                     serverDashboardsToRemove.add(serverDashboard);
                 }
             }
 
             if (serverDashboardsToRemove.size() > 0) {
-                Logger.debug("[GUILD-DATA] Removing " + serverDashboardsToRemove.size() + " invalid Server Dashboards...");
+                Logger.flow("[GUILD-DATA] Removing " + serverDashboardsToRemove.size() + " invalid Server Dashboards...");
                 loadedServerDashboards.removeAll(serverDashboardsToRemove);
+                Logger.debug("[GUILD-DATA] Removed " + serverDashboardsToRemove.size() + " invalid Server Dashboards.");
             }
         }
     }
@@ -373,17 +382,22 @@ public class GuildData extends ManagedGuild {
                     notificationChannel.getManagedTextChannel().updateEntries(Main.getMayuShardManager().get());
 
                     Logger.flow("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
+                } catch (PermissionException | ErrorResponseException | InvalidTextChannelIDException exception) {
+                    Logger.get().flow(exception);
+                    Logger.error("[GUILD-DATA] Unable to load Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Bot was kicked or the text channel was deleted. (Permission or ErrorResponse Exception)");
+                    notificationChannelsToRemove.add(notificationChannel);
                 } catch (Exception exception) {
                     Logger.throwing(exception);
 
-                    Logger.error("[GUILD-DATA] Unable to load Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Probably bot was kicked or text channel was deleted.");
+                    Logger.error("[GUILD-DATA] Unable to load Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")! Bot was kicked or the text channel was deleted. (Unknown Exception)");
                     notificationChannelsToRemove.add(notificationChannel);
                 }
             }
 
             if (!notificationChannelsToRemove.isEmpty()) {
-                Logger.debug("[GUILD-DATA] Removing " + notificationChannelsToRemove.size() + " invalid Notification Channels...");
+                Logger.flow("[GUILD-DATA] Removing " + notificationChannelsToRemove.size() + " invalid Notification Channels...");
                 loadedNotificationChannels.removeAll(notificationChannelsToRemove);
+                Logger.debug("[GUILD-DATA] Removed " + notificationChannelsToRemove.size() + " invalid Notification Channels.");
             }
         }
     }

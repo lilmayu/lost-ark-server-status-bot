@@ -2,10 +2,10 @@ package dev.mayuna.lostarkbot.console.commands;
 
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
-import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.NotificationsManager;
-import dev.mayuna.lostarkbot.util.Config;
+import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 
@@ -24,7 +24,7 @@ public class LoadDataConsoleCommand extends AbstractConsoleCommand {
             switch (argumentParser.getArgumentAtIndex(0).getValue()) {
                 case "guilds" -> {
                     GuildDataManager.loadAllFiles();
-                    GuildDataManager.loadAllGuildData();
+                    GuildDataManager.loadAllGuildDataFeatures();
 
                     Logger.success("Loading done.");
                 }

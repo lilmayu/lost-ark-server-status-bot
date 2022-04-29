@@ -12,7 +12,8 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
-import dev.mayuna.lostarkbot.objects.Notifications;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
+import dev.mayuna.lostarkbot.objects.other.Notifications;
 import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
 import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -38,7 +39,8 @@ public class NotificationsManager {
     private static @Getter Forums forumsMaintenance;
     private static @Getter Forums forumsDowntime;
 
-    public static void load() {
+    public static void init() {
+        Logger.info("[NOTIFICATIONS] Initializing Notification manager...");
         HashCache.loadHashes();
 
         notificationsUpdateWorker.scheduleAtFixedRate(new TimerTask() {

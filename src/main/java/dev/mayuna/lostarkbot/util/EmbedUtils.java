@@ -6,11 +6,11 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
-import dev.mayuna.lostarkbot.objects.LostArkRegion;
-import dev.mayuna.lostarkbot.objects.LostArkServersChange;
-import dev.mayuna.lostarkbot.objects.MayuTweet;
-import dev.mayuna.lostarkbot.objects.core.LanguagePack;
-import dev.mayuna.lostarkbot.objects.core.ServerDashboard;
+import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.other.MayuTweet;
+import dev.mayuna.lostarkbot.objects.features.LanguagePack;
+import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
@@ -50,7 +50,7 @@ public class EmbedUtils {
         description += Constants.ONLINE_EMOTE + " " + languagePack.getOnline() + " ";
         description += Constants.BUSY_EMOTE + " " + languagePack.getBusy() + " ";
         description += Constants.FULL_EMOTE + " " + languagePack.getFull() + " ";
-        description += Constants.WARNING_EMOTE + " " + languagePack.getMaintenance();
+        description += Constants.MAINTENANCE_EMOTE + " " + languagePack.getMaintenance();
         embedBuilder.setDescription(description);
 
         LinkedHashMap<String, String> regionFields = new LinkedHashMap<>();
@@ -112,7 +112,7 @@ public class EmbedUtils {
                 if (serverStatus != null) {
                     toAppend = Utils.getServerLine(serverName, serverStatus) + "\n";
                 } else {
-                    toAppend = Constants.NOT_FOUND_EMOTE + " " + serverName + " (" + languagePack.getNotFound() + ")\n";
+                    toAppend = Constants.OFFLINE_EMOTE + " " + serverName + " (" + languagePack.getNotFound() + ")\n";
                 }
 
                 if (fieldValue.length() + toAppend.length() < 1024) {

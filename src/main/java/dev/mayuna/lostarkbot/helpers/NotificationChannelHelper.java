@@ -1,8 +1,8 @@
 package dev.mayuna.lostarkbot.helpers;
 
-import dev.mayuna.lostarkbot.managers.GuildDataManager;
-import dev.mayuna.lostarkbot.objects.core.GuildData;
-import dev.mayuna.lostarkbot.objects.core.NotificationChannel;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
+import dev.mayuna.lostarkbot.objects.features.GuildData;
+import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;

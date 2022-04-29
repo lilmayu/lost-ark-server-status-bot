@@ -7,8 +7,8 @@ import dev.mayuna.mayusjdautils.interactive.objects.Interaction;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
 public class HelpCommand extends SlashCommand {
 
@@ -97,10 +97,11 @@ public class HelpCommand extends SlashCommand {
                                       `/notifications twitter` - Enables or disables Twitter notifications
                                       `/notifications twitter-filter` - Filters specified keywords in tweets
                                       `/notifications twitter-settings` - Twitter settings
-                                      `/notifications status-server` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for server""", false
+                                      `/notifications twitter-accounts` - Enables or disables Tweets from Twitters""", false
         );
         embedBuilder.addField("• Command `/notifications` (2/2)",
                               """
+                                      `/notifications status-server` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for server
                                       `/notifications status-region` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for region
                                       `/notifications status-whitelist` - Adds or removes whitelisted statuses
                                       `/notifications status-ping` - Adds or removes roles to ping

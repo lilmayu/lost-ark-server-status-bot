@@ -3,8 +3,8 @@ package dev.mayuna.lostarkbot.console.commands;
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
-import dev.mayuna.lostarkbot.managers.GuildDataManager;
-import dev.mayuna.lostarkbot.objects.core.GuildData;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
+import dev.mayuna.lostarkbot.objects.features.GuildData;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 
@@ -27,7 +27,7 @@ public class GuildConsoleCommand extends AbstractConsoleCommand {
                     GuildData guildData = GuildDataManager.getGuildData(guildID);
 
                     if (guildData == null) {
-                        Logger.error("There is no Guild Data with ID " + guildID);
+                        Logger.error("There is no Guild Data with id " + guildID);
                         return CommandResult.SUCCESS;
                     }
 
@@ -55,7 +55,7 @@ public class GuildConsoleCommand extends AbstractConsoleCommand {
                     GuildData guildData = GuildDataManager.getGuildData(guildID);
 
                     if (guildData == null) {
-                        Logger.error("There is no Guild Data with ID " + guildID);
+                        Logger.error("There is no Guild Data with id " + guildID);
                         return CommandResult.SUCCESS;
                     }
 
@@ -71,7 +71,7 @@ public class GuildConsoleCommand extends AbstractConsoleCommand {
                     GuildData guildData = GuildDataManager.getGuildData(guildID);
 
                     if (guildData == null) {
-                        Logger.error("There is no Guild Data with ID " + guildID);
+                        Logger.error("There is no Guild Data with id " + guildID);
                         return CommandResult.SUCCESS;
                     }
 

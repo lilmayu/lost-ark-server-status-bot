@@ -7,11 +7,13 @@ import dev.mayuna.lostarkbot.commands.LostArkCommand;
 import dev.mayuna.lostarkbot.commands.NotificationsCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.console.commands.*;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.listeners.CommandListener;
 import dev.mayuna.lostarkbot.listeners.ShardWatcher;
 import dev.mayuna.lostarkbot.managers.*;
-import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.Constants;
+import dev.mayuna.lostarkbot.util.config.Config;
+import dev.mayuna.lostarkbot.util.config.LegacyConfig;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
@@ -51,7 +53,7 @@ public class Main {
         }
 
         Logger.info("Starting up Mayu's Lost Ark Bot @ v" + Constants.VERSION + "...");
-        Logger.info("Made by mayuna#8016");
+        Logger.info("> Made by mayuna#8016");
 
         Logger.info("Initializing Console Commands...");
         ConsoleCommandManager.init();
@@ -61,11 +63,15 @@ public class Main {
         loadLibrarySettings();
 
         Logger.info("Loading config...");
+        LegacyConfig.load();
         if (!Config.load()) {
             Logger.fatal("There was fatal error while loading Config! Cannot proceed.");
             System.exit(-1);
         }
         configLoaded = true;
+
+        Logger.info("Initializing Executor Service (Update Service)...");
+        ShardExecutorManager.initExecutorService();
 
         Logger.info("Loading JDA Utilities...");
         loadJdaUtilities();
@@ -75,8 +81,6 @@ public class Main {
 
         Logger.info("Loading JDA...");
         loadJda();
-
-        ShardExecutorManager.initExecutorService();
 
         Logger.info("Loading managers...");
         loadManagers();
@@ -88,21 +92,19 @@ public class Main {
     private static void loadJdaUtilities() {
         client = new CommandClientBuilder()
                 .setStatus(OnlineStatus.IDLE)
-                .setActivity(Activity.playing("Loading..."))
+                .setActivity(Activity.playing("Loading core..."))
                 .useHelpBuilder(false)
-                .setOwnerId(String.valueOf(Config.getOwnerID()))
-                .setPrefix(Config.getPrefix())
-                .setAlternativePrefix(Constants.ALTERNATIVE_PREFIX)
+                .setOwnerId(String.valueOf(Config.get().getBot().getOwnerId()))
                 .setListener(new CommandListener());
 
         RestAction.setDefaultTimeout(2L, TimeUnit.MINUTES);
     }
 
     private static void loadJda() {
-        Logger.info("Building shard manager... Total shards: " + Config.getTotalShards());
+        Logger.info("Building shard manager... Total shards: " + Config.get().getBot().getTotalShards());
 
-        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(Config.getToken())
-                .setShardsTotal(Config.getTotalShards())
+        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(Config.get().getBot().getToken())
+                .setShardsTotal(Config.get().getBot().getTotalShards())
                 .setStatusProvider(shardId -> OnlineStatus.IDLE)
                 .setActivityProvider(PresenceManager::getActivityProvider)
                 .addEventListeners(client.build())
@@ -112,7 +114,6 @@ public class Main {
         try {
             mayuShardManager = new MayuShardManager(shardBuilder.build());
             mayuShardManager.waitOnAll();
-
         } catch (Exception exception) {
             Logger.throwing(exception);
             Logger.fatal("Error occurred while logging into Discord! Cannot proceed.");
@@ -130,18 +131,20 @@ public class Main {
             System.exit(-1);
         }
 
-        GuildDataManager.loadAllGuildData();
-
-        PresenceManager.startPresenceTimer();
-
-        NotificationsManager.load();
-        ServerDashboardManager.load();
+        GuildDataManager.loadAllGuildDataFeatures();
+        ServerDashboardManager.init();
+        NotificationsManager.init();
 
         TwitterManager.initStream();
+
+        PresenceManager.startPresenceTimer();
     }
 
     private static void loadCommands() {
-        client.addSlashCommands(new AboutCommand(), new LostArkCommand(), new HelpCommand(), new NotificationsCommand());
+        client.addSlashCommands(new AboutCommand(),
+                                new LostArkCommand(),
+                                new HelpCommand(),
+                                new NotificationsCommand());
     }
 
     private static void loadConsoleCommands() {
@@ -154,8 +157,7 @@ public class Main {
                                                new WriteDownNumberOfGuildsConsoleCommand(),
                                                new NotificationsConsoleCommand(),
                                                new ShardsConsoleCommand(),
-                                               new TopggConsoleCommand(),
-                                               new TwitterConsoleCommand()
+                                               new TopggConsoleCommand()
         );
     }
 
@@ -166,8 +168,8 @@ public class Main {
             Logger.warn("Exception occurred! Sending it to Lost Ark Bot's exception Message channel.");
 
             if (configLoaded) {
-                if (Main.getMayuShardManager().get() != null && Config.getExceptionMessageChannelID() != 0) {
-                    MessageChannel messageChannel = Main.getMayuShardManager().get().getTextChannelById(Config.getExceptionMessageChannelID());
+                if (Main.getMayuShardManager().get() != null && Config.get().getBot().getExceptionMessageChannelID() != 0) {
+                    MessageChannel messageChannel = Main.getMayuShardManager().get().getTextChannelById(Config.get().getBot().getExceptionMessageChannelID());
                     if (messageChannel != null) {
                         MessageInfo.sendExceptionMessage(messageChannel, exceptionReport.getThrowable());
                     } else {
@@ -179,22 +181,19 @@ public class Main {
             }
         }));
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (configLoaded) {
-                Logger.info("Shutting down...");
+            Logger.info("Shutting down...");
 
-                if (fullyLoaded) {
-                    Logger.info("Saving config and guilds...");
-                    Config.save();
-                    GuildDataManager.saveAll();
-                } else {
-                    Logger.warn("Bot did not fully loaded! Config and guilds won't be saved.");
-                }
-
-                Logger.info("o/");
+            if (fullyLoaded) {
+                Logger.info("Saving GuildData...");
+                GuildDataManager.saveAll();
+            } else {
+                Logger.warn("Bot did not fully loaded! GuildData won't be saved.");
             }
+
+            Logger.info("o/");
         }));
 
-        DiscordUtils.setDefaultEmbed(new EmbedBuilder().setDescription("Loading..."));
+        DiscordUtils.setDefaultEmbed(new EmbedBuilder().setDescription("Loading, please wait... If you see this message for too long, something happened."));
         MayuCoreListener.enableExperimentalInteractionBehavior = true;
         MessageInfo.useSystemEmotes = true;
     }

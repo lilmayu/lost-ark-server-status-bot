@@ -1,11 +1,11 @@
 package dev.mayuna.lostarkbot.managers;
 
+import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.util.UpdateType;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.LostArk;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
-import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,29 +21,29 @@ public class ServerDashboardManager {
     private static @Getter @Setter LostArkServers previousServerCache;
     private static @Getter String onlinePlayersCache;
 
-    public static void load() {
+    public static void init() {
+        Logger.info("[DASHBOARDS] Initializing Server Dashboard manager...");
+
         serverDashboardUpdateWorker.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Logger.info("Updating Lost Ark Server cache...");
+                Logger.info("[DASHBOARDS] Updating Lost Ark Server cache...");
                 try {
                     updateCache();
                 } catch (Exception exception) {
                     Logger.throwing(exception);
-                    ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), exception);
-
-                    Logger.error("Could not update Lost Ark Server cache!");
+                    Logger.error("[DASHBOARDS] Could not update Lost Ark Server cache!");
                     return;
                 }
 
                 int guildsSize = GuildDataManager.countGuildDataSize();
-                Logger.info("Queuing server dashboard updates for " + guildsSize + " guilds...");
+                Logger.info("[DASHBOARDS] Queuing server dashboard updates for " + guildsSize + " guilds...");
 
                 long start = System.currentTimeMillis();
                 queueUpdatesForAllGuildData();
                 long took = System.currentTimeMillis() - start;
 
-                Logger.info("Queuing server dashboard updates on all shards for " + guildsSize + " done in " + took + "ms");
+                Logger.info("[DASHBOARDS] Queuing server dashboard updates on all shards for " + guildsSize + " done in " + took + "ms");
             }
         }, 0, 300000);
     }

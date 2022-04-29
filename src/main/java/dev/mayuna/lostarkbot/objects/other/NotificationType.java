@@ -1,4 +1,4 @@
-package dev.mayuna.lostarkbot.objects;
+package dev.mayuna.lostarkbot.objects.other;
 
 public enum NotificationType {
     NEWS,

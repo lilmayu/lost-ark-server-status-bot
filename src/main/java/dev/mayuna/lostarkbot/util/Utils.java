@@ -7,18 +7,24 @@ import com.google.gson.JsonParser;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
-import dev.mayuna.lostarkbot.objects.LostArkRegion;
-import dev.mayuna.lostarkbot.objects.LostArkServersChange;
+import dev.mayuna.lostarkbot.managers.TwitterManager;
+import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.other.TwitterUser;
+import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
+import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import dev.mayuna.mayuslibrary.utils.ArrayUtils;
 import dev.mayuna.mayuslibrary.utils.StringUtils;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
+import java.awt.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
@@ -28,20 +34,23 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Utils {
 
     public static LostArkRegion getRegionForServer(String serverName) {
-        if (Config.getWestNorthAmerica().contains(serverName)) {
+        Config.LostArk lostArkConfig = Config.get().getLostArk();
+
+        if (lostArkConfig.getWestNorthAmerica().contains(serverName)) {
             return LostArkRegion.WEST_NORTH_AMERICA;
-        } else if (Config.getEastNorthAmerica().contains(serverName)) {
+        } else if (lostArkConfig.getEastNorthAmerica().contains(serverName)) {
             return LostArkRegion.EAST_NORTH_AMERICA;
-        } else if (Config.getCentralEurope().contains(serverName)) {
+        } else if (lostArkConfig.getCentralEurope().contains(serverName)) {
             return LostArkRegion.CENTRAL_EUROPE;
-        } else if (Config.getSouthAmerica().contains(serverName)) {
+        } else if (lostArkConfig.getSouthAmerica().contains(serverName)) {
             return LostArkRegion.SOUTH_AMERICA;
-        } else if (Config.getEuropeWest().contains(serverName)) {
+        } else if (lostArkConfig.getEuropeWest().contains(serverName)) {
             return LostArkRegion.EUROPE_WEST;
         }
         return null;
@@ -64,8 +73,8 @@ public class Utils {
             case GOOD -> serverLine = Constants.ONLINE_EMOTE;
             case BUSY -> serverLine = Constants.BUSY_EMOTE;
             case FULL -> serverLine = Constants.FULL_EMOTE;
-            case MAINTENANCE -> serverLine = Constants.WARNING_EMOTE;
-            default -> serverLine = Constants.NOT_FOUND_EMOTE;
+            case MAINTENANCE -> serverLine = Constants.MAINTENANCE_EMOTE;
+            default -> serverLine = Constants.OFFLINE_EMOTE;
         }
 
         serverLine += " " + serverName;
@@ -75,14 +84,14 @@ public class Utils {
 
     public static String getEmoteByStatus(ServerStatus serverStatus) {
         if (serverStatus == null) {
-            return Constants.NOT_FOUND_EMOTE;
+            return Constants.OFFLINE_EMOTE;
         }
 
         return switch (serverStatus) {
             case GOOD -> Constants.ONLINE_EMOTE;
             case BUSY -> Constants.BUSY_EMOTE;
             case FULL -> Constants.FULL_EMOTE;
-            case MAINTENANCE -> Constants.WARNING_EMOTE;
+            case MAINTENANCE -> Constants.MAINTENANCE_EMOTE;
         };
     }
 
@@ -291,31 +300,33 @@ public class Utils {
     }
 
     public static void waitByConfigValue(UpdateType updateType) {
+        Config.WaitTimes waitTimesConfig = Config.get().getWaitTimes();
+
         try {
             switch (updateType) {
                 case SERVER_DASHBOARD -> {
-                    long waitTime = Config.getWaitTimeBetweenDashboardUpdates();
+                    long waitTime = waitTimesConfig.getDashboardUpdates();
 
                     if (waitTime != 0) {
                         Thread.sleep(waitTime);
                     }
                 }
                 case NOTIFICATIONS -> {
-                    long waitTime = Config.getWaitTimeBetweenNotificationMessages();
+                    long waitTime = waitTimesConfig.getNotificationMessages();
 
                     if (waitTime != 0) {
                         Thread.sleep(waitTime);
                     }
                 }
                 case SERVER_STATUS -> {
-                    long waitTime = Config.getWaitTimeBetweenServerStatusMessages();
+                    long waitTime = waitTimesConfig.getServerStatusMessages();
 
                     if (waitTime != 0) {
                         Thread.sleep(waitTime);
                     }
                 }
                 case TWITTER -> {
-                    long waitTime = Config.getWaitTimeBetweenTweets();
+                    long waitTime = waitTimesConfig.getTweets();
 
                     if (waitTime != 0) {
                         Thread.sleep(waitTime);
@@ -389,5 +400,25 @@ public class Utils {
         System.arraycopy(b, 0, result, aLen, bLen);
 
         return result;
+    }
+
+    public static EmbedBuilder getTwitterDefaultEmbed() {
+        EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
+
+        embedBuilder.setColor(new Color(29, 161, 242));
+
+        return embedBuilder;
+    }
+
+    public static List<String> getUnfollowedUsers(List<String> followedUsers) {
+        List<String> unfollowedUsers = new LinkedList<>();
+
+        for (TwitterUser twitterUser : TwitterManager.getFollowingTwitterUsers()) {
+            if (!followedUsers.contains(twitterUser.username())) {
+                unfollowedUsers.add(twitterUser.username());
+            }
+        }
+
+        return unfollowedUsers;
     }
 }

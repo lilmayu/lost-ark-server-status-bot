@@ -2,7 +2,8 @@ package dev.mayuna.lostarkbot.managers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.mayuna.lostarkbot.objects.core.LanguagePack;
+import dev.mayuna.lostarkbot.objects.features.LanguagePack;
+import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjsonutils.JsonUtil;
@@ -14,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LanguageManager {
-
-    public static final String LANG_FOLDER = "./lang/";
 
     private final static @Getter List<LanguagePack> loadedLanguages = new ArrayList<>();
 
@@ -43,7 +42,7 @@ public class LanguageManager {
         Logger.info("Loading languages...");
         loadedLanguages.clear();
 
-        File langFolder = new File(LANG_FOLDER);
+        File langFolder = new File(Constants.LANG_FOLDER);
         if (!langFolder.exists()) {
             if (!langFolder.mkdirs()) {
                 Logger.error("Could not create lang folder!");

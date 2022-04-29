@@ -1,7 +1,8 @@
-package dev.mayuna.lostarkbot.objects;
+package dev.mayuna.lostarkbot.objects.other;
 
 import dev.mayuna.lostarkbot.util.EmbedUtils;
 import dev.mayuna.lostarkbot.util.StringUtils;
+import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import twitter4j.MediaEntity;
@@ -98,9 +99,26 @@ public class MayuTweet {
             return true;
         }
 
-        String text = status.getText().toLowerCase();
+        String text = getText().toLowerCase();
+
         for (String keyword : keywords) {
             if (text.contains(keyword.toLowerCase())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean doesMatchTwitterUsers(List<String> followedUsers) {
+        if (followedUsers.isEmpty()) {
+            return false;
+        }
+
+        String userTag = getUserTag();
+
+        for (String followedUser : followedUsers) {
+            if (userTag.equalsIgnoreCase(followedUser)) {
                 return true;
             }
         }

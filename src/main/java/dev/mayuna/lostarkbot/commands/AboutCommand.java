@@ -1,12 +1,13 @@
 package dev.mayuna.lostarkbot.commands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
-import dev.mayuna.lostarkbot.util.Config;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.util.Constants;
+import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.mayusjdautils.utils.DiscordUtils;
 import dev.mayuna.mayuslibrary.utils.ArrayUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class AboutCommand extends SlashCommand {
 
@@ -19,7 +20,7 @@ public class AboutCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.deferReply(true).complete();
+        Utils.makeEphemeral(event, true);
 
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setDescription("");
@@ -36,10 +37,10 @@ public class AboutCommand extends SlashCommand {
     private String getContributors() {
         String contributors = "";
 
-        for (String contributor : Config.getContributors()) {
+        for (String contributor : Config.get().getBot().getContributors()) {
             contributors += "`" + contributor + "`";
 
-            if (!ArrayUtils.getLast(Config.getContributors().toArray()).equals(contributor)) {
+            if (!ArrayUtils.getLast(Config.get().getBot().getContributors().toArray()).equals(contributor)) {
                 contributors += ", ";
             }
         }

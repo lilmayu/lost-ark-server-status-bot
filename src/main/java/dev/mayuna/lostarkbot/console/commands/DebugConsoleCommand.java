@@ -3,12 +3,15 @@ package dev.mayuna.lostarkbot.console.commands;
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
-import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.managers.ShardExecutorManager;
 import dev.mayuna.lostarkbot.util.HashUtils;
+import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
+
+import java.util.Iterator;
 
 public class DebugConsoleCommand extends AbstractConsoleCommand {
 
@@ -46,13 +49,33 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
         }
 
         Logger.info("=== Debug ===");
+
+        Logger.info("== Discord ==");
         Logger.info("Shards: " + Main.getMayuShardManager().get().getShardsTotal());
         Logger.info("JDA Guilds: " + Main.getMayuShardManager().get().getGuilds().size());
+
+        Logger.info("== Data ==");
         Logger.info("GuildData: " + GuildDataManager.countGuildDataSize());
         Logger.info("Dashboards: " + GuildDataManager.countAllDashboards());
         Logger.info("Notifications ch.: " + GuildDataManager.countAllNotificationChannels());
+
+        Logger.info("== Other ==");
         Logger.info("In-game players: " + ServerDashboardManager.getOnlinePlayersCache());
-        Logger.info("Currently running tasks: " + ShardExecutorManager.getCurrentlyRunningTasks());
+
+        Logger.info("== Executor ==");
+        Logger.info("Currently running tasks: " + ShardExecutorManager.getExecutorService().getActiveCount());
+        Logger.info("Queued tasks: " + ShardExecutorManager.getExecutorService().getQueue().size());
+        Logger.info("Total task count: " + ShardExecutorManager.getExecutorService().getTaskCount());
+
+        if (!ShardExecutorManager.getRunningTasks().isEmpty()) {
+            Logger.info("= Running tasks - " + ShardExecutorManager.getRunningTasks().size() + " =");
+            Iterator<ShardExecutorManager.Task> iterator = ShardExecutorManager.getRunningTasks().listIterator();
+            while (iterator.hasNext()) {
+                ShardExecutorManager.Task task = iterator.next();
+
+                Logger.info("> " + task.shardId() + " | " + task.updateType() + " | Running for " + Utils.getTimerWithoutMillis(task.getElapsedTime()));
+            }
+        }
 
         return CommandResult.SUCCESS;
     }

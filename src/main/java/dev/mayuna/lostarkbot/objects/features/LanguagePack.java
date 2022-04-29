@@ -1,7 +1,7 @@
-package dev.mayuna.lostarkbot.objects.core;
+package dev.mayuna.lostarkbot.objects.features;
 
 import com.google.gson.annotations.Expose;
-import dev.mayuna.lostarkbot.objects.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import lombok.Getter;
 import lombok.Setter;
 

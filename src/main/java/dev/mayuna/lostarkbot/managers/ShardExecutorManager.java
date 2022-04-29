@@ -1,37 +1,43 @@
 package dev.mayuna.lostarkbot.managers;
 
 import dev.mayuna.lostarkbot.Main;
-import dev.mayuna.lostarkbot.util.Config;
 import dev.mayuna.lostarkbot.util.UpdateType;
+import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
 
-import java.util.concurrent.ExecutorService;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 
 public class ShardExecutorManager {
 
-    private static @Getter ExecutorService executorService;
-    private static @Getter int currentlyRunningTasks = 0;
+    private static final @Getter List<Task> runningTasks = Collections.synchronizedList(new LinkedList<>());
+    private static @Getter ThreadPoolExecutor executorService;
 
     public static void initExecutorService() {
         Logger.info("Initializing Executor Service...");
 
-        executorService = Executors.newFixedThreadPool(Config.getTotalUpdateThreadPool());
+        executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(Config.get().getBot().getTotalUpdateThreads());
     }
 
     public static void submit(int shardId, UpdateType updateType, Runnable runnable) {
         executorService.submit(() -> {
-            currentlyRunningTasks++;
-
             Thread.currentThread().setName("[" + shardId + "] ShardUpdater (" + updateType.name() + ")");
 
-            long start = System.currentTimeMillis();
-            runnable.run();
-            Logger.debug("On shard " + shardId + " update " + updateType.name() + " took " + (System.currentTimeMillis() - start) + "ms");
-
-            currentlyRunningTasks--;
+            Task task = new Task(updateType, System.currentTimeMillis(), shardId);
+            runningTasks.add(task);
+            try {
+                runnable.run();
+            } catch (Exception exception) {
+                Logger.throwing(exception);
+                Logger.warn("Task " + updateType + " on shard " + shardId + " resulted in exception!");
+            }
+            runningTasks.remove(task);
+            Logger.debug("On shard " + shardId + " update " + updateType.name() + " took " + task.getElapsedTime() + "ms");
         });
     }
 
@@ -44,6 +50,13 @@ public class ShardExecutorManager {
             submit(shardId, updateType, () -> {
                 consumer.accept(finalShardId);
             });
+        }
+    }
+
+    public record Task(@Getter UpdateType updateType, @Getter long start, @Getter int shardId) {
+
+        public long getElapsedTime() {
+            return System.currentTimeMillis() - start;
         }
     }
 }

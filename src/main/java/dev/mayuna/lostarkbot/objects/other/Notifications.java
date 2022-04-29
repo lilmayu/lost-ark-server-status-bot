@@ -1,4 +1,4 @@
-package dev.mayuna.lostarkbot.objects;
+package dev.mayuna.lostarkbot.objects.other;
 
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;

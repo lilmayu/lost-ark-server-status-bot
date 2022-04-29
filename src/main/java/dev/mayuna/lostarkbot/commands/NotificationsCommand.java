@@ -4,8 +4,8 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
-import dev.mayuna.lostarkbot.objects.LostArkRegion;
-import dev.mayuna.lostarkbot.objects.core.NotificationChannel;
+import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
@@ -19,17 +19,19 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 public class NotificationsCommand extends SlashCommand {
 
@@ -50,7 +52,8 @@ public class NotificationsCommand extends SlashCommand {
                 new StatusPingCommand(),
                 new TwitterCommand(),
                 new TwitterFilterCommand(),
-                new TwitterSettingsCommand()
+                new TwitterSettingsCommand(),
+                new TwitterAccountsCommand()
         };
     }
 
@@ -156,7 +159,13 @@ public class NotificationsCommand extends SlashCommand {
             }
 
             notificationChannel = NotificationChannelHelper.getNotificationChannel(channel);
-            embedBuilder.setDescription("This channel is marked as Notification Channel.");
+
+            String description = "";
+            description += "This channel is marked as Notification Channel.\n\n**Technical stuff**\n";
+            description += "Guild id: `" + channel.getGuild().getId() + "`\n";
+            description += "Message Channel id: `" + channel.getId() + "`\n";
+            description += "NotificationChannel id: `" + notificationChannel.getName() + "`";
+            embedBuilder.setDescription(description);
 
             String newsCategories = "";
             if (notificationChannel.getNewsCategories().isEmpty()) {
@@ -272,6 +281,19 @@ public class NotificationsCommand extends SlashCommand {
                     twitter += keyword;
 
                     if (!Utils.isLast(notificationChannel.getTwitterKeywords(), keyword)) {
+                        twitter += ", ";
+                    }
+                }
+            }
+
+            if (notificationChannel.getTwitterFollowedAccounts().isEmpty()) {
+                twitter += "\nYou do not follow any accounts.";
+            } else {
+                twitter += "\nFollowed accounts: ";
+                for (String accountName : notificationChannel.getTwitterFollowedAccounts()) {
+                    twitter += "[@" + accountName + "](https://twitter.com/" + accountName + ")";
+
+                    if (!Utils.isLast(notificationChannel.getTwitterFollowedAccounts(), accountName)) {
                         twitter += ", ";
                     }
                 }
@@ -452,7 +474,6 @@ public class NotificationsCommand extends SlashCommand {
                 return;
             }
 
-
             if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
                 return;
             }
@@ -631,6 +652,133 @@ public class NotificationsCommand extends SlashCommand {
                 notificationChannel.setTwitterQuotes(!notificationChannel.isTwitterQuotes());
                 getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
             });
+
+            return message;
+        }
+    }
+
+    protected static class TwitterAccountsCommand extends SlashCommand {
+
+        public TwitterAccountsCommand() {
+            this.name = "twitter-accounts";
+            this.help = "Allows you to follow specific Twitter accounts";
+
+            this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Utils.makeEphemeral(event, true);
+            InteractionHook hook = event.getHook();
+            TextChannel channel = event.getTextChannel();
+
+            if (PermissionUtils.checkPermissionsAndSendIfMissing(channel, hook)) {
+                return;
+            }
+
+            if (!NotificationChannelHelper.isNotificationChannelInChannel(channel)) {
+                hook.editOriginalEmbeds(MessageInfo.errorEmbed("This channel isn't marked as Notification Channel!").build()).queue();
+                return;
+            }
+
+            NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(channel);
+            getBaseMessage(notificationChannel).editOriginal(hook);
+        }
+
+        private InteractiveMessage getBaseMessage(NotificationChannel notificationChannel) {
+            EmbedBuilder embedBuilder = Utils.getTwitterDefaultEmbed();
+            embedBuilder.setTitle("Twitter Accounts");
+
+            String description = "";
+
+            description += "You will receive Tweets into your Notification Channel from these Twitter accounts.\n\n";
+            if (notificationChannel.getTwitterFollowedAccounts().isEmpty()) {
+                description += "You do not follow any Twitter account.";
+            } else {
+                for (String followedUser : notificationChannel.getTwitterFollowedAccounts()) {
+                    description += "[@" + followedUser + "](https://twitter.com/" + followedUser + ")\n";
+                }
+            }
+
+            embedBuilder.setDescription(description);
+
+            InteractiveMessage message = InteractiveMessage.create(new MessageBuilder().setEmbeds(embedBuilder.build()));
+
+            message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Enable accounts")), interactionEvent -> { // TODO: Disabled button, pokud uživatel přidá všechny
+                getEnableAccountsMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+            });
+
+            message.addInteraction(Interaction.asButton(DiscordUtils.generateButton(ButtonStyle.PRIMARY, "Disable accounts")), interactionEvent -> { // TODO: Disabled button, pokud uživatel odebere všechny
+                getDisableAccountsMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+            });
+
+            return message;
+        }
+
+        private InteractiveMessage getEnableAccountsMessage(NotificationChannel notificationChannel) {
+            EmbedBuilder embedBuilder = Utils.getTwitterDefaultEmbed();
+            embedBuilder.setTitle("Twitter Accounts | Enable");
+            embedBuilder.setDescription("Please, choose an account you want to follow (enable).");
+
+            InteractiveMessage message = InteractiveMessage.create(new MessageBuilder().setEmbeds(embedBuilder.build()));
+            SelectMenu.Builder selectMenuBuilder = SelectMenu.create(UUID.randomUUID().toString());
+            selectMenuBuilder.setPlaceholder("Choose an account");
+            message.setSelectMenuBuilder(selectMenuBuilder);
+
+            List<String> unfollowedTwitterAccounts = Utils.getUnfollowedUsers(notificationChannel.getTwitterFollowedAccounts());
+
+            if (unfollowedTwitterAccounts.isEmpty()) {
+                message.addInteraction(Interaction.asSelectOption(DiscordUtils.generateSelectOption("All accounts are enabled.")), interactionEvent -> {
+                    getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+                });
+            } else {
+                for (String twitterAccount : unfollowedTwitterAccounts) {
+                    message.addInteraction(Interaction.asSelectOption(DiscordUtils.generateSelectOption(twitterAccount)), interactionEvent -> {
+                        boolean success = notificationChannel.addToFollowedTwitterAccounts(twitterAccount);
+
+                        if (!success) {
+                            interactionEvent.getInteractionHook().editOriginalEmbeds(MessageInfo.errorEmbed("Could not enable account **" + twitterAccount + "**! This account is already enabled.").build()).queue();
+                        } else {
+                            notificationChannel.save();
+                            getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+                        }
+                    });
+                }
+            }
+
+            return message;
+        }
+
+        private InteractiveMessage getDisableAccountsMessage(NotificationChannel notificationChannel) {
+            EmbedBuilder embedBuilder = Utils.getTwitterDefaultEmbed();
+            embedBuilder.setTitle("Twitter Accounts | Disable");
+            embedBuilder.setDescription("Please, choose an account you want to unfollow (disable).");
+
+            InteractiveMessage message = InteractiveMessage.create(new MessageBuilder().setEmbeds(embedBuilder.build()));
+            SelectMenu.Builder selectMenuBuilder = SelectMenu.create(UUID.randomUUID().toString());
+            selectMenuBuilder.setPlaceholder("Choose an account");
+            message.setSelectMenuBuilder(selectMenuBuilder);
+
+            List<String> followedTwitterAccounts = notificationChannel.getTwitterFollowedAccounts();
+
+            if (followedTwitterAccounts.isEmpty()) {
+                message.addInteraction(Interaction.asSelectOption(DiscordUtils.generateSelectOption("All accounts are disabled.")), interactionEvent -> {
+                    getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+                });
+            } else {
+                for (String twitterAccount : followedTwitterAccounts) {
+                    message.addInteraction(Interaction.asSelectOption(DiscordUtils.generateSelectOption(twitterAccount)), interactionEvent -> {
+                        boolean success = notificationChannel.removeFromFollowedTwitterKeywords(twitterAccount);
+
+                        if (!success) {
+                            interactionEvent.getInteractionHook().editOriginalEmbeds(MessageInfo.errorEmbed("Could not disable account **" + twitterAccount + "**! This account is already disabled.").build()).queue();
+                        } else {
+                            notificationChannel.save();
+                            getBaseMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
+                        }
+                    });
+                }
+            }
 
             return message;
         }

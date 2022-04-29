@@ -8,7 +8,7 @@ import dev.mayuna.mayusjdautils.utils.MessageInfo;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CommandListener implements com.jagrosh.jdautilities.command.CommandListener {
@@ -85,6 +85,7 @@ public class CommandListener implements com.jagrosh.jdautilities.command.Command
         Logger.error("SlashCommand Exception @ " + event.getResponseNumber());
         Logger.warn(" - Full: '" + event.getCommandString() + "'");
         Logger.warn(" - Please, see errors below.");
+        ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), throwable);
 
         try {
             MessageInfo.Builder.create()
@@ -95,8 +96,6 @@ public class CommandListener implements com.jagrosh.jdautilities.command.Command
                             .getUser() + "'s slash command `" + event.getCommandString() + "`.\nThis will be automatically reported. Sorry for inconvenience and please, try again.")
                     .addCustomField(new MessageEmbed.Field("Technical details", MessageInfo.formatExceptionInformationField(throwable), false))
                     .editOriginal(event.getHook());
-
-            ExceptionReporter.getInstance().uncaughtException(Thread.currentThread(), throwable);
         } catch (Exception exception) {
             Logger.throwing(exception);
             Logger.warn("Exception occurred while editing original message from command which resulted in exception! Probably safe to ignore.");

@@ -1,19 +1,17 @@
-package dev.mayuna.lostarkbot.objects.core;
+package dev.mayuna.lostarkbot.objects.features;
 
 import com.google.gson.annotations.Expose;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
-import dev.mayuna.lostarkbot.managers.GuildDataManager;
+import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.objects.LostArkRegion;
-import dev.mayuna.lostarkbot.objects.LostArkServersChange;
-import dev.mayuna.lostarkbot.objects.MayuTweet;
-import dev.mayuna.lostarkbot.objects.Notifications;
-import dev.mayuna.lostarkbot.util.Constants;
-import dev.mayuna.lostarkbot.util.EmbedUtils;
-import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
+import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.other.MayuTweet;
+import dev.mayuna.lostarkbot.objects.other.Notifications;
+import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.managed.ManagedTextChannel;
 import lombok.Getter;
@@ -44,6 +42,7 @@ public class NotificationChannel {
     private @Getter @Setter @Expose boolean twitterQuotes = true;
     private @Getter @Setter @Expose boolean twitterFancyEmbeds = true;
     private @Getter @Expose List<String> twitterKeywords = new ArrayList<>();
+    private @Getter @Expose List<String> twitterFollowedAccounts = new ArrayList<>(List.of("playlostark"));
 
     // Server / region change
     private @Getter @Expose List<String> servers = new ArrayList<>();
@@ -166,6 +165,19 @@ public class NotificationChannel {
         return twitterKeywords.remove(keyword);
     }
 
+    public boolean addToFollowedTwitterAccounts(String twitterAccount) {
+        if (!twitterFollowedAccounts.contains(twitterAccount)) {
+            twitterFollowedAccounts.add(twitterAccount);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeFromFollowedTwitterKeywords(String twitterAccount) {
+        return twitterFollowedAccounts.remove(twitterAccount);
+    }
+
     /**
      * Sends all unread notifications to specified {@link TextChannel} (if there is a NotificationChannel). Also, calls {@link GuildDataManager#getOrCreateGuildData(Guild)}
      *
@@ -210,8 +222,7 @@ public class NotificationChannel {
 
         for (MessageBuilder messageBuilder : messageBuilders) {
             Logger.flow("[NOTIFICATIONS] Sending notification message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
-
-            managedTextChannel.getTextChannel().sendMessage(messageBuilder.build()).complete();
+            MessageSender.sendMessage(messageBuilder.build(), managedTextChannel.getTextChannel(), UpdateType.NOTIFICATIONS);
         }
     }
 
@@ -272,21 +283,24 @@ public class NotificationChannel {
             description += Constants.ONLINE_EMOTE + " " + languagePack.getOnline() + " ";
             description += Constants.BUSY_EMOTE + " " + languagePack.getBusy() + " ";
             description += Constants.FULL_EMOTE + " " + languagePack.getFull() + " ";
-            description += Constants.WARNING_EMOTE + " " + languagePack.getMaintenance() + " ";
-            description += Constants.NOT_FOUND_EMOTE + " Offline";
+            description += Constants.MAINTENANCE_EMOTE + " " + languagePack.getMaintenance() + " ";
+            description += Constants.OFFLINE_EMOTE + " Offline";
             embedBuilder.setDescription(description);
 
             embedBuilder.setFooter("Provided by Mayu's Lost Ark Bot");
             embedBuilder.setTimestamp(Instant.now());
 
-            Logger.flow("[STATUS-CHANGE] Sending status change message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
-
-            managedTextChannel.getTextChannel().sendMessage(new MessageBuilder(content).setEmbeds(embedBuilder.build()).build()).complete();
+            Logger.flow("[STATUS-CHANGE] Queuing status change message into " + managedTextChannel.getTextChannel() + " (" + getName() + ")");
+            MessageSender.sendMessage(new MessageBuilder(content).setEmbeds(embedBuilder.build()).build(), managedTextChannel.getTextChannel(), UpdateType.SERVER_STATUS);
         }
     }
 
     public void processMayuTweet(MayuTweet mayuTweet) {
         if (!twitterEnabled) {
+            return;
+        }
+
+        if (!mayuTweet.doesMatchTwitterUsers(twitterFollowedAccounts)) {
             return;
         }
 
@@ -306,10 +320,18 @@ public class NotificationChannel {
             return;
         }
 
-        if (!twitterFancyEmbeds) {
-            managedTextChannel.getTextChannel().sendMessage(mayuTweet.getTweetUrl()).complete();
-        } else {
-            managedTextChannel.getTextChannel().sendMessage(mayuTweet.getMessage()).complete();
+        Logger.flow("[TWITTER] Queuing Twitter message into " + managedTextChannel.getTextChannel() + " (" + getName() + "); Tweet id: " + mayuTweet.getTweetId());
+
+        try {
+            if (!twitterFancyEmbeds) {
+                MessageSender.sendMessage(new MessageBuilder(mayuTweet.getTweetUrl()).build(), managedTextChannel.getTextChannel(), UpdateType.TWITTER);
+            } else {
+                MessageSender.sendMessage(mayuTweet.getMessage(), managedTextChannel.getTextChannel(), UpdateType.TWITTER);
+            }
+        } catch (Exception exception) {
+            Logger.throwing(exception);
+
+            Logger.warn("There was an exception while sending tweet to " + managedTextChannel.getTextChannel() + " (" + getName() + ")!");
         }
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 public class PermissionUtils {
 
     private static final Permission[] requiredPermissions = new Permission[]{
-            Permission.MESSAGE_WRITE,
+            Permission.MESSAGE_SEND,
             Permission.MESSAGE_EMBED_LINKS,
             Permission.MESSAGE_EXT_EMOJI,
             Permission.MESSAGE_HISTORY,

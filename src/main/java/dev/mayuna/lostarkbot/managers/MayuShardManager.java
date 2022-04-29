@@ -18,7 +18,7 @@ public class MayuShardManager {
     }
 
     public void waitOnAll() throws InterruptedException {
-        Logger.info("Waiting till all shards are connected...");
+        Logger.info("[SHARD-MANAGER] Waiting till all shards are connected...");
 
         int counter = 0;
         long start = System.currentTimeMillis();
@@ -37,7 +37,7 @@ public class MayuShardManager {
 
                 double timeRemaining = notConnectedShards * timePerShard;
 
-                Logger.info("Waiting on " + getShardsWithoutStatus(JDA.Status.CONNECTED).size() + " shards... ETA: " + Utils.getTimerWithoutMillis((long) Math.ceil(timeRemaining)));
+                Logger.info("[SHARD-MANAGER] Waiting on " + getShardsWithoutStatus(JDA.Status.CONNECTED).size() + " shards... ETA: " + Utils.getTimerWithoutMillis((long) Math.ceil(timeRemaining)));
 
                 counter = -1;
             }
@@ -46,7 +46,7 @@ public class MayuShardManager {
             Thread.sleep(1000);
         } while (!areAllShardsConnected());
 
-        Logger.success("All shards are connected. Proceeding...");
+        Logger.success("[SHARD-MANAGER] All shards are connected. Proceeding...");
     }
 
     public void onGatewayPing(GatewayPingEvent event) {
