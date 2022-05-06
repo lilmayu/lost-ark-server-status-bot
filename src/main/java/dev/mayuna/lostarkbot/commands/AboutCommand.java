@@ -5,8 +5,8 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.config.Config;
-import dev.mayuna.mayusjdautils.utils.DiscordUtils;
-import dev.mayuna.mayuslibrary.utils.ArrayUtils;
+import dev.mayuna.mayusjdautils.util.DiscordUtils;
+import dev.mayuna.mayuslibrary.util.ArrayUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 public class AboutCommand extends SlashCommand {

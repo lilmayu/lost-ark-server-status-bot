@@ -1,7 +1,7 @@
 package dev.mayuna.lostarkbot.util;
 
-import dev.mayuna.mayusjdautils.utils.MessageInfo;
-import dev.mayuna.mayuslibrary.utils.ArrayUtils;
+import dev.mayuna.mayusjdautils.util.MessageInfo;
+import dev.mayuna.mayuslibrary.util.ArrayUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
@@ -54,6 +54,9 @@ public class PermissionUtils {
         interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Bot does not have required permission(s): " + missingPermissionsString).build()).queue();
     }
 
+    /**
+     * Returns true if there are missing permissions
+     */
     public static boolean checkPermissionsAndSendIfMissing(TextChannel textChannel, InteractionHook interactionHook) {
         List<Permission> missingPermissions = getMissingPermissions(textChannel.getGuild().getSelfMember(), textChannel);
 

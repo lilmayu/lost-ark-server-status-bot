@@ -16,9 +16,9 @@ import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
-import dev.mayuna.mayusjdautils.utils.DiscordUtils;
-import dev.mayuna.mayuslibrary.utils.ArrayUtils;
-import dev.mayuna.mayuslibrary.utils.StringUtils;
+import dev.mayuna.mayusjdautils.util.DiscordUtils;
+import dev.mayuna.mayuslibrary.util.ArrayUtils;
+import dev.mayuna.mayuslibrary.util.StringUtils;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -112,7 +112,7 @@ public class Utils {
      *
      * @return Null if server does not exist
      */
-    public static String doesServerExist(String serverName) {
+    public static String getCorrectServerName(String serverName) {
         for (LostArkServer server : ServerDashboardManager.getLostArkServersCache().getServers()) {
             if (server.getName().equalsIgnoreCase(serverName)) {
                 return server.getName();
@@ -182,13 +182,20 @@ public class Utils {
         return optionData;
     }
 
+    public static OptionData getShowHideArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "action", "Action", true);
+        optionData.addChoice("Show", "show");
+        optionData.addChoice("Hide", "hide");
+        return optionData;
+    }
+
     public static OptionData getStatusArgument() {
         OptionData optionData = new OptionData(OptionType.STRING, "status", "Status", true);
         for (ServerStatus serverStatus : ServerStatus.values()) {
             if (serverStatus == ServerStatus.GOOD) {
                 optionData.addChoice("Online", serverStatus.name());
             } else {
-                optionData.addChoice(StringUtils.prettyString(serverStatus.name()), serverStatus.name());
+                optionData.addChoice(StringUtils.prettyStringFirstLetter(serverStatus.name()), serverStatus.name());
             }
         }
         return optionData;
@@ -420,5 +427,41 @@ public class Utils {
         }
 
         return unfollowedUsers;
+    }
+
+    public static String makeHorizontalStringList(List<?> objects, String noValuesMessage) {
+        String string = "";
+
+        if (objects == null || objects.isEmpty()) {
+            return noValuesMessage;
+        }
+
+        for (Object object : objects) {
+            string += "`" + object.toString() + "`";
+
+            if (!ArrayUtils.isLast(object, objects.toArray())) {
+                string += ", ";
+            }
+        }
+
+        return string;
+    }
+
+    public static String makeVerticalStringList(List<?> objects, String noValuesMessage) {
+        String string = "";
+
+        if (objects == null || objects.isEmpty()) {
+            return noValuesMessage;
+        }
+
+        for (Object object : objects) {
+            string += "`" + object.toString() + "`";
+
+            if (!ArrayUtils.isLast(object, objects.toArray())) {
+                string += "\n";
+            }
+        }
+
+        return string;
     }
 }

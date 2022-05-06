@@ -9,8 +9,8 @@ import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServer;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
-import dev.mayuna.mayuslibrary.console.colors.Color;
-import dev.mayuna.mayuslibrary.console.colors.Colors;
+import dev.mayuna.mayuslibrary.graphics.console.colors.Color;
+import dev.mayuna.mayuslibrary.graphics.console.colors.Colors;
 
 public class LostArkConsoleCommand extends AbstractConsoleCommand {
 

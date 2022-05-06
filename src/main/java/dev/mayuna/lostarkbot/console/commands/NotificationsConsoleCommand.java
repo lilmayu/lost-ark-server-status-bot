@@ -166,7 +166,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                 }
 
                 case "fake-server-status" -> {
-                    String serverName = Utils.doesServerExist(argumentParser.getArgumentAtIndex(1).getValue());
+                    String serverName = Utils.getCorrectServerName(argumentParser.getArgumentAtIndex(1).getValue());
 
                     if (serverName == null) {
                         Logger.error("This server does not exist!");

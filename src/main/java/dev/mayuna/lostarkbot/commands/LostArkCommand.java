@@ -9,7 +9,7 @@ import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.mayusjdautils.utils.MessageInfo;
+import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -259,7 +259,7 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            String correctServerName = Utils.doesServerExist(serverOption.getAsString());
+            String correctServerName = Utils.getCorrectServerName(serverOption.getAsString());
 
             if (correctServerName != null) {
                 ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
@@ -362,7 +362,7 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            String correctRegion = LostArkRegion.exists(regionOption.getAsString());
+            String correctRegion = LostArkRegion.getCorrect(regionOption.getAsString());
 
             if (correctRegion != null) {
                 ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);
@@ -421,7 +421,7 @@ public class LostArkCommand extends SlashCommand {
                 return;
             }
 
-            String correctRegion = LostArkRegion.exists(regionOption.getAsString());
+            String correctRegion = LostArkRegion.getCorrect(regionOption.getAsString());
 
             if (correctRegion != null) {
                 ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(channel);

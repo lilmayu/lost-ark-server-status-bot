@@ -16,7 +16,7 @@ public enum LostArkRegion {
         this.formattedName = formattedName;
     }
 
-    public static String exists(String string) {
+    public static String getCorrect(String string) {
         for (LostArkRegion region : values()) {
             if (region.getFormattedName().equalsIgnoreCase(string) || region.name().equals(string)) {
                 return region.name();

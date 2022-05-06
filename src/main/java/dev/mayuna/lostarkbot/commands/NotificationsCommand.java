@@ -11,9 +11,9 @@ import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.interactive.InteractiveMessage;
 import dev.mayuna.mayusjdautils.interactive.objects.Interaction;
-import dev.mayuna.mayusjdautils.utils.DiscordUtils;
-import dev.mayuna.mayusjdautils.utils.MessageInfo;
-import dev.mayuna.mayuslibrary.utils.StringUtils;
+import dev.mayuna.mayusjdautils.util.DiscordUtils;
+import dev.mayuna.mayusjdautils.util.MessageInfo;
+import dev.mayuna.mayuslibrary.util.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -227,7 +227,7 @@ public class NotificationsCommand extends SlashCommand {
                     if (statusWhitelist.equals("GOOD")) {
                         statusWhitelist += "Online";
                     } else {
-                        statusWhitelist += StringUtils.prettyString(status);
+                        statusWhitelist += StringUtils.prettyStringFirstLetter(status);
                     }
 
                     if (!Utils.isLast(notificationChannel.getStatusWhitelist(), status)) {
@@ -817,7 +817,7 @@ public class NotificationsCommand extends SlashCommand {
                 return;
             }
 
-            String correctServerName = Utils.doesServerExist(serverOption.getAsString());
+            String correctServerName = Utils.getCorrectServerName(serverOption.getAsString());
 
             if (correctServerName == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Server with name `" + serverOption.getAsString() + "` does not exist!").build()).queue();
@@ -894,9 +894,9 @@ public class NotificationsCommand extends SlashCommand {
                 return;
             }
 
-            String correctRegion = LostArkRegion.exists(regionOption.getAsString());
+            String correctRegion = LostArkRegion.getCorrect(regionOption.getAsString());
 
-            if (LostArkRegion.exists(regionOption.getAsString()) == null) {
+            if (LostArkRegion.getCorrect(regionOption.getAsString()) == null) {
                 hook.editOriginalEmbeds(MessageInfo.errorEmbed("Region with name `" + regionOption.getAsString() + "` does not exist!").build()).queue();
                 return;
             }

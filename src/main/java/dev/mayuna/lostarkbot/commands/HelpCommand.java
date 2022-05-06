@@ -4,7 +4,7 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.mayusjdautils.interactive.InteractiveMessage;
 import dev.mayuna.mayusjdautils.interactive.objects.Interaction;
-import dev.mayuna.mayusjdautils.utils.DiscordUtils;
+import dev.mayuna.mayusjdautils.util.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
