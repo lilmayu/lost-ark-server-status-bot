@@ -365,13 +365,33 @@ public class NotificationChannel {
 
         Logger.flow("[TWITTER] Queuing Twitter message into " + managedTextChannel.getTextChannel() + " (" + getName() + "); Tweet id: " + mayuTweet.getTweetId());
 
+        String content = "";
+        List<String> roleIdsToRemove = new LinkedList<>();
+        for (String roleId : twitterPingRolesIds) {
+            Role role = managedTextChannel.getGuild().getRoleById(roleId);
+
+            if (role != null) {
+                if ((content + role.getAsMention() + "\n\n" + mayuTweet.getTweetUrl()).length() > 2000) {
+                    continue;
+                }
+
+                content += role.getAsMention() + " ";
+            } else {
+                roleIdsToRemove.add(roleId);
+            }
+        }
+        twitterPingRolesIds.removeAll(roleIdsToRemove);
+
         try {
             if (!twitterFancyEmbeds) {
-                MessageSender.sendMessage(new MessageBuilder(mayuTweet.getTweetUrl()).build(), managedTextChannel.getTextChannel(), UpdateType.TWITTER);
+                MessageSender.sendMessage(new MessageBuilder(content + "\n\n" + mayuTweet.getTweetUrl()).build(), managedTextChannel.getTextChannel(), UpdateType.TWITTER);
             } else {
-                MessageSender.sendMessage(mayuTweet.getMessage(), managedTextChannel.getTextChannel(), UpdateType.TWITTER);
+                MessageBuilder messageBuilder = mayuTweet.getMessageBuilder();
+                messageBuilder.setContent(content);
+
+                MessageSender.sendMessage(messageBuilder.build(), managedTextChannel.getTextChannel(), UpdateType.TWITTER);
             }
-        } catch (Exception exception) {
+        } catch (Exception exception) { // todo: tady toto tamto
             Logger.throwing(exception);
 
             Logger.warn("There was an exception while sending tweet to " + managedTextChannel.getTextChannel() + " (" + getName() + ")!");

@@ -2,9 +2,8 @@ package dev.mayuna.lostarkbot.objects.other;
 
 import dev.mayuna.lostarkbot.util.EmbedUtils;
 import dev.mayuna.lostarkbot.util.StringUtils;
-import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.MessageBuilder;
 import twitter4j.MediaEntity;
 import twitter4j.Status;
 
@@ -14,7 +13,7 @@ import java.util.List;
 public class MayuTweet {
 
     private final @Getter Status status;
-    private @Getter Message message;
+    private @Getter MessageBuilder messageBuilder;
 
     public MayuTweet(Status status) {
         this.status = status;
@@ -127,6 +126,6 @@ public class MayuTweet {
     }
 
     public void preProcessMessage() {
-        message = EmbedUtils.createTweetMessage(this).build();
+        messageBuilder = EmbedUtils.createTweetMessage(this);
     }
 }

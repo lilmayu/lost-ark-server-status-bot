@@ -29,6 +29,6 @@ public class Constants {
     };
 
     public static final TwitterUser[] TWITTER_USERS_TEST = new TwitterUser[]{
-            new TwitterUser("uwuowo___", 1067457730439462912L)
+            new TwitterUser("asdkhsabdjhqa", 1067457730439462912L)
     };
 }
