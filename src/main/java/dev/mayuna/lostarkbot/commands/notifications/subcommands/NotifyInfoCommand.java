@@ -46,9 +46,9 @@ public class NotifyInfoCommand extends SlashCommand {
 
         String description = "";
         description += "This channel is marked as Notification Channel.\n\n**Technical stuff**\n";
-        description += "Guild id: `" + textChannel.getGuild().getId() + "`\n";
-        description += "Message Channel id: `" + textChannel.getId() + "`\n";
-        description += "NotificationChannel id: `" + notificationChannel.getName() + "`";
+        description += "Guild ID: `" + textChannel.getGuild().getId() + "`\n";
+        description += "Message Channel ID: `" + textChannel.getId() + "`\n";
+        description += "NotificationChannel UUID: `" + notificationChannel.getName() + "`";
         embedBuilder.setDescription(description);
 
         String newsCategories = "";
@@ -79,7 +79,7 @@ public class NotifyInfoCommand extends SlashCommand {
 
         String regions = "";
         if (notificationChannel.getRegions().isEmpty()) {
-            regions = "No Region status changes enabled";
+            regions = "No specific Region status changes enabled";
         } else {
             for (LostArkRegion lostArkRegion : notificationChannel.getRegions()) {
                 regions += lostArkRegion.getFormattedName();
@@ -92,7 +92,7 @@ public class NotifyInfoCommand extends SlashCommand {
 
         String servers = "";
         if (notificationChannel.getServers().isEmpty()) {
-            servers = "No Region status changes enabled";
+            servers = "No specific Server status changes enabled";
         } else {
             for (String serverName : notificationChannel.getServers()) {
                 servers += serverName;
