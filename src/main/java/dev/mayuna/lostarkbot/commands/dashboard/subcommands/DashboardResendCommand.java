@@ -44,7 +44,7 @@ public class DashboardResendCommand extends SlashCommand {
             interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Server dashboard has been resent.").build()).queue();
         } else {
             interactionHook.editOriginalEmbeds(MessageInfo.warningEmbed(
-                            "There was a problem updating the Server dashboard.\n\nPlease, try `/dashboard update`. You can also recreate current Server dashboard with `/dashboard remove` and `/dashboard create` commands.")
+                            "There was a problem updating the Server dashboard.\n\nPlease, try `/dashboard force-update`. You can also recreate current Server dashboard with `/dashboard remove` and `/dashboard create` commands.")
                                                        .build()).queue();
         }
     }

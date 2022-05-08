@@ -3,9 +3,8 @@ package dev.mayuna.lostarkbot;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import dev.mayuna.lostarkbot.commands.AboutCommand;
 import dev.mayuna.lostarkbot.commands.HelpCommand;
-import dev.mayuna.lostarkbot.commands.LostArkCommand;
-import dev.mayuna.lostarkbot.commands.NotificationsCommand;
 import dev.mayuna.lostarkbot.commands.dashboard.DashboardRootCommand;
+import dev.mayuna.lostarkbot.commands.notifications.NotifyRootCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.console.commands.*;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
@@ -14,7 +13,6 @@ import dev.mayuna.lostarkbot.listeners.ShardWatcher;
 import dev.mayuna.lostarkbot.managers.*;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.config.Config;
-import dev.mayuna.lostarkbot.util.config.LegacyConfig;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
 import dev.mayuna.mayusjdautils.util.DiscordUtils;
@@ -66,7 +64,6 @@ public class Main {
         loadLibrarySettings();
 
         Logger.info("Loading config...");
-        LegacyConfig.load();
         if (!Config.load()) {
             Logger.fatal("There was fatal error while loading Config! Cannot proceed.");
             System.exit(-1);
@@ -145,9 +142,8 @@ public class Main {
 
     private static void loadCommands() {
         client.addSlashCommands(new AboutCommand(),
-                                new LostArkCommand(),
                                 new HelpCommand(),
-                                new NotificationsCommand(),
+                                new NotifyRootCommand(),
                                 new DashboardRootCommand()
         );
     }

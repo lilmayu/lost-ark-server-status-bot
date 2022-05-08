@@ -9,17 +9,20 @@ public class DashboardRootCommand extends SlashCommand {
 
     public DashboardRootCommand() {
         this.name = "dashboard";
-        this.help = "Root command of Lost Ark's server dashboard system";
+        this.help = "Root command of Server dashboard system";
 
         this.children = new SlashCommand[]{
-                new DashboardCreateCommand(), // /dashboard create
-                new DashboardRemoveCommand(), // /dashboard remove
-                new DashboardInfoCommand(),   // /dashboard info
-                new DashboardForceUpdateCommand(), // /dashboard force-update
+                new DashboardCreateCommand(),
+                new DashboardRemoveCommand(),
+                new DashboardInfoCommand(),
+                new DashboardForceUpdateCommand(),
                 new DashboardResendCommand(),
                 new DashboardFavoriteCommand(),
                 new DashboardRegionCommand(),
-                new DashboardAllRegionsCommand()
+                new DashboardAllRegionsCommand(),
+                new DashboardLanguageCommands.DashboardLanguageListCommand(),
+                new DashboardLanguageCommands.DashboardLanguageCommand(),
+                new DashboardSettingsCommand()
         };
     }
 

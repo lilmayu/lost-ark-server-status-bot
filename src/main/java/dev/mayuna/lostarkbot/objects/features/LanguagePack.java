@@ -28,7 +28,6 @@ public class LanguagePack {
     private @Getter @Setter @Expose String favorite;
 
     private @Getter @Setter @Expose String noServers; // No servers available. Probably bug or some kind of maintenance.
-    private @Getter @Setter @Expose String notFound; // Not found
     private @Getter @Setter @Expose String updateFooter;
 
     public String getTranslatedRegionName(LostArkRegion region) {
@@ -73,7 +72,6 @@ public class LanguagePack {
                           westNorthAmerica,
                           favorite,
                           noServers,
-                          notFound,
                           updateFooter
         ).allMatch(Objects::isNull);
     }
@@ -96,7 +94,6 @@ public class LanguagePack {
                 ", westNorthAmerica='" + westNorthAmerica + '\'' +
                 ", favorite='" + favorite + '\'' +
                 ", noServers='" + noServers + '\'' +
-                ", notFound='" + notFound + '\'' +
                 ", updateFooter='" + updateFooter + '\'' +
                 '}';
     }

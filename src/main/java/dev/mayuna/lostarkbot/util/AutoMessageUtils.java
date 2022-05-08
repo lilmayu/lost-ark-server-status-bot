@@ -31,7 +31,10 @@ public class AutoMessageUtils {
         return true;
     }
 
-    public static boolean allCheckNotificationChannel(TextChannel textChannel, InteractionHook interactionHook) {
+    /**
+     * Returns true if everything is alright
+     */
+    public static boolean isEverythingAlrightNotificationChannel(TextChannel textChannel, InteractionHook interactionHook) {
         if (!isCorrectChannelType(textChannel, interactionHook)) {
             return false;
         }
@@ -124,5 +127,9 @@ public class AutoMessageUtils {
         }
 
         return optionMapping;
+    }
+
+    public static void sendInvalidArgumentMessage(InteractionHook interactionHook, String name) {
+        interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Invalid `" + name + "` argument.").build()).queue();
     }
 }

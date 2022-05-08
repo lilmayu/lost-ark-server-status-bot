@@ -10,6 +10,7 @@ import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.managers.TwitterManager;
 import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.other.StatusWhitelistObject;
 import dev.mayuna.lostarkbot.objects.other.TwitterUser;
 import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
@@ -18,7 +19,6 @@ import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.util.DiscordUtils;
 import dev.mayuna.mayuslibrary.util.ArrayUtils;
-import dev.mayuna.mayuslibrary.util.StringUtils;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -195,9 +195,16 @@ public class Utils {
             if (serverStatus == ServerStatus.GOOD) {
                 optionData.addChoice("Online", serverStatus.name());
             } else {
-                optionData.addChoice(StringUtils.prettyStringFirstLetter(serverStatus.name()), serverStatus.name());
+                optionData.addChoice(Utils.prettyString(serverStatus.name()), serverStatus.name());
             }
         }
+        return optionData;
+    }
+
+    public static OptionData getChangedFromToStatusArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "type", "Type", true);
+        optionData.addChoice("Changed from", "from");
+        optionData.addChoice("Changed to", "to");
         return optionData;
     }
 
@@ -238,8 +245,9 @@ public class Utils {
         optionData.addChoice("Status change Server", "status_server");
         optionData.addChoice("Status change Region", "status_region");
         optionData.addChoice("Status whitelist", "status_whitelist");
-        optionData.addChoice("Ping roles", "ping_roles");
-        optionData.addChoice("Twitter Filter", "twitter_filter");
+        optionData.addChoice("Status change ping roles", "status_ping_roles");
+        optionData.addChoice("Twitter filter", "twitter_filter");
+        optionData.addChoice("Twitter ping roles", "twitter_ping_roles");
         return optionData;
     }
 
@@ -347,32 +355,55 @@ public class Utils {
         }
     }
 
-    public static boolean isOnWhitelist(LostArkServersChange.Difference difference, List<String> statusWhitelist) {
-        if (statusWhitelist.isEmpty()) {
+    public static boolean isOnWhitelist(LostArkServersChange.Difference difference, List<StatusWhitelistObject> statusWhitelistObjects) {
+        if (statusWhitelistObjects.isEmpty()) {
             return true;
         }
 
-        if (difference.getNewStatus() == null) {
-            if (statusWhitelist.contains("OFFLINE")) {
-                return true;
+        List<String> statusesFrom = new LinkedList<>();
+        List<String> statusesTo = new LinkedList<>();
+
+        for (StatusWhitelistObject statusWhitelistObject : statusWhitelistObjects) {
+            switch (statusWhitelistObject.getType()) {
+                case FROM -> {
+                    statusesFrom.add(statusWhitelistObject.getStatus());
+                }
+                case TO -> {
+                    statusesTo.add(statusWhitelistObject.getStatus());
+                }
             }
         }
 
-        if (difference.getOldStatus() == null) {
-            if (statusWhitelist.contains("OFFLINE")) {
-                return true;
-            }
+        String oldServerStatus = String.valueOf(difference.getOldStatus());
+        String newServerStatus = String.valueOf(difference.getNewStatus());
+
+        if (oldServerStatus.equals("null")) {
+            oldServerStatus = "OFFLINE";
         }
 
-        for (ServerStatus serverStatus : ServerStatus.values()) {
-            if (serverStatus == difference.getNewStatus()) {
-                if (statusWhitelist.contains(serverStatus.name())) {
+        if (newServerStatus.equals("null")) {
+            newServerStatus = "OFFLINE";
+        }
+
+        if (statusesTo.isEmpty()) {
+            for (String status : statusesFrom) {
+                if (oldServerStatus.equalsIgnoreCase(status)) {
                     return true;
                 }
             }
+        }
 
-            if (serverStatus == difference.getOldStatus()) {
-                if (statusWhitelist.contains(serverStatus.name())) {
+        if (statusesFrom.isEmpty()) {
+            for (String status : statusesTo) {
+                if (newServerStatus.equalsIgnoreCase(status)) {
+                    return true;
+                }
+            }
+        }
+
+        for (String oldStatus : statusesFrom) {
+            for (String newStatus : statusesTo) {
+                if (oldStatus.equalsIgnoreCase(oldServerStatus) && newStatus.equalsIgnoreCase(newServerStatus)) {
                     return true;
                 }
             }
@@ -463,5 +494,20 @@ public class Utils {
         }
 
         return string;
+    }
+
+    public static String prettyString(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
+    }
+
+    public static List<StatusWhitelistObject> getStatusWhitelistObjectsByType(List<StatusWhitelistObject> statusWhitelistObjects, StatusWhitelistObject.Type type) {
+        List<StatusWhitelistObject> returnValue = new LinkedList<>();
+        for (StatusWhitelistObject statusWhitelistObject : statusWhitelistObjects) {
+            if (statusWhitelistObject.getType() == type) {
+                returnValue.add(statusWhitelistObject);
+            }
+        }
+
+        return returnValue;
     }
 }

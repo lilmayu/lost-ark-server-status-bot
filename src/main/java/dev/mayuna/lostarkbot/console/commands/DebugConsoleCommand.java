@@ -43,6 +43,13 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
 
                     Logger.info("Hash of '" + toHash + "' is '" + HashUtils.hashMD5(toHash));
                 }
+
+                case "data" -> {
+                    Logger.info("=== Debug - Data ===");
+                    Logger.info("GuildData: " + GuildDataManager.countGuildDataSize());
+                    Logger.info("Dashboards: " + GuildDataManager.countAllDashboards());
+                    Logger.info("Notifications ch.: " + GuildDataManager.countAllNotificationChannels());
+                }
             }
 
             return CommandResult.SUCCESS;
@@ -53,11 +60,6 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
         Logger.info("== Discord ==");
         Logger.info("Shards: " + Main.getMayuShardManager().get().getShardsTotal());
         Logger.info("JDA Guilds: " + Main.getMayuShardManager().get().getGuilds().size());
-
-        Logger.info("== Data ==");
-        Logger.info("GuildData: " + GuildDataManager.countGuildDataSize());
-        Logger.info("Dashboards: " + GuildDataManager.countAllDashboards());
-        Logger.info("Notifications ch.: " + GuildDataManager.countAllNotificationChannels());
 
         Logger.info("== Other ==");
         Logger.info("In-game players: " + ServerDashboardManager.getOnlinePlayersCache());
@@ -76,6 +78,9 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
                 Logger.info("> " + task.shardId() + " | " + task.updateType() + " | Running for " + Utils.getTimerWithoutMillis(task.getElapsedTime()));
             }
         }
+
+        Logger.info("");
+        Logger.info("Type debug data for data-related debug");
 
         return CommandResult.SUCCESS;
     }

@@ -3,6 +3,7 @@ package dev.mayuna.lostarkbot.commands.dashboard.subcommands;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
+import dev.mayuna.lostarkbot.objects.features.LanguagePack;
 import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
@@ -32,7 +33,10 @@ public class DashboardInfoCommand extends SlashCommand {
         long messageId = dashboard.getManagedGuildMessage().getRawGuildID();
 
         String description = "";
-        description += "**Hidden regions**\n";
+        LanguagePack languagePack = dashboard.getLanguage();
+        description += "Current Language: **" + languagePack.getLangName() + "** (`" + languagePack.getLangCode() + "`)\n";
+
+        description += "\n**Hidden regions**\n";
         description += Utils.makeVerticalStringList(dashboard.getHiddenRegions(), "There are no hidden regions.") + "\n";
 
         description += "\n**Favorite servers**\n";

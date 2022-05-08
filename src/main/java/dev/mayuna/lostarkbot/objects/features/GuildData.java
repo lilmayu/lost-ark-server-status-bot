@@ -380,6 +380,7 @@ public class GuildData extends ManagedGuild {
 
                 try {
                     notificationChannel.getManagedTextChannel().updateEntries(Main.getMayuShardManager().get());
+                    notificationChannel.processOldStatusWhitelist();
 
                     Logger.flow("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
                 } catch (PermissionException | ErrorResponseException | InvalidTextChannelIDException exception) {

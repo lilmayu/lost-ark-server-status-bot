@@ -5,12 +5,18 @@
             <PatternLayout disableAnsi="false" pattern="[%d{${LOG_DATEFORMAT_PATTERN:-HH:mm:ss.SSS}}][%style{%11.-11t}] %highlight{%5.-5p: %m}{SUCCESS=green, FATAL=Blink black BG_Red, ERROR=red, WARN=yellow bold, INFO=white, DEBUG=black bright, MDEBUG=black bright, TRACE=blue}%n"/>
         </Console>
         <RollingFile name="file_logging" fileName="logs/latest.log"
-                     filePattern="logs/$${date:yyyy-MM}/%d{yyyy-MM-dd_HH}-%i.log.gz">
+                     filePattern="logs/%d{yyyy-MM-dd_HH}-%i.log.gz">
             <PatternLayout disableAnsi="true" pattern="[%d{${LOG_DATEFORMAT_PATTERN:-dd-MM-yyyy}}][%d{${LOG_DATEFORMAT_PATTERN:-HH:mm:ss.SSS}}][%t] %5p: %m%n"/>
             <Policies>
-                <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
                 <OnStartupTriggeringPolicy/>
             </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="./logs/" maxDepth="2">
+                    <IfFileName glob="*.log.gz">
+                        <IfLastModified age="P7D"/>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
     </Appenders>
     <Loggers>

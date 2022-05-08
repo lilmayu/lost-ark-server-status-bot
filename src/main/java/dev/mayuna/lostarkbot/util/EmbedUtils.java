@@ -112,7 +112,7 @@ public class EmbedUtils {
                 if (serverStatus != null) {
                     toAppend = Utils.getServerLine(serverName, serverStatus) + "\n";
                 } else {
-                    toAppend = Constants.OFFLINE_EMOTE + " " + serverName + " (" + languagePack.getNotFound() + ")\n";
+                    toAppend = Constants.OFFLINE_EMOTE + " " + serverName + "\n";
                 }
 
                 if (fieldValue.length() + toAppend.length() < 1024) {

@@ -51,11 +51,13 @@ public class DashboardAllRegionsCommand extends SlashCommand {
             case "show" -> {
                 dashboard.showAllRegions();
                 dashboard.update();
+                dashboard.save();
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully showed all regions!").build()).queue();
             }
             case "hide" -> {
                 dashboard.hideAllRegions();
                 dashboard.update();
+                dashboard.save();
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully hidden all regions!").build()).queue();
             }
         }

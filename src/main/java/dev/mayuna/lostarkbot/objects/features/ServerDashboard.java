@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
+import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.util.*;
@@ -93,7 +94,7 @@ public class ServerDashboard {
         String correctRegionName = LostArkRegion.getCorrect(region);
 
         if (correctRegionName != null) {
-            if (hiddenRegions.remove(region)) {
+            if (hiddenRegions.remove(correctRegionName)) {
                 return true;
             }
         }
@@ -110,6 +111,17 @@ public class ServerDashboard {
         for (LostArkRegion region : LostArkRegion.values()) {
             hiddenRegions.add(region.name());
         }
+    }
+
+    public LanguagePack getLanguage() {
+        LanguagePack languagePack = LanguageManager.getLanguageByCode(langCode);
+
+        if (languagePack == null) {
+            languagePack = LanguageManager.getDefaultLanguage();
+            langCode = languagePack.getLangCode();;
+        }
+
+        return languagePack;
     }
 
 
