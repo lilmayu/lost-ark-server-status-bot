@@ -15,7 +15,7 @@ import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
 import dev.mayuna.mayusjdautils.managed.ManagedGuild;
 import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
 import dev.mayuna.mayusjdautils.managed.ManagedTextChannel;
-import dev.mayuna.mayusjdautils.utils.RestActionMethod;
+import dev.mayuna.mayusjdautils.util.RestActionMethod;
 import lombok.Getter;
 import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
@@ -380,6 +380,7 @@ public class GuildData extends ManagedGuild {
 
                 try {
                     notificationChannel.getManagedTextChannel().updateEntries(Main.getMayuShardManager().get());
+                    notificationChannel.processOldStatusWhitelist();
 
                     Logger.flow("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
                 } catch (PermissionException | ErrorResponseException | InvalidTextChannelIDException exception) {

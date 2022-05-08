@@ -1,18 +1,17 @@
 package dev.mayuna.lostarkbot.objects.features;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
-import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
-import dev.mayuna.lostarkbot.objects.other.MayuTweet;
-import dev.mayuna.lostarkbot.objects.other.Notifications;
+import dev.mayuna.lostarkbot.objects.other.*;
 import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayusjdautils.managed.ManagedTextChannel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -49,8 +48,10 @@ public class NotificationChannel {
     private @Getter @Expose List<LostArkRegion> regions = new ArrayList<>();
 
     // Status server changes
-    private @Getter @Expose List<String> statusWhitelist = new ArrayList<>(); // Possible values: ONLINE, BUSY, FULL, MAINTENANCE, OFFLINE
-    private @Getter @Expose List<String> roleIds = new ArrayList<>();
+    private @Getter @Expose(serialize = false) List<String> statusWhitelist = new ArrayList<>(); // Possible values: GOOD, BUSY, FULL, MAINTENANCE, OFFLINE
+    private @Getter @Expose List<StatusWhitelistObject> statusWhitelistObjects = new LinkedList<>();
+    private @Getter @Expose @SerializedName(value = "statusPingRolesIds", alternate = {"roleIds"}) List<String> statusPingRolesIds = new ArrayList<>();
+    private @Getter @Expose List<String> twitterPingRolesIds = new ArrayList<>();
 
     public NotificationChannel() {
     }
@@ -61,6 +62,19 @@ public class NotificationChannel {
 
     public String getName() {
         return managedTextChannel.getName();
+    }
+
+    public void processOldStatusWhitelist() {
+        if (statusWhitelist.isEmpty()) {
+            return;
+        }
+
+        Logger.debug("Processing old status whitelist...");
+
+        for (String status : statusWhitelist) {
+            addToWhitelist(new StatusWhitelistObject(StatusWhitelistObject.Type.FROM, status));
+            addToWhitelist(new StatusWhitelistObject(StatusWhitelistObject.Type.TO, status));
+        }
     }
 
     public void save() {
@@ -120,36 +134,65 @@ public class NotificationChannel {
         return regions.remove(lostArkRegion);
     }
 
-    public boolean addToWhitelist(String status) {
-        if (!statusWhitelist.contains(status)) {
-            statusWhitelist.add(status);
+    public boolean addToWhitelist(StatusWhitelistObject statusWhitelistObject) {
+        String status = statusWhitelistObject.getStatus();
+
+        try {
+            ServerStatus.valueOf(status);
+        } catch (Exception ignored) {
+            if (!status.equalsIgnoreCase("OFFLINE")) {
+                return false;
+            }
+        }
+
+        if (!statusWhitelistObjects.contains(statusWhitelistObject)) {
+            statusWhitelistObjects.add(statusWhitelistObject);
             return true;
         }
 
         return false;
     }
 
-    public boolean removeFromWhitelist(String status) {
-        return statusWhitelist.remove(status);
+    public boolean removeFromWhitelist(StatusWhitelistObject statusWhitelistObject) {
+        return statusWhitelistObjects.remove(statusWhitelistObject);
     }
 
-    public boolean addToRoleIds(Role role) {
+    public boolean addToStatusPingRoleIds(Role role) {
         String roleId = role.getId();
 
-        if (!roleIds.contains(roleId)) {
-            roleIds.add(roleId);
+        if (!statusPingRolesIds.contains(roleId)) {
+            statusPingRolesIds.add(roleId);
             return true;
         }
 
         return false;
     }
 
-    public boolean removeFromRoleIds(String roleId) {
-        return roleIds.remove(roleId);
+    public boolean removeFromStatusPingRoleIds(String roleId) {
+        return statusPingRolesIds.remove(roleId);
     }
 
-    public boolean removeFromRoleIds(Role role) {
-        return removeFromRoleIds(role.getId());
+    public boolean removeFromStatusPingRoleIds(Role role) {
+        return removeFromStatusPingRoleIds(role.getId());
+    }
+
+    public boolean addToTwitterPingRoleIds(Role role) {
+        String roleId = role.getId();
+
+        if (!twitterPingRolesIds.contains(roleId)) {
+            twitterPingRolesIds.add(roleId);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeFromTwitterPingRoleIds(String roleId) {
+        return twitterPingRolesIds.remove(roleId);
+    }
+
+    public boolean removeFromTwitterPingRoleIds(Role role) {
+        return removeFromTwitterPingRoleIds(role.getId());
     }
 
     public boolean addToTwitterKeywords(String keyword) {
@@ -232,7 +275,7 @@ public class NotificationChannel {
 
         for (LostArkRegion lostArkRegion : getRegions()) {
             lostArkServersChange.getDifferenceForWholeRegion(lostArkRegion).forEach(difference -> {
-                if (Utils.isOnWhitelist(difference, statusWhitelist) && difference != null) {
+                if (Utils.isOnWhitelist(difference, statusWhitelistObjects) && difference != null) {
                     regionDifferences.put(difference, lostArkRegion);
                 }
             });
@@ -248,7 +291,7 @@ public class NotificationChannel {
                 continue;
 
             if (!regionDifferences.containsKey(difference)) {
-                if (Utils.isOnWhitelist(difference, statusWhitelist)) {
+                if (Utils.isOnWhitelist(difference, statusWhitelistObjects)) {
                     serverDifferences.add(difference);
                 }
             }
@@ -257,7 +300,7 @@ public class NotificationChannel {
         String content = "";
 
         List<String> roleIdsToRemove = new LinkedList<>();
-        for (String roleId : roleIds) {
+        for (String roleId : statusPingRolesIds) {
             Role role = managedTextChannel.getGuild().getRoleById(roleId);
 
             if (role != null) {
@@ -270,7 +313,7 @@ public class NotificationChannel {
                 roleIdsToRemove.add(roleId);
             }
         }
-        roleIds.removeAll(roleIdsToRemove);
+        statusPingRolesIds.removeAll(roleIdsToRemove);
 
         List<EmbedBuilder> embedBuilders = EmbedUtils.createEmbeds(regionDifferences, serverDifferences);
 

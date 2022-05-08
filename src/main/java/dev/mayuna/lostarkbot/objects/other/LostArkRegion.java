@@ -1,5 +1,6 @@
 package dev.mayuna.lostarkbot.objects.other;
 
+import dev.mayuna.lostarkbot.util.logging.Logger;
 import lombok.Getter;
 
 public enum LostArkRegion {
@@ -16,10 +17,20 @@ public enum LostArkRegion {
         this.formattedName = formattedName;
     }
 
-    public static String exists(String string) {
+    public static String getCorrect(String string) {
         for (LostArkRegion region : values()) {
-            if (region.getFormattedName().equalsIgnoreCase(string) || region.name().equals(string)) {
+            if (region.getFormattedName().equalsIgnoreCase(string) || region.name().equalsIgnoreCase(string)) {
                 return region.name();
+            }
+        }
+
+        return null;
+    }
+
+    public static String getCorrectFormatted(String string) {
+        for (LostArkRegion region : values()) {
+            if (region.getFormattedName().equalsIgnoreCase(string) || region.name().equalsIgnoreCase(string)) {
+                return region.getFormattedName();
             }
         }
 

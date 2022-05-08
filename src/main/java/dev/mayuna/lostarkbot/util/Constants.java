@@ -11,7 +11,7 @@ public class Constants {
     public static final String LANG_FOLDER = "./lang/";
     public static final String STEAM_API_URL = "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=1599340";
 
-    public static final String VERSION = "2.0beta_29042022a";
+    public static final String VERSION = "2.1beta_08052022a";
 
     public static final String ONLINE_EMOTE = "<:Online:968167180749381692>";
     public static final String BUSY_EMOTE = "<:Busy:968167180992651294>";

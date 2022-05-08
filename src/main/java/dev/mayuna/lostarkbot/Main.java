@@ -3,8 +3,8 @@ package dev.mayuna.lostarkbot;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import dev.mayuna.lostarkbot.commands.AboutCommand;
 import dev.mayuna.lostarkbot.commands.HelpCommand;
-import dev.mayuna.lostarkbot.commands.LostArkCommand;
-import dev.mayuna.lostarkbot.commands.NotificationsCommand;
+import dev.mayuna.lostarkbot.commands.dashboard.DashboardRootCommand;
+import dev.mayuna.lostarkbot.commands.notifications.NotifyRootCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
 import dev.mayuna.lostarkbot.console.commands.*;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
@@ -13,14 +13,14 @@ import dev.mayuna.lostarkbot.listeners.ShardWatcher;
 import dev.mayuna.lostarkbot.managers.*;
 import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.config.Config;
-import dev.mayuna.lostarkbot.util.config.LegacyConfig;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
-import dev.mayuna.mayusjdautils.utils.DiscordUtils;
-import dev.mayuna.mayusjdautils.utils.MessageInfo;
+import dev.mayuna.mayusjdautils.util.DiscordUtils;
+import dev.mayuna.mayusjdautils.util.MessageInfo;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionListener;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 import lombok.Getter;
+import lombok.Setter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -40,6 +40,7 @@ public class Main {
     // Runtime
     private static boolean configLoaded = false;
     private static boolean fullyLoaded = false;
+    private static @Setter boolean stopping = false;
 
     public static void main(String[] args) throws InterruptedException {
         long start = System.currentTimeMillis();
@@ -63,7 +64,6 @@ public class Main {
         loadLibrarySettings();
 
         Logger.info("Loading config...");
-        LegacyConfig.load();
         if (!Config.load()) {
             Logger.fatal("There was fatal error while loading Config! Cannot proceed.");
             System.exit(-1);
@@ -142,9 +142,10 @@ public class Main {
 
     private static void loadCommands() {
         client.addSlashCommands(new AboutCommand(),
-                                new LostArkCommand(),
                                 new HelpCommand(),
-                                new NotificationsCommand());
+                                new NotifyRootCommand(),
+                                new DashboardRootCommand()
+        );
     }
 
     private static void loadConsoleCommands() {
@@ -183,7 +184,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Logger.info("Shutting down...");
 
-            if (fullyLoaded) {
+            if (fullyLoaded && !stopping) {
                 Logger.info("Saving GuildData...");
                 GuildDataManager.saveAll();
             } else {

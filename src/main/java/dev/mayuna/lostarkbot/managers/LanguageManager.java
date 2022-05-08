@@ -104,7 +104,6 @@ public class LanguageManager {
         languagePack.setWestNorthAmerica("West North America");
         languagePack.setFavorite("Favorite");
         languagePack.setNoServers("No servers available. Probably bug or some kind of maintenance.");
-        languagePack.setNotFound("Not found");
         languagePack.setUpdateFooter("This message will be updated every 5 minutes");
 
         return languagePack;

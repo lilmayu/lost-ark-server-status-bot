@@ -48,40 +48,6 @@ public class Config {
         }
     }
 
-    public void loadLegacyConfig() {
-        bot.token = LegacyConfig.getToken();
-        bot.exceptionMessageChannelID = LegacyConfig.getExceptionMessageChannelID();
-        bot.ownerId = LegacyConfig.getOwnerID();
-        bot.botId = LegacyConfig.getBotId();
-        bot.totalShards = LegacyConfig.getTotalShards();
-        bot.totalUpdateThreads = LegacyConfig.getTotalUpdateThreadPool();
-        bot.contributors = LegacyConfig.getContributors();
-
-        urls.unofficialLostArkAPI = LegacyConfig.getUnofficialLostArkAPIUrl();
-
-        lostArk.westNorthAmerica = LegacyConfig.getWestNorthAmerica();
-        lostArk.eastNorthAmerica = LegacyConfig.getEastNorthAmerica();
-        lostArk.centralEurope = LegacyConfig.getCentralEurope();
-        lostArk.southAmerica = LegacyConfig.getSouthAmerica();
-        lostArk.europeWest = LegacyConfig.getEuropeWest();
-
-        twitter.APIKey = LegacyConfig.getTwitterAPIKey();
-        twitter.APIKeySecret = LegacyConfig.getTwitterAPIKeySecret();
-        twitter.accessToken = LegacyConfig.getTwitterAccessToken();
-        twitter.accessTokenSecret = LegacyConfig.getTwitterAccessTokenSecret();
-        twitter.testMode = LegacyConfig.isTwitterTestMode();
-
-        topgg.topggToken = LegacyConfig.getTopggToken();
-        topgg.updateTopggBotStats = LegacyConfig.isUpdateTopggBotStats();
-
-        waitTimes.dashboardUpdates = LegacyConfig.getWaitTimeBetweenDashboardUpdates();
-        waitTimes.serverStatusMessages = LegacyConfig.getWaitTimeBetweenServerStatusMessages();
-        waitTimes.notificationMessages = LegacyConfig.getWaitTimeBetweenNotificationMessages();
-        waitTimes.tweets = LegacyConfig.getWaitTimeBetweenTweets();
-
-        save();
-    }
-
     public static boolean save() {
         try {
             Files.writeString(getPath(), getGson().toJson(instance), StandardOpenOption.CREATE);

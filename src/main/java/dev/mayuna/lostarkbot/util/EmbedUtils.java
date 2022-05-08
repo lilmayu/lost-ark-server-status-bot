@@ -14,7 +14,7 @@ import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.lostarkscraper.objects.LostArkServers;
 import dev.mayuna.lostarkscraper.objects.ServerStatus;
-import dev.mayuna.mayusjdautils.utils.DiscordUtils;
+import dev.mayuna.mayusjdautils.util.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -112,7 +112,7 @@ public class EmbedUtils {
                 if (serverStatus != null) {
                     toAppend = Utils.getServerLine(serverName, serverStatus) + "\n";
                 } else {
-                    toAppend = Constants.OFFLINE_EMOTE + " " + serverName + " (" + languagePack.getNotFound() + ")\n";
+                    toAppend = Constants.OFFLINE_EMOTE + " " + serverName + "\n";
                 }
 
                 if (fieldValue.length() + toAppend.length() < 1024) {

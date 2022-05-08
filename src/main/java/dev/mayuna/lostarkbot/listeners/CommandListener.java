@@ -4,7 +4,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.mayusjdautils.utils.MessageInfo;
+import dev.mayuna.mayusjdautils.util.MessageInfo;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
