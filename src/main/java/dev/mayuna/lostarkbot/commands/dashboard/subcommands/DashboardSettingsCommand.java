@@ -9,7 +9,6 @@ import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
-import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.interactive.InteractiveMessage;
 import dev.mayuna.mayusjdautils.interactive.objects.Interaction;
 import dev.mayuna.mayusjdautils.util.DiscordUtils;
@@ -37,9 +36,15 @@ public class DashboardSettingsCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         if (!AutoMessageUtils.isEverythingAlrightDashboard(textChannel, interactionHook)) {
             return;
@@ -221,6 +226,6 @@ public class DashboardSettingsCommand extends SlashCommand {
 
     private enum RegionAction {
         SHOW,
-        HIDE;
+        HIDE
     }
 }

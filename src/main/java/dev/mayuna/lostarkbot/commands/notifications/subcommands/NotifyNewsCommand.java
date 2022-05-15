@@ -6,7 +6,6 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
-import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
@@ -34,9 +33,15 @@ public class NotifyNewsCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         OptionMapping actionOption = AutoMessageUtils.getOptionMapping(event, "action");
         OptionMapping newsCategoryOption = AutoMessageUtils.getOptionMapping(event, "category");

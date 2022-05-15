@@ -42,7 +42,7 @@ public class ShardExecutorManager {
     }
 
     public static void submitForEachShard(UpdateType updateType, Consumer<Integer> consumer) {
-        Logger.flow("Submitting update type " + updateType.name());
+        Logger.debug("Submitting update type " + updateType.name() + " to all shards");
 
         for (int shardId = 0; shardId < Main.getMayuShardManager().get().getShardsTotal(); shardId++) {
             int finalShardId = shardId;

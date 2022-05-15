@@ -6,7 +6,6 @@ import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
-import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
@@ -34,9 +33,15 @@ public class NotifyForumsCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         OptionMapping actionOption = AutoMessageUtils.getOptionMapping(event, "action");
         OptionMapping forumsCategoriesOption = AutoMessageUtils.getOptionMapping(event, "category");
@@ -55,7 +60,8 @@ public class NotifyForumsCommand extends SlashCommand {
         switch (actionOption.getAsString()) {
             case "enable" -> {
                 if (notificationChannel.enable(forumsCategory)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Forums category **" + forumsCategory + "**!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Forums category **" + forumsCategory + "**!").build())
+                            .queue();
                     notificationChannel.save();
                 } else {
                     interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Forums category **" + forumsCategory + "** are already enabled!").build()).queue();
@@ -63,10 +69,12 @@ public class NotifyForumsCommand extends SlashCommand {
             }
             case "disable" -> {
                 if (notificationChannel.disable(forumsCategory)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Forums category **" + forumsCategory + "**!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Forums category **" + forumsCategory + "**!").build())
+                            .queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Forums category **" + forumsCategory + "** are already disabled!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Forums category **" + forumsCategory + "** are already disabled!").build())
+                            .queue();
                 }
             }
         }

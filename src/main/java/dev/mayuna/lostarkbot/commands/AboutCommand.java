@@ -20,7 +20,9 @@ public class AboutCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
 
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
         embedBuilder.setDescription("");

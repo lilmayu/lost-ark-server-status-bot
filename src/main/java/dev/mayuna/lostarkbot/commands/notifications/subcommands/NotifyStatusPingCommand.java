@@ -34,9 +34,15 @@ public class NotifyStatusPingCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         OptionMapping actionOption = AutoMessageUtils.getOptionMapping(event, "action");
         OptionMapping roleOption = AutoMessageUtils.getOptionMapping(event, "role");
@@ -57,7 +63,7 @@ public class NotifyStatusPingCommand extends SlashCommand {
                 if (notificationChannel.addToStatusPingRoleIds(role)) {
                     notificationChannel.save();
                     interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added role " + role.getAsMention() + " to roles, which will be pinged on Server status change!")
-                                                    .build()).queue();
+                                                               .build()).queue();
                 } else {
                     interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Role " + role.getAsMention() + " is already added!").build()).queue();
                 }
@@ -66,7 +72,7 @@ public class NotifyStatusPingCommand extends SlashCommand {
                 if (notificationChannel.removeFromStatusPingRoleIds(role)) {
                     notificationChannel.save();
                     interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed role " + role.getAsMention() + " from roles, which will be pinged on Server status change!")
-                                                    .build()).queue();
+                                                               .build()).queue();
                 } else {
                     interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Cannot remove role " + role.getAsMention() + " since it was not added!").build()).queue();
                 }

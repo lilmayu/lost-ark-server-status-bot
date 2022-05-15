@@ -7,6 +7,7 @@ import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
 import dev.mayuna.lostarkbot.managers.ShardExecutorManager;
 import dev.mayuna.lostarkbot.util.HashUtils;
+import dev.mayuna.lostarkbot.util.SpecialRateLimiter;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
@@ -63,6 +64,7 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
 
         Logger.info("== Other ==");
         Logger.info("In-game players: " + ServerDashboardManager.getOnlinePlayersCache());
+        Logger.info("SpecialRateLimiter: " + SpecialRateLimiter.getCurrentRequestCount() + " requests (last " + SpecialRateLimiter.getLastRequestCount() + " requests)");
 
         Logger.info("== Executor ==");
         Logger.info("Currently running tasks: " + ShardExecutorManager.getExecutorService().getActiveCount());

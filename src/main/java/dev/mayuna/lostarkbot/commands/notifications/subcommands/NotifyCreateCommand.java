@@ -23,9 +23,15 @@ public class NotifyCreateCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         if (!AutoMessageUtils.isCorrectChannelType(textChannel, interactionHook)) {
             return;
@@ -43,7 +49,9 @@ public class NotifyCreateCommand extends SlashCommand {
 
         if (notificationChannel != null) {
             notificationChannel.save();
-            interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully marked this Text Channel as Notification Channel.\n\nYou can now enable Notifications in this channel. See `/help` for more information.").build()).queue();
+            interactionHook.editOriginalEmbeds(MessageInfo.successEmbed(
+                            "Successfully marked this Text Channel as Notification Channel.\n\nYou can now enable Notifications in this channel. See `/help` for more information.")
+                                                       .build()).queue();
         } else {
             interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed(
                             "There was error while marking this channel as Notification Channel. Please, try again. Check if bot has all necessary permissions. However, you should not see this message ever.")

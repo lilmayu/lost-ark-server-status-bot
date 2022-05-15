@@ -3,6 +3,7 @@ package dev.mayuna.lostarkbot;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import dev.mayuna.lostarkbot.commands.AboutCommand;
 import dev.mayuna.lostarkbot.commands.HelpCommand;
+import dev.mayuna.lostarkbot.commands.NeofetchCommand;
 import dev.mayuna.lostarkbot.commands.dashboard.DashboardRootCommand;
 import dev.mayuna.lostarkbot.commands.notifications.NotifyRootCommand;
 import dev.mayuna.lostarkbot.console.ConsoleCommandManager;
@@ -12,6 +13,8 @@ import dev.mayuna.lostarkbot.listeners.CommandListener;
 import dev.mayuna.lostarkbot.listeners.ShardWatcher;
 import dev.mayuna.lostarkbot.managers.*;
 import dev.mayuna.lostarkbot.util.Constants;
+import dev.mayuna.lostarkbot.util.SpecialRateLimiter;
+import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
@@ -39,11 +42,12 @@ public class Main {
 
     // Runtime
     private static boolean configLoaded = false;
-    private static boolean fullyLoaded = false;
+    private static @Getter boolean fullyLoaded = false;
+    private static @Getter long uptimeStart = 0;
     private static @Setter boolean stopping = false;
 
     public static void main(String[] args) throws InterruptedException {
-        long start = System.currentTimeMillis();
+        uptimeStart = System.currentTimeMillis();
 
         File logsFolder = new File("./logs/");
         if (!logsFolder.exists()) {
@@ -86,7 +90,7 @@ public class Main {
         loadManagers();
 
         fullyLoaded = true;
-        Logger.success("Loading done! (took " + (System.currentTimeMillis() - start) + "ms)");
+        Logger.success("Loading done! (took " + Utils.getTimerWithoutMillis(System.currentTimeMillis() - uptimeStart) + "ms)");
     }
 
     private static void loadJdaUtilities() {
@@ -143,6 +147,7 @@ public class Main {
     private static void loadCommands() {
         client.addSlashCommands(new AboutCommand(),
                                 new HelpCommand(),
+                                new NeofetchCommand(),
                                 new NotifyRootCommand(),
                                 new DashboardRootCommand()
         );
@@ -197,5 +202,13 @@ public class Main {
         DiscordUtils.setDefaultEmbed(new EmbedBuilder().setDescription("Loading, please wait... If you see this message for too long, something happened."));
         MayuCoreListener.enableExperimentalInteractionBehavior = true;
         MessageInfo.useSystemEmotes = true;
+
+        SpecialRateLimiter.setMaxRequests(20);
+        SpecialRateLimiter.setResetRequestCountAfter(1300);
+        SpecialRateLimiter.init();
+    }
+
+    public static String getUptime() {
+        return Utils.getTimerWithoutMillis(System.currentTimeMillis() - uptimeStart);
     }
 }

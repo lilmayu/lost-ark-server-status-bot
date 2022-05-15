@@ -1,6 +1,7 @@
 package dev.mayuna.lostarkbot.util;
 
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
@@ -131,5 +132,14 @@ public class AutoMessageUtils {
 
     public static void sendInvalidArgumentMessage(InteractionHook interactionHook, String name) {
         interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Invalid `" + name + "` argument.").build()).queue();
+    }
+
+    public static boolean isBotFullyLoaded(InteractionHook interactionHook) {
+        if (!Main.isFullyLoaded()) {
+            interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Bot is loading! Please, wait a moment.").build()).queue();
+            return false;
+        }
+
+        return true;
     }
 }

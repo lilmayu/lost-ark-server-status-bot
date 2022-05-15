@@ -321,7 +321,7 @@ public class GuildDataManager {
     }
 
     public static void processMayuTweet(int shardId, MayuTweet mayuTweet) {
-        Logger.info("[TWITTER] Sending tweet " + mayuTweet.getTweetId() + " to notification channels...");
+        Logger.flow("[TWITTER] Sending tweet " + mayuTweet.getTweetId() + " to notification channels...");
         long took;
 
         var loadedGuildDataList = getLoadedGuildDataListByShard(shardId);
@@ -341,8 +341,6 @@ public class GuildDataManager {
 
             took = System.currentTimeMillis() - start;
         }
-
-        Logger.info("[TWITTER] Sending tweet done in " + took + "ms");
     }
 
     // Loading

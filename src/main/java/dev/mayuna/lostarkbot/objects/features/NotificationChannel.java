@@ -22,6 +22,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.time.Instant;
 import java.util.*;
@@ -50,6 +52,7 @@ public class NotificationChannel {
     // Status server changes
     private @Getter @Expose(serialize = false) List<String> statusWhitelist = new ArrayList<>(); // Possible values: GOOD, BUSY, FULL, MAINTENANCE, OFFLINE
     private @Getter @Expose List<StatusWhitelistObject> statusWhitelistObjects = new LinkedList<>();
+    private @Getter @Expose List<StatusWhitelistObject> statusBlacklistObjects = new LinkedList<>();
     private @Getter @Expose @SerializedName(value = "statusPingRolesIds", alternate = {"roleIds"}) List<String> statusPingRolesIds = new ArrayList<>();
     private @Getter @Expose List<String> twitterPingRolesIds = new ArrayList<>();
 
@@ -155,6 +158,29 @@ public class NotificationChannel {
 
     public boolean removeFromWhitelist(StatusWhitelistObject statusWhitelistObject) {
         return statusWhitelistObjects.remove(statusWhitelistObject);
+    }
+
+    public boolean addToBlacklist(StatusWhitelistObject statusWhitelistObject) {
+        String status = statusWhitelistObject.getStatus();
+
+        try {
+            ServerStatus.valueOf(status);
+        } catch (Exception ignored) {
+            if (!status.equalsIgnoreCase("OFFLINE")) {
+                return false;
+            }
+        }
+
+        if (!statusBlacklistObjects.contains(statusWhitelistObject)) {
+            statusBlacklistObjects.add(statusWhitelistObject);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeFromBlacklist(StatusWhitelistObject statusWhitelistObject) {
+        return statusBlacklistObjects.remove(statusWhitelistObject);
     }
 
     public boolean addToStatusPingRoleIds(Role role) {
@@ -275,7 +301,7 @@ public class NotificationChannel {
 
         for (LostArkRegion lostArkRegion : getRegions()) {
             lostArkServersChange.getDifferenceForWholeRegion(lostArkRegion).forEach(difference -> {
-                if (Utils.isOnWhitelist(difference, statusWhitelistObjects) && difference != null) {
+                if (Utils.isOnWhitelistAndIsNotOnBlacklist(difference, statusWhitelistObjects, statusBlacklistObjects) && difference != null) {
                     regionDifferences.put(difference, lostArkRegion);
                 }
             });
@@ -291,7 +317,7 @@ public class NotificationChannel {
                 continue;
 
             if (!regionDifferences.containsKey(difference)) {
-                if (Utils.isOnWhitelist(difference, statusWhitelistObjects)) {
+                if (Utils.isOnWhitelistAndIsNotOnBlacklist(difference, statusWhitelistObjects, statusBlacklistObjects)) {
                     serverDifferences.add(difference);
                 }
             }
@@ -391,10 +417,14 @@ public class NotificationChannel {
 
                 MessageSender.sendMessage(messageBuilder.build(), managedTextChannel.getTextChannel(), UpdateType.TWITTER);
             }
-        } catch (Exception exception) { // todo: tady toto tamto
+        } catch (PermissionException | ErrorResponseException e) {
+            Logger.get().flow(e);
+
+            Logger.warn("There was an exception while sending tweet to " + managedTextChannel.getTextChannel() + " (" + getName() + ")! (Permission or Response Exception)");
+        } catch (Exception exception) {
             Logger.throwing(exception);
 
-            Logger.warn("There was an exception while sending tweet to " + managedTextChannel.getTextChannel() + " (" + getName() + ")!");
+            Logger.error("There was an exception while sending tweet to " + managedTextChannel.getTextChannel() + " (" + getName() + ")! (Unknown Exception)");
         }
     }
 }

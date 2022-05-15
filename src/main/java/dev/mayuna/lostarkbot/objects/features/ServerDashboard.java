@@ -11,6 +11,7 @@ import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
 import dev.mayuna.mayusjdautils.managed.ManagedGuildMessage;
+import dev.mayuna.mayusjdautils.util.CallbackResult;
 import dev.mayuna.mayusjdautils.util.RestActionMethod;
 import lombok.Getter;
 import lombok.Setter;
@@ -118,7 +119,7 @@ public class ServerDashboard {
 
         if (languagePack == null) {
             languagePack = LanguageManager.getDefaultLanguage();
-            langCode = languagePack.getLangCode();;
+            langCode = languagePack.getLangCode();
         }
 
         return languagePack;
@@ -159,10 +160,16 @@ public class ServerDashboard {
             return waiter;
         }
 
+        SpecialRateLimiter.waitIfRateLimited();
         managedGuildMessage.updateEntries(Main.getMayuShardManager().get(), RestActionMethod.QUEUE, entriesSuccess -> {
+            if (entriesSuccess != CallbackResult.NOTHING) {
+                SpecialRateLimiter.madeRequest();
+            }
+
             Message message = new MessageBuilder().setEmbeds(EmbedUtils.createEmbed(this, ServerDashboardManager.getLostArkServersCache()).build()).build();
 
             try {
+                SpecialRateLimiter.waitIfRateLimited();
                 managedGuildMessage.sendOrEditMessage(message, RestActionMethod.QUEUE, success -> {
                     Logger.flow("Successfully updated dashboard " + this.getName() + " (Guild: " + this.managedGuildMessage.getRawGuildID() + "; Text Channel: " + this.managedGuildMessage.getRawTextChannelID() + "; Message: " + this.managedGuildMessage.getRawMessageID() + ") with result " + success);
 
@@ -180,6 +187,7 @@ public class ServerDashboard {
                     waiter.setObject(false);
                     waiter.proceed();
                 });
+                SpecialRateLimiter.madeRequest();
             } catch (PermissionException | ErrorResponseException exception) {
                 Logger.get().flow(exception);
                 Logger.warn("Dashboard " + this.getName() + " resulted in exception while updating! (Guild: " + this.managedGuildMessage.getRawGuildID() + "; Text Channel: " + this.managedGuildMessage.getRawTextChannelID() + "; Message: " + this.managedGuildMessage.getRawMessageID() + " (Permission or Response Exception)");
@@ -208,6 +216,7 @@ public class ServerDashboard {
         });
 
         Utils.waitByConfigValue(UpdateType.SERVER_DASHBOARD);
+
         return waiter;
     }
 }

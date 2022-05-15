@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class Utils {
 
@@ -134,8 +135,14 @@ public class Utils {
         }
     }
 
-    public static void makeEphemeral(SlashCommandEvent event, boolean ephemeral) {
-        event.deferReply(ephemeral).complete();
+    public static boolean makeEphemeral(SlashCommandEvent event, boolean ephemeral) {
+        try {
+            event.deferReply(ephemeral).complete();
+            return true;
+        } catch (Exception exception) {
+            Logger.get().warn("Exception occurred while acknowledging command interaction!", exception);
+            return false;
+        }
     }
 
     public static String getOnlinePlayers() {
@@ -245,6 +252,7 @@ public class Utils {
         optionData.addChoice("Status change Server", "status_server");
         optionData.addChoice("Status change Region", "status_region");
         optionData.addChoice("Status whitelist", "status_whitelist");
+        optionData.addChoice("Status blacklist", "status_blacklist");
         optionData.addChoice("Status change ping roles", "status_ping_roles");
         optionData.addChoice("Twitter filter", "twitter_filter");
         optionData.addChoice("Twitter ping roles", "twitter_ping_roles");
@@ -355,21 +363,34 @@ public class Utils {
         }
     }
 
-    public static boolean isOnWhitelist(LostArkServersChange.Difference difference, List<StatusWhitelistObject> statusWhitelistObjects) {
+    public static boolean isOnWhitelistAndIsNotOnBlacklist(LostArkServersChange.Difference difference, List<StatusWhitelistObject> statusWhitelistObjects, List<StatusWhitelistObject> statusBlacklistObjects) {
         if (statusWhitelistObjects.isEmpty()) {
             return true;
         }
 
-        List<String> statusesFrom = new LinkedList<>();
-        List<String> statusesTo = new LinkedList<>();
+        List<String> whitelistStatusesFrom = new LinkedList<>();
+        List<String> whitelistStatusesTo = new LinkedList<>();
+        List<String> blacklistStatusesFrom = new LinkedList<>();
+        List<String> blacklistStatusesTo = new LinkedList<>();
 
         for (StatusWhitelistObject statusWhitelistObject : statusWhitelistObjects) {
             switch (statusWhitelistObject.getType()) {
                 case FROM -> {
-                    statusesFrom.add(statusWhitelistObject.getStatus());
+                    whitelistStatusesFrom.add(statusWhitelistObject.getStatus());
                 }
                 case TO -> {
-                    statusesTo.add(statusWhitelistObject.getStatus());
+                    whitelistStatusesTo.add(statusWhitelistObject.getStatus());
+                }
+            }
+        }
+
+        for (StatusWhitelistObject statusWhitelistObject : statusBlacklistObjects) {
+            switch (statusWhitelistObject.getType()) {
+                case FROM -> {
+                    blacklistStatusesFrom.add(statusWhitelistObject.getStatus());
+                }
+                case TO -> {
+                    blacklistStatusesTo.add(statusWhitelistObject.getStatus());
                 }
             }
         }
@@ -385,24 +406,52 @@ public class Utils {
             newServerStatus = "OFFLINE";
         }
 
-        if (statusesTo.isEmpty()) {
-            for (String status : statusesFrom) {
+        // == Blacklist == //
+
+        if (blacklistStatusesTo.isEmpty()) {
+            for (String status : blacklistStatusesFrom) {
+                if (oldServerStatus.equalsIgnoreCase(status)) {
+                    return false;
+                }
+            }
+        }
+
+        if (blacklistStatusesFrom.isEmpty()) {
+            for (String status : blacklistStatusesTo) {
+                if (newServerStatus.equalsIgnoreCase(status)) {
+                    return false;
+                }
+            }
+        }
+
+        for (String oldStatus : blacklistStatusesFrom) {
+            for (String newStatus : blacklistStatusesTo) {
+                if (oldStatus.equalsIgnoreCase(oldServerStatus) && newStatus.equalsIgnoreCase(newServerStatus)) {
+                    return false;
+                }
+            }
+        }
+
+        // == Whitelist == //
+
+        if (whitelistStatusesTo.isEmpty()) {
+            for (String status : whitelistStatusesFrom) {
                 if (oldServerStatus.equalsIgnoreCase(status)) {
                     return true;
                 }
             }
         }
 
-        if (statusesFrom.isEmpty()) {
-            for (String status : statusesTo) {
+        if (whitelistStatusesFrom.isEmpty()) {
+            for (String status : whitelistStatusesTo) {
                 if (newServerStatus.equalsIgnoreCase(status)) {
                     return true;
                 }
             }
         }
 
-        for (String oldStatus : statusesFrom) {
-            for (String newStatus : statusesTo) {
+        for (String oldStatus : whitelistStatusesFrom) {
+            for (String newStatus : whitelistStatusesTo) {
                 if (oldStatus.equalsIgnoreCase(oldServerStatus) && newStatus.equalsIgnoreCase(newServerStatus)) {
                     return true;
                 }
@@ -509,5 +558,10 @@ public class Utils {
         }
 
         return returnValue;
+    }
+
+    public enum Direction {
+        HORIZONTAL,
+        VERTICAL;
     }
 }

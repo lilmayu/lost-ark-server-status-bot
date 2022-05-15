@@ -21,7 +21,9 @@ public class HelpCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
 
         getMainMenuMessage().sendMessage(event.getHook(), true);
     }
@@ -66,7 +68,8 @@ public class HelpCommand extends SlashCommand {
 
         embedBuilder.addField("• General",
                               "`/help` - Shows this help menu\n" +
-                                      "`/about` - Shows information about this bot", false
+                                      "`/about` - Shows information about this bot\n" +
+                                      "`/neofetch` - Shows information about this bot in a aesthetic way.", false
         );
         embedBuilder.addField("• Command `/dashboard`",
                               """
@@ -103,6 +106,7 @@ public class HelpCommand extends SlashCommand {
                                       `/notify status-server` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for server
                                       `/notify status-region` - Enables or disables [server tracking](https://i.imgur.com/cvfNohX.png) for region
                                       `/notify status-whitelist` - Allows you to whitelist statuses
+                                      `/notify status-blacklist` - Allows you to blacklist statuses
                                       `/notify status-ping` - Adds/removes roles to ping on Server status change
                                       `/notify clear` - Disables/clears specified notifications/lists""", false
         );
@@ -196,9 +200,10 @@ public class HelpCommand extends SlashCommand {
                                       2.4. `/notify status-region`
                                       2.5. `/notify status-ping`
                                       2.5. `/notify status-whitelist`
-                                      2.6. `/notify twitter-settings`
-                                      2.7. `/notify twitter-filter`
-                                      2.8. `/notify twitter-ping`
+                                      2.6. `/notify status-blacklist`
+                                      2.7. `/notify twitter-settings`
+                                      2.8. `/notify twitter-filter`
+                                      2.9. `/notify twitter-ping`
                                       3. You have successfully created and customized your Notification channel""", false
         );
         embedBuilder.addField("• Common problems",
@@ -252,19 +257,22 @@ public class HelpCommand extends SlashCommand {
 
         embedBuilder.addField("• Handy example",
                               """
-                                      Lets say, you want to receive Server status changes only when servers go under Maintenance.
-                                      
+                                      Lets say, you want to receive Server status changes only when Maintenance ends.
+                                                                            
                                       This can be done with these two commands:
                                       • `/notify status-whitelist [Change to] [Online]` - Will send all server status changes where the status changes to Online
                                       • `/notify status-whitelist [Change from] [Maintenance]` - Will send all server status changes where the status changes from Maintenance
-                                      
+                                                                            
                                       If you set both of those whitelists, you will receive only notifications where Servers change their statuses from Maintenance to Online (aka. Maintenance ends).
                                       Combine it with `/notify status-ping` and you will be pinged when the Maintenance ends! Pretty useful I'd say.
                                       """,
                               false
         );
 
-        embedBuilder.addField("• I need help", "If you don't still understand this feature, hit me up on my [support server](https://discord.gg/YMs6wXPqcB) and I will gladly help you.\n\nPro TIP: You can clear your whitelist using `/notify clear` command.", false);
+        embedBuilder.addField("• I need help",
+                              "If you don't still understand this feature, hit me up on my [support server](https://discord.gg/YMs6wXPqcB) and I will gladly help you.\n\nPro TIP: You can clear your whitelist using `/notify clear` command.",
+                              false
+        );
 
         messageBuilder.setEmbeds(embedBuilder.build());
         message.setMessageBuilder(messageBuilder);

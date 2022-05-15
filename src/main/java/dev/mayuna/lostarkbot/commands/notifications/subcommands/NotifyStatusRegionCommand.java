@@ -6,7 +6,6 @@ import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
-import dev.mayuna.lostarkbot.util.PermissionUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
@@ -34,9 +33,15 @@ public class NotifyStatusRegionCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         OptionMapping actionOption = AutoMessageUtils.getOptionMapping(event, "action");
         OptionMapping regionOption = AutoMessageUtils.getOptionMapping(event, "region");
@@ -64,20 +69,24 @@ public class NotifyStatusRegionCommand extends SlashCommand {
         switch (actionOption.getAsString()) {
             case "enable" -> {
                 if (notificationChannel.enable(lostArkRegion)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Region **" + formattedRegionName + "** status change!").build())
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Region **" + formattedRegionName + "** status change!")
+                                                               .build())
                             .queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Region **" + formattedRegionName + "** status change are already enabled!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Region **" + formattedRegionName + "** status change are already enabled!")
+                                                               .build()).queue();
                 }
             }
             case "disable" -> {
                 if (notificationChannel.disable(lostArkRegion)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Region **" + formattedRegionName + "** status change!").build())
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Region **" + formattedRegionName + "** status change!")
+                                                               .build())
                             .queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Region **" + formattedRegionName + "** status change are already disabled!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Region **" + formattedRegionName + "** status change are already disabled!")
+                                                               .build()).queue();
                 }
             }
         }

@@ -10,6 +10,7 @@ public class MessageSender {
 
     public static void sendMessage(Message message, TextChannel textChannel, UpdateType type) {
         try {
+            SpecialRateLimiter.waitIfRateLimited();
             textChannel.sendMessage(message).queue(success -> {
                 Logger.flow("Successfully sent message (" + success.getId() + ") with type " + type + " into channel " + textChannel);
             }, failure -> {
@@ -22,6 +23,7 @@ public class MessageSender {
                     Logger.error("Could not send message with type " + type + " into channel " + textChannel + " (Unknown exception)");
                 }
             });
+            SpecialRateLimiter.madeRequest();
             Utils.waitByConfigValue(type);
         } catch (PermissionException | ErrorResponseException exception) {
             Logger.get().flow(exception);

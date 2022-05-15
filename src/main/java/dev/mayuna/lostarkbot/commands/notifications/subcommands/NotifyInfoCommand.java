@@ -31,9 +31,15 @@ public class NotifyInfoCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         NotificationChannel notificationChannel;
         EmbedBuilder embedBuilder = MessageInfo.informationEmbed("");
@@ -103,9 +109,11 @@ public class NotifyInfoCommand extends SlashCommand {
             }
         }
 
-        String statusWhitelist = "";
+        String statusWhitelistBlacklist = "";
+        String whitelist = "";
+        String blacklist = "";
         if (notificationChannel.getStatusWhitelistObjects().isEmpty()) {
-            statusWhitelist = "Status whitelist is empty.";
+            whitelist = "Status whitelist is empty.";
         } else {
             List<StatusWhitelistObject> fromStatuses = Utils.getStatusWhitelistObjectsByType(notificationChannel.getStatusWhitelistObjects(), StatusWhitelistObject.Type.FROM);
             List<StatusWhitelistObject> toStatuses = Utils.getStatusWhitelistObjectsByType(notificationChannel.getStatusWhitelistObjects(), StatusWhitelistObject.Type.TO);
@@ -113,8 +121,20 @@ public class NotifyInfoCommand extends SlashCommand {
             String from = "**Changed from**\n" + Utils.makeVerticalStringList(fromStatuses, "No whitelisted statuses.");
             String to = "**Changed to**\n" + Utils.makeVerticalStringList(toStatuses, "No whitelisted statuses.");
 
-            statusWhitelist = from + "\n" + to;
+            whitelist = from + "\n" + to;
         }
+        if (notificationChannel.getStatusBlacklistObjects().isEmpty()) {
+            blacklist = "Status blacklist is empty.";
+        } else {
+            List<StatusWhitelistObject> fromStatuses = Utils.getStatusWhitelistObjectsByType(notificationChannel.getStatusBlacklistObjects(), StatusWhitelistObject.Type.FROM);
+            List<StatusWhitelistObject> toStatuses = Utils.getStatusWhitelistObjectsByType(notificationChannel.getStatusBlacklistObjects(), StatusWhitelistObject.Type.TO);
+
+            String from = "**Changed from**\n" + Utils.makeVerticalStringList(fromStatuses, "No blacklisted statuses.");
+            String to = "**Changed to**\n" + Utils.makeVerticalStringList(toStatuses, "No blacklisted statuses.");
+
+            blacklist = from + "\n" + to;
+        }
+        statusWhitelistBlacklist = "> **Whitelist**\n" + whitelist + "\n\n> **Blacklist**\n" + blacklist;
 
         String statusChangePingRoles = "";
         if (notificationChannel.getStatusPingRolesIds().isEmpty()) {
@@ -212,7 +232,7 @@ public class NotifyInfoCommand extends SlashCommand {
         embedBuilder.addField("Enabled Region status changes", regions, true);
         embedBuilder.addField("Enabled Server status changes", servers, true);
         embedBuilder.addBlankField(false);
-        embedBuilder.addField("Status whitelist", statusWhitelist, true);
+        embedBuilder.addField("Status whitelist/blacklist", statusWhitelistBlacklist, true);
         embedBuilder.addField("Roles to ping on Server status change", statusChangePingRoles, true);
         embedBuilder.addBlankField(false);
         embedBuilder.addField("Twitter", twitter, true);

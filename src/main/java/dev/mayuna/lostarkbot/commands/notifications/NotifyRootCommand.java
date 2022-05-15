@@ -27,6 +27,7 @@ public class NotifyRootCommand extends SlashCommand {
                 new NotifyStatusServerCommand(),
                 new NotifyStatusRegionCommand(),
                 new NotifyStatusWhitelistCommand(),
+                new NotifyStatusBlacklistCommand(),
                 new NotifyStatusPingCommand(),
 
                 new NotifyClearCommand()
@@ -35,7 +36,9 @@ public class NotifyRootCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
 
         event.getHook().editOriginal("Psst, you should not be here.").queue();
     }

@@ -31,9 +31,15 @@ public class NotifyClearCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         OptionMapping clearOption = AutoMessageUtils.getOptionMapping(event, "clear");
 
@@ -67,6 +73,10 @@ public class NotifyClearCommand extends SlashCommand {
             case "status_whitelist" -> {
                 notificationChannel.getStatusWhitelistObjects().clear();
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Status whitelist!").build()).queue();
+            }
+            case "status_blacklist" -> {
+                notificationChannel.getStatusBlacklistObjects().clear();
+                interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Status blacklist!").build()).queue();
             }
             case "status_ping_roles" -> {
                 notificationChannel.getStatusPingRolesIds().clear();

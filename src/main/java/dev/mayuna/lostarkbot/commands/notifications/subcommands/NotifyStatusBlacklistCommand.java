@@ -17,11 +17,11 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotifyStatusWhitelistCommand extends SlashCommand {
+public class NotifyStatusBlacklistCommand extends SlashCommand {
 
-    public NotifyStatusWhitelistCommand() {
-        this.name = "status-whitelist";
-        this.help = "Allows you to whitelist specific statuses in current Notification Channel";
+    public NotifyStatusBlacklistCommand() {
+        this.name = "status-blacklist";
+        this.help = "Allows you to blacklist specific statuses in current Notification Channel";
 
         this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -71,20 +71,20 @@ public class NotifyStatusWhitelistCommand extends SlashCommand {
 
         switch (actionOption.getAsString()) {
             case "add" -> {
-                if (notificationChannel.addToWhitelist(statusWhitelistObject)) {
+                if (notificationChannel.addToBlacklist(statusWhitelistObject)) {
                     notificationChannel.save();
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully whitelisted **" + typePretty + " " + status + "** status change!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully blacklisted **" + typePretty + " " + status + "** status change!").build()).queue();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Status change **" + typePretty + " " + status + "** is already whitelisted!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Status change **" + typePretty + " " + status + "** is already blacklisted!").build()).queue();
                 }
             }
             case "remove" -> {
-                if (notificationChannel.removeFromWhitelist(statusWhitelistObject)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed whitelisted **" + typePretty + " " + status + "** status change!").build())
+                if (notificationChannel.removeFromBlacklist(statusWhitelistObject)) {
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed blacklisted **" + typePretty + " " + status + "** status change!").build())
                             .queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Status change **" + typePretty + " " + status + "** is not whitelisted!\n\nTIP: If you want to clear whole whitelist, you can use `/notify clear` command.")
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Status change **" + typePretty + " " + status + "** is not blacklisted!\n\nTIP: If you want to clear whole blacklist, you can use `/notify clear` command.")
                                                                .build()).queue();
                 }
             }

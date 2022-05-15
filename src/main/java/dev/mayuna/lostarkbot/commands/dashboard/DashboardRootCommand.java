@@ -28,7 +28,9 @@ public class DashboardRootCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
 
         event.getHook().editOriginal("Psst, you should not be here.").queue();
     }

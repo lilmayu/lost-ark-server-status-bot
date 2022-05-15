@@ -33,9 +33,15 @@ public class DashboardFavoriteCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        Utils.makeEphemeral(event, true);
+        if (!Utils.makeEphemeral(event, true)) {
+            return;
+        }
         TextChannel textChannel = event.getTextChannel();
         InteractionHook interactionHook = event.getHook();
+
+        if (!AutoMessageUtils.isBotFullyLoaded(interactionHook)) {
+            return;
+        }
 
         OptionMapping actionOption = AutoMessageUtils.getOptionMapping(event, "action");
         OptionMapping serverOption = AutoMessageUtils.getOptionMapping(event, "server");
@@ -56,9 +62,11 @@ public class DashboardFavoriteCommand extends SlashCommand {
                 if (dashboard.addToFavorites(serverName)) {
                     dashboard.update();
                     dashboard.save();
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added server `" + Utils.getCorrectServerName(serverName) + "` into Favorite section!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added server `" + Utils.getCorrectServerName(serverName) + "` into Favorite section!")
+                                                               .build()).queue();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Server with name `" + serverOption.getAsString() + "` is already added in Favorite section or this server does not exist!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Server with name `" + serverOption.getAsString() + "` is already added in Favorite section or this server does not exist!")
+                                                               .build()).queue();
                 }
             }
 
