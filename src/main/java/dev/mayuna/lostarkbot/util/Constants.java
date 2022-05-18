@@ -20,6 +20,7 @@ public class Constants {
     public static final String OFFLINE_EMOTE = "<:Offline:968167180493537382>";
 
     public static final String TWITTER_LOGO_URL = "https://i.imgur.com/QvQPU4a.png";
+    public static final String BOT_LOGO_URL = "https://i.imgur.com/hoxDyuH.png";
 
     public static final TwitterUser[] TWITTER_USERS = new TwitterUser[]{
             new TwitterUser("playlostark", 1291477342624210944L),
