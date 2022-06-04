@@ -1,6 +1,6 @@
-package dev.mayuna.lostarkbot.api.exceptions;
+package dev.mayuna.lostarkbot.old.api.exceptions;
 
-import dev.mayuna.lostarkbot.api.misc.ApiRequest;
+import dev.mayuna.lostarkbot.old.api.misc.ApiRequest;
 import lombok.Getter;
 
 public class MissingPathParametersException extends RuntimeException {

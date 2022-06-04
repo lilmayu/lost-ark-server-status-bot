@@ -39,10 +39,14 @@ public class DashboardRemoveCommand extends SlashCommand {
             return;
         }
 
-        if (ServerDashboardHelper.deleteServerDashboard(textChannel)) {
-            interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed Server Dashboard from this channel!").build()).queue();
-        } else {
-            interactionHook.editOriginalEmbeds(MessageInfo.warningEmbed("Server Dashboard was removed, however message was unable to be deleted.").build()).queue();
-        }
+        ServerDashboardHelper.deleteServerDashboard(textChannel).thenAccept(result -> {
+            if (result) {
+                interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully removed Server Dashboard from this channel!").build())
+                               .queue();
+            } else {
+                interactionHook.editOriginalEmbeds(MessageInfo.warningEmbed("Server Dashboard was removed, however message was unable to be deleted.")
+                                                              .build()).queue();
+            }
+        });
     }
 }

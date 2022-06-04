@@ -8,7 +8,6 @@ import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
 import dev.mayuna.lostarkbot.objects.other.MayuTweet;
 import dev.mayuna.lostarkbot.objects.other.Notifications;
 import dev.mayuna.lostarkbot.util.Constants;
-import dev.mayuna.lostarkbot.util.Waiter;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 import dev.mayuna.mayusjdautils.exceptions.InvalidTextChannelIDException;
 import dev.mayuna.mayusjdautils.exceptions.NonDiscordException;
@@ -25,13 +24,15 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GuildData extends ManagedGuild {
 
     private @Getter @Expose @SerializedName("serverDashboards") List<ServerDashboard> loadedServerDashboards = Collections.synchronizedList(new ArrayList<>());
-    private @Getter @Expose @SerializedName("notificationChannels") List<NotificationChannel> loadedNotificationChannels = Collections.synchronizedList(new ArrayList<>());
+    private @Getter @Expose @SerializedName("notificationChannels") List<NotificationChannel> loadedNotificationChannels = Collections.synchronizedList(
+            new ArrayList<>());
 
     public GuildData(Guild guild) {
         super(UUID.randomUUID().toString(), guild);
@@ -118,7 +119,7 @@ public class GuildData extends ManagedGuild {
      *
      * @return Null if there already is some {@link ServerDashboard} in specified text channel or if bot was unable to create/edit message
      */
-    public ServerDashboard createServerDashboard(@NonNull TextChannel textChannel) {
+    public CompletableFuture<ServerDashboard> createServerDashboard(@NonNull TextChannel textChannel) {
         if (isServerDashboardInChannel(textChannel)) {
             return null;
         }
@@ -126,16 +127,19 @@ public class GuildData extends ManagedGuild {
         ManagedGuildMessage managedGuildMessage = new ManagedGuildMessage(UUID.randomUUID().toString(), textChannel.getGuild(), textChannel, null);
         ServerDashboard serverDashboard = new ServerDashboard(managedGuildMessage);
 
-        Waiter<Boolean> waiter = serverDashboard.update();
-        waiter.await();
+        CompletableFuture<ServerDashboard> serverDashboardCompletableFuture = new CompletableFuture<>();
 
-        if (waiter.getObject()) {
-            this.addServerDashboard(serverDashboard);
-            this.save();
-            return serverDashboard;
-        }
+        serverDashboard.update().thenAcceptAsync(result -> {
+            if (result) {
+                this.addServerDashboard(serverDashboard);
+                this.save();
+                serverDashboardCompletableFuture.complete(serverDashboard);
+            } else {
+                serverDashboardCompletableFuture.complete(null);
+            }
+        });
 
-        return null;
+        return serverDashboardCompletableFuture;
     }
 
     /**
@@ -143,15 +147,15 @@ public class GuildData extends ManagedGuild {
      *
      * @param textChannel Non-null {@link TextChannel}
      *
-     * @return True in {@link Waiter#getObject()} if {@link ServerDashboard} was successfully removed
+     * @return True in {@link CompletableFuture} if {@link ServerDashboard} was successfully removed
      */
-    public Waiter<Boolean> deleteServerDashboard(@NonNull TextChannel textChannel) {
+    public CompletableFuture<Boolean> deleteServerDashboard(@NonNull TextChannel textChannel) {
         ServerDashboard serverDashboard = this.getServerDashboard(textChannel);
-        Waiter<Boolean> waiter = new Waiter<>(false);
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
 
         if (serverDashboard == null) {
-            waiter.proceed();
-            return waiter;
+            completableFuture.complete(false);
+            return completableFuture;
         }
 
         this.removeServerDashboard(serverDashboard);
@@ -161,26 +165,25 @@ public class GuildData extends ManagedGuild {
         try {
             managedGuildMessage.updateEntries(Main.getMayuShardManager().get(), RestActionMethod.QUEUE, success -> {
                 managedGuildMessage.getMessage().delete().queue(successDelete -> {
-                    waiter.setObject(true);
-                    waiter.proceed();
+                    completableFuture.complete(true);
                 }, failureDelete -> {
                     Logger.warn("Failed to remove Server Dashboard's message (" + serverDashboard.getName() + ")! However, it was removed from loaded ones.");
 
-                    waiter.proceed(); // Default false
+                    completableFuture.complete(false);
                 });
             }, failure -> {
                 Logger.warn("Failed to update entries for Server Dashboard " + serverDashboard.getName() + "! However, it was removed from loaded ones.");
 
-                waiter.proceed(); // Default false
+                completableFuture.complete(false);
             });
         } catch (Exception exception) {
             Logger.throwing(exception);
             Logger.warn("Failed to remove Server Dashboard's message (" + serverDashboard.getName() + ")! However, it was removed from loaded ones.");
 
-            waiter.proceed(); // Default false
+            completableFuture.complete(false);
         }
 
-        return waiter;
+        return completableFuture;
     }
 
     // Updating
@@ -214,6 +217,7 @@ public class GuildData extends ManagedGuild {
             Iterator<ServerDashboard> serverDashboardIterator = loadedServerDashboards.listIterator();
             while (serverDashboardIterator.hasNext()) {
                 ServerDashboard serverDashboard = serverDashboardIterator.next();
+                serverDashboard.processBackwardsCompatibility();
 
                 CountDownLatch finished = new CountDownLatch(1);
                 AtomicBoolean canContinue = new AtomicBoolean(false);
@@ -380,7 +384,7 @@ public class GuildData extends ManagedGuild {
 
                 try {
                     notificationChannel.getManagedTextChannel().updateEntries(Main.getMayuShardManager().get());
-                    notificationChannel.processOldStatusWhitelist();
+                    notificationChannel.processBackwardsCompatibility();
 
                     Logger.flow("[GUILD-DATA] Successfully loaded Notification Channel " + notificationChannel.getName() + " for GuildData " + getRawGuildID() + " (" + getName() + ")");
                 } catch (PermissionException | ErrorResponseException | InvalidTextChannelIDException exception) {
@@ -465,11 +469,13 @@ public class GuildData extends ManagedGuild {
 
     @Override
     public boolean equals(Object object) {
-        if (this == object)
+        if (this == object) {
             return true;
+        }
 
-        if (!(object instanceof GuildData))
+        if (!(object instanceof GuildData)) {
             return false;
+        }
 
         GuildData guildData = (GuildData) object;
 

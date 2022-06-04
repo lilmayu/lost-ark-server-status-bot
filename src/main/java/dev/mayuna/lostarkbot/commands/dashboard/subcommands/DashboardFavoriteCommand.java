@@ -3,6 +3,7 @@ package dev.mayuna.lostarkbot.commands.dashboard.subcommands;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
+import dev.mayuna.lostarkbot.managers.PersistentServerCacheManager;
 import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
@@ -62,7 +63,7 @@ public class DashboardFavoriteCommand extends SlashCommand {
                 if (dashboard.addToFavorites(serverName)) {
                     dashboard.update();
                     dashboard.save();
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added server `" + Utils.getCorrectServerName(serverName) + "` into Favorite section!")
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully added server `" + PersistentServerCacheManager.getServerByName(serverName).getName() + "` into Favorite section!")
                                                                .build()).queue();
                 } else {
                     interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Server with name `" + serverOption.getAsString() + "` is already added in Favorite section or this server does not exist!")

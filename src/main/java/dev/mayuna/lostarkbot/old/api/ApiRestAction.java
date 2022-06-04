@@ -1,13 +1,13 @@
-package dev.mayuna.lostarkbot.api;
+package dev.mayuna.lostarkbot.old.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.mayuna.lostarkbot.api.exceptions.ApiException;
-import dev.mayuna.lostarkbot.api.exceptions.HttpException;
-import dev.mayuna.lostarkbot.api.exceptions.MissingPathParametersException;
-import dev.mayuna.lostarkbot.api.misc.*;
-import dev.mayuna.lostarkbot.api.unofficial.UnofficialLostArkApi;
+import dev.mayuna.lostarkbot.old.api.exceptions.ApiException;
+import dev.mayuna.lostarkbot.old.api.exceptions.HttpException;
+import dev.mayuna.lostarkbot.old.api.exceptions.MissingPathParametersException;
+import dev.mayuna.lostarkbot.old.api.unofficial.UnofficialLostArkApi;
+import dev.mayuna.lostarkbot.old.api.misc.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
 
 import java.io.IOException;

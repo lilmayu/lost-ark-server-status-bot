@@ -1,7 +1,7 @@
-package dev.mayuna.lostarkbot.api.misc;
+package dev.mayuna.lostarkbot.old.api.misc;
 
 import com.google.gson.annotations.SerializedName;
-import dev.mayuna.lostarkbot.api.Api;
+import dev.mayuna.lostarkbot.old.api.Api;
 import lombok.Getter;
 import lombok.Setter;
 

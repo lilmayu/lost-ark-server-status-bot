@@ -1,7 +1,7 @@
 package dev.mayuna.lostarkbot.objects.features;
 
 import com.google.gson.annotations.Expose;
-import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,13 +32,13 @@ public class LanguagePack {
 
     public String getTranslatedRegionName(LostArkRegion region) {
         switch (region) {
-            case WEST_NORTH_AMERICA -> {
+            case NORTH_AMERICA_WEST -> {
                 return westNorthAmerica;
             }
-            case EAST_NORTH_AMERICA -> {
+            case NORTH_AMERICA_EAST -> {
                 return eastNorthAmerica;
             }
-            case CENTRAL_EUROPE -> {
+            case EUROPE_CENTRAL -> {
                 return centralEurope;
             }
             case SOUTH_AMERICA -> {

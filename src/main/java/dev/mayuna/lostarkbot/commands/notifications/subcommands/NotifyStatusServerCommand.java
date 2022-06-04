@@ -3,9 +3,11 @@ package dev.mayuna.lostarkbot.commands.notifications.subcommands;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
+import dev.mayuna.lostarkbot.managers.PersistentServerCacheManager;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServer;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -50,10 +52,11 @@ public class NotifyStatusServerCommand extends SlashCommand {
             return;
         }
 
-        String correctServerName = Utils.getCorrectServerName(serverOption.getAsString());
+        LostArkServer lostArkServer = PersistentServerCacheManager.getServerByName(serverOption.getAsString());
 
-        if (correctServerName == null) {
-            interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Server with name `" + serverOption.getAsString() + "` does not exist!").build()).queue();
+        if (lostArkServer == null) {
+            interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Server with name `" + serverOption.getAsString() + "` does not exist!")
+                                                          .build()).queue();
             return;
         }
 
@@ -63,25 +66,27 @@ public class NotifyStatusServerCommand extends SlashCommand {
 
         NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(textChannel);
 
+        String serverName = lostArkServer.getName();
+
         switch (actionOption.getAsString()) {
             case "enable" -> {
-                if (notificationChannel.enable(correctServerName)) {
+                if (notificationChannel.enableStatusChangeForServer(serverName)) {
                     notificationChannel.save();
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Server **" + correctServerName + "** status change!")
-                                                               .build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Server **" + serverName + "** status change!")
+                                                                  .build()).queue();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + correctServerName + "** status change are already enabled!")
-                                                               .build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + serverName + "** status change are already enabled!")
+                                                                  .build()).queue();
                 }
             }
             case "disable" -> {
-                if (notificationChannel.disable(correctServerName)) {
+                if (notificationChannel.disableStatusChangeForServer(serverName)) {
                     notificationChannel.save();
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Server **" + correctServerName + "** status change!")
-                                                               .build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Server **" + serverName + "** status change!")
+                                                                  .build()).queue();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + correctServerName + "** status change are already disabled!")
-                                                               .build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Server **" + serverName + "** status change are already disabled!")
+                                                                  .build()).queue();
                 }
             }
         }

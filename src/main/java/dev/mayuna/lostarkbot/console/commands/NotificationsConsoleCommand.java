@@ -2,12 +2,12 @@ package dev.mayuna.lostarkbot.console.commands;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dev.mayuna.lostarkbot.api.unofficial.Forums;
-import dev.mayuna.lostarkbot.api.unofficial.News;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
+import dev.mayuna.lostarkbot.old.api.unofficial.Forums;
+import dev.mayuna.lostarkbot.old.api.unofficial.News;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
@@ -18,9 +18,6 @@ import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
 import dev.mayuna.lostarkbot.util.ObjectUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.objects.LostArkServer;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
-import dev.mayuna.lostarkscraper.objects.ServerStatus;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 import lombok.SneakyThrows;
 
@@ -157,16 +154,17 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                     Logger.success("Sending done.");
                 }
 
+                /* TODO: Aktualizovat toto
                 case "force-send-server-status-change" -> {
                     Logger.info("Forcing Server Status Change...");
 
-                    GuildDataManager.processServerStatusChange(ServerDashboardManager.getPreviousServerCache(), ServerDashboardManager.getLostArkServersCache());
+                    GuildDataManager.processServerStatusChange(ServerDashboardManager.getPreviousServerCacheOld(), ServerDashboardManager.getLostArkServersCacheOld());
 
                     Logger.info("Done.");
                 }
 
                 case "fake-server-status" -> {
-                    String serverName = Utils.getCorrectServerName(argumentParser.getArgumentAtIndex(1).getValue());
+                    String serverName = Utils.getServerByName(argumentParser.getArgumentAtIndex(1).getValue());
 
                     if (serverName == null) {
                         Logger.error("This server does not exist!");
@@ -182,7 +180,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                         return CommandResult.SUCCESS;
                     }
 
-                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCache();
+                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCacheOld();
                     LostArkServer lostArkServer = Utils.getServerFromList(lostArkServers.getServers(), serverName);
 
                     lostArkServers.getServers().remove(lostArkServer);
@@ -204,7 +202,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                         return CommandResult.SUCCESS;
                     }
 
-                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCache();
+                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCacheOld();
                     List<LostArkServer> servers = new LinkedList<>();
 
                     for (LostArkServer lostArkServer : lostArkServers.getServers()) {
@@ -218,11 +216,12 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                 }
 
                 case "clear-all-servers" -> {
-                    ServerDashboardManager.getLostArkServersCache().getServers().clear();
+                    ServerDashboardManager.getLostArkServersCacheOld().getServers().clear();
 
                     Logger.success("Successfully removed all servers from cache!");
                 }
 
+                */
                 default -> {
                     return CommandResult.INCORRECT_SYNTAX;
                 }

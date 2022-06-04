@@ -4,22 +4,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.managers.TwitterManager;
-import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
 import dev.mayuna.lostarkbot.objects.other.StatusWhitelistObject;
 import dev.mayuna.lostarkbot.objects.other.TwitterUser;
 import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.objects.LostArkServer;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
-import dev.mayuna.lostarkscraper.objects.ServerStatus;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServer;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServers;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkServerStatus;
 import dev.mayuna.mayusjdautils.util.DiscordUtils;
 import dev.mayuna.mayuslibrary.util.ArrayUtils;
-import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -33,94 +30,28 @@ import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 public class Utils {
 
-    public static LostArkRegion getRegionForServer(String serverName) {
-        Config.LostArk lostArkConfig = Config.get().getLostArk();
-
-        if (lostArkConfig.getWestNorthAmerica().contains(serverName)) {
-            return LostArkRegion.WEST_NORTH_AMERICA;
-        } else if (lostArkConfig.getEastNorthAmerica().contains(serverName)) {
-            return LostArkRegion.EAST_NORTH_AMERICA;
-        } else if (lostArkConfig.getCentralEurope().contains(serverName)) {
-            return LostArkRegion.CENTRAL_EUROPE;
-        } else if (lostArkConfig.getSouthAmerica().contains(serverName)) {
-            return LostArkRegion.SOUTH_AMERICA;
-        } else if (lostArkConfig.getEuropeWest().contains(serverName)) {
-            return LostArkRegion.EUROPE_WEST;
-        }
-        return null;
+    public static String getServerLine(LostArkServer lostArkServer) {
+        return getEmoteByStatus(lostArkServer.getStatus()) + " " + lostArkServer.getName();
     }
 
-    public static Map<String, ServerStatus> getServersByRegion(LostArkRegion region, LostArkServers servers) {
-        Map<String, ServerStatus> serverStatusMap = new LinkedHashMap<>();
-        for (LostArkServer server : servers.getServers()) {
-            if (getRegionForServer(server.getName()) == region) {
-                serverStatusMap.put(server.getName(), server.getStatus());
-            }
-        }
-        return serverStatusMap;
-    }
-
-    public static String getServerLine(String serverName, ServerStatus serverStatus) {
-        String serverLine;
-
-        switch (serverStatus) {
-            case GOOD -> serverLine = Constants.ONLINE_EMOTE;
-            case BUSY -> serverLine = Constants.BUSY_EMOTE;
-            case FULL -> serverLine = Constants.FULL_EMOTE;
-            case MAINTENANCE -> serverLine = Constants.MAINTENANCE_EMOTE;
-            default -> serverLine = Constants.OFFLINE_EMOTE;
-        }
-
-        serverLine += " " + serverName;
-
-        return serverLine;
-    }
-
-    public static String getEmoteByStatus(ServerStatus serverStatus) {
+    public static String getEmoteByStatus(LostArkServerStatus serverStatus) {
         if (serverStatus == null) {
             return Constants.OFFLINE_EMOTE;
         }
 
         return switch (serverStatus) {
-            case GOOD -> Constants.ONLINE_EMOTE;
+            case ONLINE -> Constants.ONLINE_EMOTE;
             case BUSY -> Constants.BUSY_EMOTE;
             case FULL -> Constants.FULL_EMOTE;
             case MAINTENANCE -> Constants.MAINTENANCE_EMOTE;
+            default -> Constants.OFFLINE_EMOTE;
         };
-    }
-
-    public static ServerStatus getServerStatus(String serverName, LostArkServers servers) {
-        for (LostArkServer server : servers.getServers()) {
-            if (server.getName().equalsIgnoreCase(serverName)) {
-                return server.getStatus();
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Checks if server exists. If exists, returns correct, possibly same as specified server name, server name.
-     *
-     * @param serverName Server name
-     *
-     * @return Null if server does not exist
-     */
-    public static String getCorrectServerName(String serverName) {
-        for (LostArkServer server : ServerDashboardManager.getLostArkServersCache().getServers()) {
-            if (server.getName().equalsIgnoreCase(serverName)) {
-                return server.getName();
-            }
-        }
-
-        return null;
     }
 
     public static long toUnixTimestamp(String timestamp) {
@@ -198,12 +129,8 @@ public class Utils {
 
     public static OptionData getStatusArgument() {
         OptionData optionData = new OptionData(OptionType.STRING, "status", "Status", true);
-        for (ServerStatus serverStatus : ServerStatus.values()) {
-            if (serverStatus == ServerStatus.GOOD) {
-                optionData.addChoice("Online", serverStatus.name());
-            } else {
-                optionData.addChoice(Utils.prettyString(serverStatus.name()), serverStatus.name());
-            }
+        for (LostArkServerStatus serverStatus : LostArkServerStatus.values()) {
+            optionData.addChoice(Utils.prettyString(serverStatus.name()), serverStatus.name());
         }
         return optionData;
     }
@@ -221,26 +148,23 @@ public class Utils {
         return optionData;
     }
 
-    public static OptionData getNewsCategoryArgument() {
-        OptionData optionData = new OptionData(OptionType.STRING, "category", "News category", true);
-        for (NewsCategory newsCategory : NewsCategory.values()) {
-            optionData.addChoice(newsCategory.toString(), newsCategory.name());
-        }
+    public static OptionData getNewsTagArgument() {
+        OptionData optionData = new OptionData(OptionType.STRING, "tag", "News tag", true);
+
+        // TODO: Staticky sem hodit názvy news tagů
+
         return optionData;
     }
 
     public static OptionData getForumsCategoryArgument() {
-        OptionData optionData = new OptionData(OptionType.STRING, "category", "Forum category", true);
-        for (ForumsCategory forumsCategory : ForumsCategory.values()) {
-            optionData.addChoice(forumsCategory.toString(), forumsCategory.name());
-        }
+        OptionData optionData = new OptionData(OptionType.NUMBER, "category", "Forum category", true);
         return optionData;
     }
 
     public static OptionData getRegionArgument() {
         OptionData optionData = new OptionData(OptionType.STRING, "region", "Region", true);
         for (LostArkRegion region : LostArkRegion.values()) {
-            optionData.addChoice(region.getFormattedName(), region.name());
+            optionData.addChoice(region.getPrettyName(), region.name());
         }
         return optionData;
     }
@@ -277,7 +201,8 @@ public class Utils {
         return null;
     }
 
-    public static List<LostArkServersChange.Difference> getDifferencesByRegion(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences, LostArkRegion lostArkRegion) {
+    public static List<LostArkServersChange.Difference> getDifferencesByRegion(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences,
+                                                                               LostArkRegion lostArkRegion) {
         List<LostArkServersChange.Difference> differences = new LinkedList<>();
 
         regionDifferences.forEach((difference, regionMap) -> {
@@ -363,7 +288,9 @@ public class Utils {
         }
     }
 
-    public static boolean isOnWhitelistAndIsNotOnBlacklist(LostArkServersChange.Difference difference, List<StatusWhitelistObject> statusWhitelistObjects, List<StatusWhitelistObject> statusBlacklistObjects) {
+    public static boolean isOnWhitelistAndIsNotOnBlacklist(LostArkServersChange.Difference difference,
+                                                           List<StatusWhitelistObject> statusWhitelistObjects,
+                                                           List<StatusWhitelistObject> statusBlacklistObjects) {
         if (statusWhitelistObjects.isEmpty()) {
             return true;
         }
@@ -549,7 +476,8 @@ public class Utils {
         return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
     }
 
-    public static List<StatusWhitelistObject> getStatusWhitelistObjectsByType(List<StatusWhitelistObject> statusWhitelistObjects, StatusWhitelistObject.Type type) {
+    public static List<StatusWhitelistObject> getStatusWhitelistObjectsByType(List<StatusWhitelistObject> statusWhitelistObjects,
+                                                                              StatusWhitelistObject.Type type) {
         List<StatusWhitelistObject> returnValue = new LinkedList<>();
         for (StatusWhitelistObject statusWhitelistObject : statusWhitelistObjects) {
             if (statusWhitelistObject.getType() == type) {
@@ -558,6 +486,20 @@ public class Utils {
         }
 
         return returnValue;
+    }
+
+    public static LostArkServerStatus getServerStatus(String serverName, LostArkServers servers) {
+        LostArkServer lostArkServer = servers.getServerByName(serverName).orElse(null);
+
+        if (lostArkServer != null) {
+            return lostArkServer.getStatus();
+        }
+
+        return LostArkServerStatus.OFFLINE;
+    }
+
+    public static String getServerLine(String serverName, LostArkServerStatus serverStatus) {
+        return getServerLine(new LostArkServer(serverName, null, serverStatus));
     }
 
     public enum Direction {

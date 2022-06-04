@@ -1,4 +1,4 @@
-package dev.mayuna.lostarkbot.api;
+package dev.mayuna.lostarkbot.old.api;
 
 public interface Api {
 

@@ -6,7 +6,6 @@ import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
-import dev.mayuna.lostarkbot.util.Waiter;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -38,20 +37,26 @@ public class DashboardResendCommand extends SlashCommand {
         }
 
         ServerDashboard dashboard = ServerDashboardHelper.getServerDashboard(textChannel);
+
+        Runnable runnable = () -> {
+            dashboard.update().thenAcceptAsync(result -> {
+                if (result) {
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Server dashboard has been resent.").build()).queue();
+                } else {
+                    interactionHook.editOriginalEmbeds(MessageInfo.warningEmbed(
+                                                                          "There was a problem updating the Server dashboard.\n\nPlease, try `/dashboard force-update`. You can also recreate current Server dashboard with `/dashboard remove` and `/dashboard create` commands.")
+                                                                  .build()).queue();
+                }
+            });
+        };
+
         try {
-            dashboard.getManagedGuildMessage().getMessage().delete().queue(success -> {}, failure -> {});
+            dashboard.getManagedGuildMessage().getMessage().delete().queue(success -> {
+                runnable.run();
+            }, failure -> {
+                runnable.run();
+            });
         } catch (Exception ignored) {
-        }
-
-        Waiter<Boolean> waiter = dashboard.update();
-        waiter.await();
-
-        if (waiter.getObject()) {
-            interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Server dashboard has been resent.").build()).queue();
-        } else {
-            interactionHook.editOriginalEmbeds(MessageInfo.warningEmbed(
-                            "There was a problem updating the Server dashboard.\n\nPlease, try `/dashboard force-update`. You can also recreate current Server dashboard with `/dashboard remove` and `/dashboard create` commands.")
-                                                       .build()).queue();
         }
     }
 }

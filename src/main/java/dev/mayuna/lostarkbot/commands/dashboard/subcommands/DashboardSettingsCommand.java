@@ -6,9 +6,9 @@ import dev.mayuna.lostarkbot.helpers.ServerDashboardHelper;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.objects.features.LanguagePack;
 import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
-import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
 import dev.mayuna.mayusjdautils.interactive.InteractiveMessage;
 import dev.mayuna.mayusjdautils.interactive.objects.Interaction;
 import dev.mayuna.mayusjdautils.util.DiscordUtils;
@@ -171,12 +171,12 @@ public class DashboardSettingsCommand extends SlashCommand {
 
         if (regionAction == RegionAction.SHOW) {
             for (String region : dashboard.getHiddenRegions()) {
-                regions.add(LostArkRegion.getCorrectFormatted(region));
+                regions.add(LostArkRegion.get(region).getPrettyName());
             }
         } else {
             for (LostArkRegion region : LostArkRegion.values()) {
                 if (!dashboard.getHiddenRegions().contains(region.name())) {
-                    regions.add(region.getFormattedName());
+                    regions.add(region.getPrettyName());
                 }
             }
         }

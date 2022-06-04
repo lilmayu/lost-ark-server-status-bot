@@ -1,13 +1,13 @@
-package dev.mayuna.lostarkbot.api.unofficial;
+package dev.mayuna.lostarkbot.old.api.unofficial;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import dev.mayuna.lostarkbot.api.misc.ApiRequest;
-import dev.mayuna.lostarkbot.api.misc.ApiResponse;
-import dev.mayuna.lostarkbot.api.misc.HttpRequestType;
-import dev.mayuna.lostarkbot.api.misc.PathParameter;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
+import dev.mayuna.lostarkbot.old.api.misc.ApiRequest;
+import dev.mayuna.lostarkbot.old.api.misc.ApiResponse;
+import dev.mayuna.lostarkbot.old.api.misc.HttpRequestType;
+import dev.mayuna.lostarkbot.old.api.misc.PathParameter;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
 import lombok.Getter;
 
 import java.util.ArrayList;

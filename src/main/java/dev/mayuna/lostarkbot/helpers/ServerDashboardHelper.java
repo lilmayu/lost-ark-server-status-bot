@@ -3,10 +3,11 @@ package dev.mayuna.lostarkbot.helpers;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.objects.features.GuildData;
 import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
-import dev.mayuna.lostarkbot.util.Waiter;
 import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+
+import java.util.concurrent.CompletableFuture;
 
 public class ServerDashboardHelper {
 
@@ -28,7 +29,7 @@ public class ServerDashboardHelper {
      *
      * @return Null if there already is some {@link ServerDashboard} in specified server or if bot was unable to create/edit message
      */
-    public static ServerDashboard createServerDashboard(@NonNull TextChannel textChannel) {
+    public static CompletableFuture<ServerDashboard> createServerDashboard(@NonNull TextChannel textChannel) {
         return GuildDataManager.getOrCreateGuildData(textChannel.getGuild()).createServerDashboard(textChannel);
     }
 
@@ -39,11 +40,9 @@ public class ServerDashboardHelper {
      *
      * @return True if {@link ServerDashboard} was successfully removed
      */
-    public static boolean deleteServerDashboard(@NonNull TextChannel textChannel) {
+    public static CompletableFuture<Boolean> deleteServerDashboard(@NonNull TextChannel textChannel) {
         GuildData guildData = GuildDataManager.getOrCreateGuildData(textChannel.getGuild());
-        Waiter<Boolean> waiter = guildData.deleteServerDashboard(textChannel);
-        waiter.await();
-        return waiter.getObject();
+        return guildData.deleteServerDashboard(textChannel);
     }
 
     /**

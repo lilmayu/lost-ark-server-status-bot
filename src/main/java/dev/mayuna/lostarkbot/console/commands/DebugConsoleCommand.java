@@ -30,7 +30,7 @@ public class DebugConsoleCommand extends AbstractConsoleCommand {
                 case "force-update" -> {
                     Logger.info("Force updating all guilds...");
 
-                    GuildDataManager.updateAllServerDashboards();
+                    //GuildDataManager.updateAllServerDashboards();
 
                     Logger.success("Updating done.");
                 }

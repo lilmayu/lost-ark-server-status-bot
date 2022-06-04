@@ -1,6 +1,6 @@
-package dev.mayuna.lostarkbot.api.exceptions;
+package dev.mayuna.lostarkbot.old.api.exceptions;
 
-import dev.mayuna.lostarkbot.api.misc.HttpError;
+import dev.mayuna.lostarkbot.old.api.misc.HttpError;
 import lombok.Getter;
 
 public class HttpException extends RuntimeException {

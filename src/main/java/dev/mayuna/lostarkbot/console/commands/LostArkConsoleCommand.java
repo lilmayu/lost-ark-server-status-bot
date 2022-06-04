@@ -3,11 +3,11 @@ package dev.mayuna.lostarkbot.console.commands;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
-import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.objects.LostArkServer;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServer;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServers;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 import dev.mayuna.mayuslibrary.graphics.console.colors.Color;
 import dev.mayuna.mayuslibrary.graphics.console.colors.Colors;
@@ -27,9 +27,9 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
             switch (argumentParser.getArgumentAtIndex(0).getValue()) {
                 case "show-cache" -> {
                     Logger.info("Previous Lost Ark Servers cache: ");
-                    print(ServerDashboardManager.getPreviousServerCache());
+                    print(ServerDashboardManager.getPreviousLostArkServersCache());
                     Logger.info("Current Lost Ark Servers cache: ");
-                    print(ServerDashboardManager.getLostArkServersCache());
+                    print(ServerDashboardManager.getCurrentLostArkServersCache());
                 }
                 case "update-cache" -> {
                     Logger.info("Updating Lost Ark Servers cache...");
@@ -59,11 +59,11 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
         Logger.info("Is null? " + (lostArkServers == null));
 
         if (lostArkServers != null) {
-            Logger.info("There is " + lostArkServers.getServers().size() + " servers");
+            Logger.info("There is " + lostArkServers.get().size() + " servers");
 
             int counter = 0;
-            for (LostArkServer server : lostArkServers.getServers()) {
-                LostArkRegion region = Utils.getRegionForServer(server.getName());
+            for (LostArkServer serverName : lostArkServers.get()) {
+                LostArkRegion region = serverName.getRegion();
                 String regionName;
 
                 if (region == null) {
@@ -72,7 +72,7 @@ public class LostArkConsoleCommand extends AbstractConsoleCommand {
                     regionName = region.name();
                 }
 
-                Logger.info("[" + counter + "]: " + server.getName() + " // " + server.getStatus().name() + " - " + regionName);
+                Logger.info("[" + counter + "]: " + serverName.getName() + " // " + serverName.getStatus().name() + " - " + regionName);
 
                 counter++;
             }

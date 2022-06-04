@@ -1,9 +1,9 @@
-package dev.mayuna.lostarkbot.api.unofficial;
+package dev.mayuna.lostarkbot.old.api.unofficial;
 
-import dev.mayuna.lostarkbot.api.Api;
-import dev.mayuna.lostarkbot.api.ApiRestAction;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
+import dev.mayuna.lostarkbot.old.api.Api;
+import dev.mayuna.lostarkbot.old.api.ApiRestAction;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.util.config.Config;
 
 public class UnofficialLostArkApi implements Api {

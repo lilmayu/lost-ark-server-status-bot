@@ -17,36 +17,25 @@ public class StatusWhitelistObject {
         this.status = status;
     }
 
-    public enum Type {
-        FROM,
-        TO;
-
-        public static Type get(String string) {
-            for (Type type : values())
-                if (type.name().equalsIgnoreCase(string))
-                    return type;
-
-            return null;
+    public void processBackwardsCompatibility() {
+        if (status.equalsIgnoreCase("GOOD")) {
+            status = "ONLINE";
         }
     }
 
     @Override
     public String toString() {
-        String prettyStatus = status;
-
-        if (prettyStatus.equals("GOOD")) {
-            prettyStatus = "ONLINE";
-        }
-
-        return Utils.prettyString(prettyStatus);
+        return Utils.prettyString(status);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof StatusWhitelistObject))
+        }
+        if (!(o instanceof StatusWhitelistObject)) {
             return false;
+        }
         StatusWhitelistObject that = (StatusWhitelistObject) o;
         return Objects.equals(status, that.status) && type == that.type;
     }
@@ -54,5 +43,20 @@ public class StatusWhitelistObject {
     @Override
     public int hashCode() {
         return Objects.hash(status, type);
+    }
+
+    public enum Type {
+        FROM,
+        TO;
+
+        public static Type get(String string) {
+            for (Type type : values()) {
+                if (type.name().equalsIgnoreCase(string)) {
+                    return type;
+                }
+            }
+
+            return null;
+        }
     }
 }

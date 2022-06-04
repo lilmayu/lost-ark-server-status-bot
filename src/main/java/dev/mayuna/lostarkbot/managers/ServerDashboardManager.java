@@ -1,11 +1,11 @@
 package dev.mayuna.lostarkbot.managers;
 
+import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.util.UpdateType;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.LostArk;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServers;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +17,8 @@ public class ServerDashboardManager {
 
     private static final @Getter Timer serverDashboardUpdateWorker = new Timer("ServerDashboardUpdateWorker");
 
-    private static @Getter @Setter LostArkServers lostArkServersCache;
-    private static @Getter @Setter LostArkServers previousServerCache;
+    private static @Getter @Setter LostArkServers currentLostArkServersCache;
+    private static @Getter @Setter LostArkServers previousLostArkServersCache;
     private static @Getter String onlinePlayersCache;
 
     public static void init() {
@@ -54,14 +54,15 @@ public class ServerDashboardManager {
         });
 
         ShardExecutorManager.submitForEachShard(UpdateType.SERVER_STATUS, shardId -> {
-            GuildDataManager.processServerStatusChange(shardId, previousServerCache, lostArkServersCache);
+            GuildDataManager.processServerStatusChange(shardId, previousLostArkServersCache, currentLostArkServersCache);
         });
     }
 
     public static void updateCache() throws IOException {
-        previousServerCache = lostArkServersCache;
+        currentLostArkServersCache = previousLostArkServersCache;
 
-        lostArkServersCache = LostArk.fetchServers();
+        currentLostArkServersCache = Main.getLostArkFetcher().fetchServers().execute().join();
+        PersistentServerCacheManager.updateServerCache(currentLostArkServersCache.get());
         onlinePlayersCache = Utils.getOnlinePlayers();
     }
 }

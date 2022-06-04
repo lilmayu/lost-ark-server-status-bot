@@ -2,7 +2,7 @@ package dev.mayuna.lostarkbot.commands.notifications.subcommands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
@@ -21,7 +21,7 @@ public class NotifyForumsCommand extends SlashCommand {
 
     public NotifyForumsCommand() {
         this.name = "forums";
-        this.help = "Allows you to enable/disable specific Lost Ark Forum post notifications";
+        this.help = "Allows you to enable/disable specific Lost Ark Forum post notifications"; // TODO: Toto se bude přidávat přes menu
 
         this.userPermissions = new Permission[]{Permission.ADMINISTRATOR};
 
@@ -55,25 +55,26 @@ public class NotifyForumsCommand extends SlashCommand {
         }
 
         NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(textChannel);
-        ForumsCategory forumsCategory = ForumsCategory.valueOf(forumsCategoriesOption.getAsString());
+        int forumCategory = forumsCategoriesOption.getAsInt();
 
         switch (actionOption.getAsString()) {
             case "enable" -> {
-                if (notificationChannel.enable(forumsCategory)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Forums category **" + forumsCategory + "**!").build())
+                if (notificationChannel.enableForumCategory(forumCategory)) {
+                    // TODO: Místo čísel názvy!!
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Forums category **" + forumCategory + "**!").build())
                             .queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Forums category **" + forumsCategory + "** are already enabled!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Forums category **" + forumCategory + "** are already enabled!").build()).queue();
                 }
             }
             case "disable" -> {
-                if (notificationChannel.disable(forumsCategory)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Forums category **" + forumsCategory + "**!").build())
+                if (notificationChannel.disableForumCategory(forumCategory)) {
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Forums category **" + forumCategory + "**!").build())
                             .queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Forums category **" + forumsCategory + "** are already disabled!").build())
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for Forums category **" + forumCategory + "** are already disabled!").build())
                             .queue();
                 }
             }

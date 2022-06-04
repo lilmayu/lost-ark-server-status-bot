@@ -2,14 +2,14 @@ package dev.mayuna.lostarkbot.commands.notifications.subcommands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
-import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.objects.other.StatusWhitelistObject;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -58,52 +58,52 @@ public class NotifyInfoCommand extends SlashCommand {
         embedBuilder.setDescription(description);
 
         String newsCategories = "";
-        if (notificationChannel.getNewsCategories().isEmpty()) {
+        if (notificationChannel.getNewsTags().isEmpty()) {
             newsCategories = "No News categories enabled.";
         } else {
-            for (NewsCategory newsCategory : notificationChannel.getNewsCategories()) {
-                newsCategories += newsCategory.toString();
+            for (String newsTag : notificationChannel.getNewsTags()) {
+                newsCategories += newsTag.toString();
 
-                if (!Utils.isLast(notificationChannel.getNewsCategories(), newsCategory)) {
+                if (!Utils.isLast(notificationChannel.getNewsTags(), newsTag)) {
                     newsCategories += ",\n";
                 }
             }
         }
 
         String forumsCategories = "";
-        if (notificationChannel.getForumsCategories().isEmpty()) {
+        if (notificationChannel.getForumCategories().isEmpty()) {
             forumsCategories = "No Forums categories enabled.";
         } else {
-            for (ForumsCategory forumsCategory : notificationChannel.getForumsCategories()) {
-                forumsCategories += forumsCategory.toString();
+            for (int forumCategoryId : notificationChannel.getForumCategories()) {
+                forumsCategories += forumCategoryId;
 
-                if (!Utils.isLast(notificationChannel.getForumsCategories(), forumsCategory)) {
+                if (!Utils.isLast(notificationChannel.getForumCategories(), forumCategoryId)) {
                     forumsCategories += ",\n";
                 }
             }
         }
 
         String regions = "";
-        if (notificationChannel.getRegions().isEmpty()) {
+        if (notificationChannel.getStatusChangeRegions().isEmpty()) {
             regions = "No specific Region status changes enabled";
         } else {
-            for (LostArkRegion lostArkRegion : notificationChannel.getRegions()) {
-                regions += lostArkRegion.getFormattedName();
+            for (LostArkRegion lostArkRegion : notificationChannel.getStatusChangeRegions()) {
+                regions += lostArkRegion.getPrettyName();
 
-                if (!Utils.isLast(notificationChannel.getRegions(), lostArkRegion)) {
+                if (!Utils.isLast(notificationChannel.getStatusChangeRegions(), lostArkRegion)) {
                     regions += ",\n";
                 }
             }
         }
 
         String servers = "";
-        if (notificationChannel.getServers().isEmpty()) {
+        if (notificationChannel.getStatusChangeServers().isEmpty()) {
             servers = "No specific Server status changes enabled";
         } else {
-            for (String serverName : notificationChannel.getServers()) {
+            for (String serverName : notificationChannel.getStatusChangeServers()) {
                 servers += serverName;
 
-                if (!Utils.isLast(notificationChannel.getServers(), serverName)) {
+                if (!Utils.isLast(notificationChannel.getStatusChangeServers(), serverName)) {
                     servers += ",\n";
                 }
             }

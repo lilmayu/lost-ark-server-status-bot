@@ -2,11 +2,12 @@ package dev.mayuna.lostarkbot.commands.notifications.subcommands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkNewsTag;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -27,7 +28,7 @@ public class NotifyNewsCommand extends SlashCommand {
 
         List<OptionData> options = new ArrayList<>(2);
         options.add(Utils.getEnableDisableArgument());
-        options.add(Utils.getNewsCategoryArgument());
+        options.add(Utils.getNewsTagArgument());
         this.options = options;
     }
 
@@ -55,23 +56,23 @@ public class NotifyNewsCommand extends SlashCommand {
         }
 
         NotificationChannel notificationChannel = NotificationChannelHelper.getNotificationChannel(textChannel);
-        NewsCategory newsCategory = NewsCategory.valueOf(newsCategoryOption.getAsString());
+        String newsTag = newsCategoryOption.getAsString();
 
         switch (actionOption.getAsString()) {
             case "enable" -> {
-                if (notificationChannel.enable(newsCategory)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for News category **" + newsCategory + "**!").build()).queue();
+                if (notificationChannel.enableNews(new LostArkNewsTag(newsTag))) {
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for News category **" + newsTag + "**!").build()).queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for News category **" + newsCategory + "** are already enabled!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for News category **" + newsTag + "** are already enabled!").build()).queue();
                 }
             }
             case "disable" -> {
-                if (notificationChannel.disable(newsCategory)) {
-                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for News category **" + newsCategory + "**!").build()).queue();
+                if (notificationChannel.disableNews(newsTag)) {
+                    interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for News category **" + newsTag + "**!").build()).queue();
                     notificationChannel.save();
                 } else {
-                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for News category **" + newsCategory + "** are already disabled!").build()).queue();
+                    interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Notifications for News category **" + newsTag + "** are already disabled!").build()).queue();
                 }
             }
         }

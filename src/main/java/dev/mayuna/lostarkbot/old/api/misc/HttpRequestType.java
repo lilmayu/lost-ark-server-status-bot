@@ -1,4 +1,4 @@
-package dev.mayuna.lostarkbot.api.misc;
+package dev.mayuna.lostarkbot.old.api.misc;
 
 public enum HttpRequestType {
     GET,

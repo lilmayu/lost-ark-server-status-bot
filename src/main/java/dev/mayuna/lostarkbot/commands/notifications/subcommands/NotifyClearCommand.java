@@ -55,19 +55,19 @@ public class NotifyClearCommand extends SlashCommand {
 
         switch (clearOption.getAsString()) {
             case "news" -> {
-                notificationChannel.getNewsCategories().clear();
+                notificationChannel.getNewsTags().clear();
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared News notifications!").build()).queue();
             }
             case "forums" -> {
-                notificationChannel.getForumsCategories().clear();
+                notificationChannel.getForumsCategoriesOld().clear();
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Forums notifications!").build()).queue();
             }
             case "status_server" -> {
-                notificationChannel.getServers().clear();
+                notificationChannel.getStatusChangeServers().clear();
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Server change status notifications!").build()).queue();
             }
             case "status_region" -> {
-                notificationChannel.getRegions().clear();
+                notificationChannel.getStatusChangeRegions().clear();
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Region change status notifications!").build()).queue();
             }
             case "status_whitelist" -> {

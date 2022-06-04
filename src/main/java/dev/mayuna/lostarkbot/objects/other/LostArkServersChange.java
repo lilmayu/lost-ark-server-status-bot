@@ -1,10 +1,11 @@
 package dev.mayuna.lostarkbot.objects.other;
 
-import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkbot.util.LostArkUtils;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkscraper.objects.LostArkServer;
-import dev.mayuna.lostarkscraper.objects.LostArkServers;
-import dev.mayuna.lostarkscraper.objects.ServerStatus;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServer;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServers;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkServerStatus;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,10 +30,10 @@ public class LostArkServersChange {
             return false;
         }
 
-        return !previousServers.equals(currentServers);
+        return !LostArkUtils.doLostArkServersEqual(previousServers, currentServers);
     }
 
-    public Difference getDifference(String serverName, ServerStatus oldServerStatus, ServerStatus newServerStatus) {
+    public Difference getDifference(String serverName, LostArkServerStatus oldServerStatus, LostArkServerStatus newServerStatus) {
         Logger.flow("ServerName: " + serverName + "; oldStatus: " + oldServerStatus + "; newStatus: " + newServerStatus);
 
         if (oldServerStatus == newServerStatus) {
@@ -44,30 +45,30 @@ public class LostArkServersChange {
     }
 
     public Difference getDifferenceForServer(String serverName) {
-        LostArkServer oldServer = Utils.getServerFromList(previousServers.getServers(), serverName);
-        LostArkServer newServer = Utils.getServerFromList(currentServers.getServers(), serverName);
+        LostArkServer oldServer = previousServers.getServerByName(serverName).orElse(null);
+        LostArkServer newServer = currentServers.getServerByName(serverName).orElse(null);
 
-        ServerStatus oldServerStatus = oldServer == null ? null : oldServer.getStatus();
-        ServerStatus newServerStatus = newServer == null ? null : newServer.getStatus();
+        LostArkServerStatus oldServerStatus = oldServer == null ? LostArkServerStatus.OFFLINE : oldServer.getStatus();
+        LostArkServerStatus newServerStatus = newServer == null ? LostArkServerStatus.OFFLINE : newServer.getStatus();
 
-        Difference difference = getDifference(serverName, oldServerStatus, newServerStatus);
-
-        Logger.get().trace("ForServer");
-        Logger.get().trace(difference);
-
-        return difference;
+        return getDifference(serverName, oldServerStatus, newServerStatus);
     }
 
     public List<Difference> getDifferenceForWholeRegion(LostArkRegion lostArkRegion) {
-        Map<String, ServerStatus> oldServers = Utils.getServersByRegion(lostArkRegion, previousServers);
-        Map<String, ServerStatus> newServers = Utils.getServersByRegion(lostArkRegion, currentServers);
+        List<LostArkServer> oldServers = previousServers.getServersByRegion(lostArkRegion);
+        List<LostArkServer> newServers = currentServers.getServersByRegion(lostArkRegion);
         List<Difference> differences = new LinkedList<>();
 
-        for (Map.Entry<String, ServerStatus> entry : oldServers.entrySet()) {
-            String serverName = entry.getKey();
+        for (LostArkServer lostArkServer : oldServers) {
+            String serverName = lostArkServer.getName();
 
-            ServerStatus oldStatus = entry.getValue();
-            ServerStatus newStatus = newServers.get(serverName);
+            LostArkServerStatus oldStatus = lostArkServer.getStatus();
+
+            LostArkServer lostArkServerNew = LostArkUtils.getServerFromListByName(serverName, newServers);
+            LostArkServerStatus newStatus = LostArkServerStatus.OFFLINE;
+            if (lostArkServerNew != null) {
+                newStatus = lostArkServerNew.getStatus();
+            }
 
             Difference difference = getDifference(serverName, oldStatus, newStatus);
 
@@ -80,11 +81,16 @@ public class LostArkServersChange {
             }
         }
 
-        for (Map.Entry<String, ServerStatus> entry : newServers.entrySet()) {
-            String serverName = entry.getKey();
+        for (LostArkServer lostArkServer : newServers) {
+            String serverName = lostArkServer.getName();
 
-            ServerStatus oldStatus = oldServers.get(serverName);
-            ServerStatus newStatus = entry.getValue();
+            LostArkServerStatus newStatus = lostArkServer.getStatus();
+
+            LostArkServer lostArkServerOld = LostArkUtils.getServerFromListByName(serverName, oldServers);
+            LostArkServerStatus oldStatus = LostArkServerStatus.OFFLINE;
+            if (lostArkServerOld != null) {
+                oldStatus = lostArkServerOld.getStatus();
+            }
 
             Difference difference = getDifference(serverName, oldStatus, newStatus);
 
@@ -103,14 +109,14 @@ public class LostArkServersChange {
         return differences;
     }
 
-    public class Difference implements Comparable<Difference> {
+    public static class Difference implements Comparable<Difference> {
 
         private final @Getter String serverName;
 
-        private final @Getter @Nullable ServerStatus oldStatus; // null = Offline
-        private final @Getter @Nullable ServerStatus newStatus; // null = Offline
+        private final @Getter LostArkServerStatus oldStatus;
+        private final @Getter LostArkServerStatus newStatus;
 
-        public Difference(@NonNull String serverName, @Nullable ServerStatus oldStatus, @Nullable ServerStatus newStatus) {
+        public Difference(@NonNull String serverName, @Nullable LostArkServerStatus oldStatus, @Nullable LostArkServerStatus newStatus) {
             this.serverName = serverName;
             this.oldStatus = oldStatus;
             this.newStatus = newStatus;

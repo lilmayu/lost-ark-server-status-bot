@@ -17,6 +17,7 @@ import dev.mayuna.lostarkbot.util.SpecialRateLimiter;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkbot.util.config.Config;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.lostarkfetcher.LostArkFetcher;
 import dev.mayuna.mayusjdautils.data.MayuCoreListener;
 import dev.mayuna.mayusjdautils.util.DiscordUtils;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
@@ -39,6 +40,9 @@ public class Main {
     // Discord
     private static @Getter MayuShardManager mayuShardManager;
     private static @Getter CommandClientBuilder client;
+
+    // APIs
+    private static final @Getter LostArkFetcher lostArkFetcher = new LostArkFetcher();
 
     // Runtime
     private static boolean configLoaded = false;
@@ -127,6 +131,11 @@ public class Main {
 
     private static void loadManagers() {
         LanguageManager.load();
+
+        if (!PersistentServerCacheManager.load()) {
+            Logger.fatal("Failed to load persistent cache!");
+            System.exit(-1);
+        }
 
         GuildDataManager.init(mayuShardManager.get().getShardsTotal());
 

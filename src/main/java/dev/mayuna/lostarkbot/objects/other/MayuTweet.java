@@ -1,12 +1,17 @@
 package dev.mayuna.lostarkbot.objects.other;
 
-import dev.mayuna.lostarkbot.util.EmbedUtils;
+import dev.mayuna.lostarkbot.util.Constants;
 import dev.mayuna.lostarkbot.util.StringUtils;
+import dev.mayuna.mayusjdautils.util.DiscordUtils;
 import lombok.Getter;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import twitter4j.MediaEntity;
 import twitter4j.Status;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -125,7 +130,66 @@ public class MayuTweet {
         return false;
     }
 
+    /**
+     * Preprocesses fancy tweet message
+     */
     public void preProcessMessage() {
-        messageBuilder = EmbedUtils.createTweetMessage(this);
+        messageBuilder = createTweetMessageBuilder();
+    }
+
+    /**
+     * Creates fancy tweet message
+     * @return {@link MessageBuilder}
+     */
+    public MessageBuilder createTweetMessageBuilder() {
+        MessageBuilder messageBuilder = new MessageBuilder();
+        EmbedBuilder baseEmbedBuilder = DiscordUtils.getDefaultEmbed();
+        List<MessageEmbed> finalEmbeds = new ArrayList<>(4);
+
+        baseEmbedBuilder.setColor(new Color(29, 161, 242));
+        baseEmbedBuilder.setFooter("Twitter", Constants.TWITTER_LOGO_URL);
+
+        baseEmbedBuilder.setAuthor(this.getUserName() + " (@" + this.getUserTag() + ")", this.getProfileUrl(), this.getProfilePictureUrl());
+
+        String description = "";
+        if (this.isReply()) {
+            description = "*Replied*\n";
+        } else if (this.isRetweet()) {
+            description = "*Retweeted*\n";
+        } else if (this.isQuoted()) {
+            description = "*Quoted*\n";
+        } else {
+            description = "*Tweeted*\n";
+        }
+
+        description += this.getFormattedText() + "\n\n";
+
+        if (this.isQuoted()) {
+            description += "*Quoted tweet*\n";
+
+            MayuTweet quotedMayuTweet = new MayuTweet(this.getQuotedStatus());
+            description += "[@" + quotedMayuTweet.getUserTag() + "](" + quotedMayuTweet.getProfileUrl() + "): " + quotedMayuTweet.getFormattedText() + "\n\n";
+        }
+
+        description += "[See more](" + this.getTweetUrl() + ")";
+        baseEmbedBuilder.setDescription(description);
+
+        if (this.hasMoreMedia()) {
+            baseEmbedBuilder.setTitle("\u200E", this.getProfileUrl());
+
+            String[] imageUrls = this.getMediaUrls();
+            baseEmbedBuilder.setImage(imageUrls[0]);
+
+            for (int x = 1; x < imageUrls.length; x++) {
+                finalEmbeds.add(new EmbedBuilder().setTitle("\u200E", this.getProfileUrl()).setImage(imageUrls[x]).build());
+            }
+        } else {
+            baseEmbedBuilder.setImage(this.getMediaUrl());
+        }
+
+        finalEmbeds.add(0, baseEmbedBuilder.build());
+        messageBuilder.setEmbeds(finalEmbeds);
+
+        return messageBuilder;
     }
 }

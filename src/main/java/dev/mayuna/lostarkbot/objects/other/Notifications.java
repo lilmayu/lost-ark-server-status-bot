@@ -1,9 +1,9 @@
 package dev.mayuna.lostarkbot.objects.other;
 
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.api.unofficial.objects.NewsObject;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
+import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsObject;
 import lombok.Getter;
 
 import java.util.HashMap;

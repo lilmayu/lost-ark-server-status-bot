@@ -1,4 +1,4 @@
-package dev.mayuna.lostarkbot.api.unofficial.objects;
+package dev.mayuna.lostarkbot.old.api.unofficial.objects;
 
 import com.google.gson.annotations.SerializedName;
 import dev.mayuna.lostarkbot.objects.abstracts.Hashable;

@@ -6,6 +6,7 @@ public class Constants {
 
     public static final String CONFIG_PATH = "./bot_config.json";
     public static final String POSTS_HASHES_JSON = "./posts_hashes.json";
+    public static final String PERSISTENT_SERVER_CACHE = "./persistent_server_cache.json";
 
     public static final String GUILDS_FOLDER = "./guilds/";
     public static final String LANG_FOLDER = "./lang/";

@@ -1,6 +1,6 @@
-package dev.mayuna.lostarkbot.api.exceptions;
+package dev.mayuna.lostarkbot.old.api.exceptions;
 
-import dev.mayuna.lostarkbot.api.misc.ApiError;
+import dev.mayuna.lostarkbot.old.api.misc.ApiError;
 import lombok.Getter;
 
 public class ApiException extends RuntimeException {

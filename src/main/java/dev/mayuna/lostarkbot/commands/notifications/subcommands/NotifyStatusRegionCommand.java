@@ -4,9 +4,9 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
-import dev.mayuna.lostarkbot.objects.other.LostArkRegion;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
 import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -50,15 +50,14 @@ public class NotifyStatusRegionCommand extends SlashCommand {
             return;
         }
 
-        String correctRegion = LostArkRegion.getCorrect(regionOption.getAsString());
+        LostArkRegion lostArkRegion = LostArkRegion.get(regionOption.getAsString());
 
-        if (correctRegion == null) {
+        if (lostArkRegion == null) {
             interactionHook.editOriginalEmbeds(MessageInfo.errorEmbed("Region with name `" + regionOption.getAsString() + "` does not exist!").build()).queue();
             return;
         }
 
-        LostArkRegion lostArkRegion = LostArkRegion.valueOf(correctRegion);
-        String formattedRegionName = lostArkRegion.getFormattedName();
+        String formattedRegionName = lostArkRegion.getPrettyName();
 
         if (!AutoMessageUtils.isEverythingAlrightNotificationChannel(textChannel, interactionHook)) {
             return;
@@ -68,7 +67,7 @@ public class NotifyStatusRegionCommand extends SlashCommand {
 
         switch (actionOption.getAsString()) {
             case "enable" -> {
-                if (notificationChannel.enable(lostArkRegion)) {
+                if (notificationChannel.enableStatusChangeForRegion(lostArkRegion)) {
                     interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully enabled notifications for Region **" + formattedRegionName + "** status change!")
                                                                .build())
                             .queue();
@@ -79,7 +78,7 @@ public class NotifyStatusRegionCommand extends SlashCommand {
                 }
             }
             case "disable" -> {
-                if (notificationChannel.disable(lostArkRegion)) {
+                if (notificationChannel.disableStatusChangeForRegion(lostArkRegion)) {
                     interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully disabled notifications for Region **" + formattedRegionName + "** status change!")
                                                                .build())
                             .queue();
