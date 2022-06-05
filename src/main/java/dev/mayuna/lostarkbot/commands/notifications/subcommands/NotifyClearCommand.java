@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
+import dev.mayuna.lostarkbot.util.LostArkUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
 import net.dv8tion.jda.api.Permission;
@@ -14,6 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class NotifyClearCommand extends SlashCommand {
@@ -59,8 +61,16 @@ public class NotifyClearCommand extends SlashCommand {
                 interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared News notifications!").build()).queue();
             }
             case "forums" -> {
-                notificationChannel.getForumsCategoriesOld().clear();
-                interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Forums notifications!").build()).queue();
+                notificationChannel.getForumCategories().clear();
+                interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Forums categories!").build()).queue();
+            }
+            case "unknown_forums" -> {
+                for (int forumCategoryId : new LinkedList<>(notificationChannel.getForumCategories())) {
+                    if (LostArkUtils.getForumCategoryName(forumCategoryId).isUnknown()) {
+                        notificationChannel.disableForumCategory(forumCategoryId);
+                    }
+                }
+                interactionHook.editOriginalEmbeds(MessageInfo.successEmbed("Successfully cleared Unknown Forums categories!").build()).queue();
             }
             case "status_server" -> {
                 notificationChannel.getStatusChangeServers().clear();

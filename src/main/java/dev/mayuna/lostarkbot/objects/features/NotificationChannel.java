@@ -5,16 +5,12 @@ import com.google.gson.annotations.SerializedName;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.LanguageManager;
 import dev.mayuna.lostarkbot.managers.PersistentServerCacheManager;
-import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
-import dev.mayuna.lostarkbot.objects.other.MayuTweet;
-import dev.mayuna.lostarkbot.objects.other.Notifications;
-import dev.mayuna.lostarkbot.objects.other.StatusWhitelistObject;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsObject;
+import dev.mayuna.lostarkbot.objects.features.lostark.WrappedForumTopic;
+import dev.mayuna.lostarkbot.objects.other.*;
 import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkForum;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkNews;
 import dev.mayuna.lostarkfetcher.objects.api.LostArkServer;
 import dev.mayuna.lostarkfetcher.objects.api.other.LostArkNewsTag;
 import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
@@ -126,7 +122,7 @@ public class NotificationChannel {
      *
      * @return True if added, false if there is already this tag
      */
-    public boolean enableNews(LostArkNewsTag newsTag) {
+    public boolean enableNews(StaticNewsTags newsTag) {
         if (newsTags.contains(newsTag.getDisplayName())) {
             return false;
         }
@@ -307,7 +303,9 @@ public class NotificationChannel {
 
     /**
      * Adds role to ping role ids list
+     *
      * @param role {@link Role}
+     *
      * @return True if added, false if it already exists
      */
     public boolean addToStatusPingRoleIds(Role role) {
@@ -323,7 +321,9 @@ public class NotificationChannel {
 
     /**
      * Removes role ID from the statusPingRolesIds list
+     *
      * @param roleId Role ID
+     *
      * @return True if the statusPingRolesIds list was changed
      */
     public boolean removeFromStatusPingRoleIds(String roleId) {
@@ -332,7 +332,9 @@ public class NotificationChannel {
 
     /**
      * Removes role from the statusPingRolesIds list
+     *
      * @param role {@link Role}
+     *
      * @return True if the statusPingRolesIds list was changed
      */
     public boolean removeFromStatusPingRoleIds(Role role) {
@@ -341,7 +343,9 @@ public class NotificationChannel {
 
     /**
      * Adds role to Twitter ping role ids list
+     *
      * @param role {@link Role}
+     *
      * @return True if added, false if it already exists
      */
     public boolean addToTwitterPingRoleIds(Role role) {
@@ -357,7 +361,9 @@ public class NotificationChannel {
 
     /**
      * Removes role ID from the twitterPingRolesIds list
+     *
      * @param roleId Role ID
+     *
      * @return True if the twitterPingRolesIds list was changed
      */
     public boolean removeFromTwitterPingRoleIds(String roleId) {
@@ -366,7 +372,9 @@ public class NotificationChannel {
 
     /**
      * Removes role from the twitterPingRolesIds list
+     *
      * @param role {@link Role}
+     *
      * @return True if the twitterPingRolesIds list was changed
      */
     public boolean removeFromTwitterPingRoleIds(Role role) {
@@ -375,7 +383,9 @@ public class NotificationChannel {
 
     /**
      * Adds Twitter keyword into the twitterKeywords list
+     *
      * @param keyword Keyword
+     *
      * @return True if added, false if it already exists
      */
     public boolean addToTwitterKeywords(String keyword) {
@@ -389,7 +399,9 @@ public class NotificationChannel {
 
     /**
      * Removes Twitter keyword from the twitterKeywords list
+     *
      * @param keyword Keyword
+     *
      * @return True if the twitterKeywords list was changed
      */
     public boolean removeFromTwitterKeywords(String keyword) {
@@ -398,7 +410,9 @@ public class NotificationChannel {
 
     /**
      * Adds Twitter account into the twitterFollowedAccounts list
+     *
      * @param twitterAccount Twitter account
+     *
      * @return True if added, false if it already exists
      */
     public boolean addToFollowedTwitterAccounts(String twitterAccount) {
@@ -412,7 +426,9 @@ public class NotificationChannel {
 
     /**
      * Removes Twitter account from the twitterFollowedAccounts list
+     *
      * @param twitterAccount Twitter account
+     *
      * @return True if the twitterFollowedAccounts list was changed
      */
     public boolean removeFromFollowedTwitterKeywords(String twitterAccount) {
@@ -430,11 +446,9 @@ public class NotificationChannel {
         MessageBuilder currentMessageBuilder = new MessageBuilder();
         List<MessageEmbed> embeds = new ArrayList<>();
 
-        // TODO: Rewrite
-        /*
-        for (NewsCategory newsCategory : getNewsTags()) {
-            for (NewsObject newsObject : notifications.getNewsByCategory(newsCategory)) {
-                embeds.add(EmbedUtils.createEmbed(newsObject, newsCategory).build());
+        for (String newsTags : getNewsTags()) {
+            for (LostArkNews lostArkNews : notifications.getNewsByCategory(StaticNewsTags.get(newsTags))) {
+                embeds.add(EmbedUtils.createEmbed(lostArkNews).build());
 
                 if (embeds.size() == 1) {
                     currentMessageBuilder.setEmbeds(embeds);
@@ -445,9 +459,9 @@ public class NotificationChannel {
             }
         }
 
-        for (ForumsCategory forumsCategory : getForumsCategoriesOld()) {
-            for (ForumsPostObject forumsPostObject : notifications.getForumsByCategory(forumsCategory)) {
-                embeds.add(EmbedUtils.createEmbed(forumsPostObject, forumsCategory).build());
+        for (int forumCategoryId : getForumCategories()) {
+            for (WrappedForumTopic forumTopic : notifications.getForumTopicsByForumCategoryId(forumCategoryId)) {
+                embeds.add(EmbedUtils.createEmbed(forumTopic).build());
 
                 if (embeds.size() == 1) {
                     currentMessageBuilder.setEmbeds(embeds);
@@ -457,7 +471,7 @@ public class NotificationChannel {
                 }
             }
         }
-        */
+
 
         if (!embeds.isEmpty()) {
             currentMessageBuilder.setEmbeds(embeds);
@@ -477,7 +491,10 @@ public class NotificationChannel {
 
         for (LostArkRegion lostArkRegion : getStatusChangeRegions()) {
             lostArkServersChange.getDifferenceForWholeRegion(lostArkRegion).forEach(difference -> {
-                if (Utils.isOnWhitelistAndIsNotOnBlacklist(difference, statusWhitelistObjects, statusBlacklistObjects) && difference != null) { // TODO: Rework této metody
+                if (Utils.isOnWhitelistAndIsNotOnBlacklist(difference,
+                                                           statusWhitelistObjects,
+                                                           statusBlacklistObjects
+                ) && difference != null) { // TODO: Rework této metody
                     regionDifferences.put(difference, lostArkRegion);
                 }
             });

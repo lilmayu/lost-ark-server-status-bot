@@ -176,7 +176,7 @@ public class GuildDataManager {
         if (guildData == null) {
             Logger.debug("Creating GuildData for guild " + guild.getIdLong());
             guildData = new GuildData(guild);
-            guildData.updateEntries(Main.getMayuShardManager().get()); // TODO: Optimized: this should just return, without any action
+            guildData.updateEntries(Main.getMayuShardManager().get());
 
             if (guildData.getShardId() == -1) {
                 Logger.error("GuildData has -1 ShardId even after updating it's entries! Putting it into ShardId 0 batch...");

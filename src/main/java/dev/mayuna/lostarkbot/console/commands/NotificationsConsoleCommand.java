@@ -1,23 +1,20 @@
 package dev.mayuna.lostarkbot.console.commands;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import dev.mayuna.lostarkbot.old.api.unofficial.Forums;
-import dev.mayuna.lostarkbot.old.api.unofficial.News;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsObject;
 import dev.mayuna.lostarkbot.console.commands.generic.AbstractConsoleCommand;
 import dev.mayuna.lostarkbot.console.commands.generic.CommandResult;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
 import dev.mayuna.lostarkbot.managers.NotificationsManager;
 import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
-import dev.mayuna.lostarkbot.objects.other.Notifications;
+import dev.mayuna.lostarkbot.managers.ShardExecutorManager;
 import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
-import dev.mayuna.lostarkbot.util.ObjectUtils;
-import dev.mayuna.lostarkbot.util.Utils;
+import dev.mayuna.lostarkbot.objects.features.lostark.WrappedForumCategoryName;
+import dev.mayuna.lostarkbot.util.UpdateType;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkForum;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkNews;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServer;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkServers;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkServerStatus;
 import dev.mayuna.mayuslibrary.arguments.ArgumentParser;
 import lombok.SneakyThrows;
 
@@ -29,7 +26,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
 
     public NotificationsConsoleCommand() {
         this.name = "notif";
-        this.syntax = "<update|show-cache|show-unread|show-read|read-all|force-send-notifications|force-send-server-status-change|fake-server-status <server> <status>|fake-all-status <status>|clear-all-servers>";
+        this.syntax = "<update|show-cache-news|show-cache-forums|show-cache-forum-names|force-send-notifications|force-send-server-status-change|fake-all-status <status>|clear-all-servers>";
     }
 
     @SneakyThrows
@@ -45,105 +42,42 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                     Logger.info("Done updating.");
                 }
 
-                case "show-cache" -> {
-                    News newsGeneral = NotificationsManager.getNewsGeneral();
-                    News newsEvents = NotificationsManager.getNewsEvents();
-                    News newsReleaseNotes = NotificationsManager.getNewsReleaseNotes();
-                    News newsUpdates = NotificationsManager.getNewsUpdates();
-                    Forums forumsMaintenance = NotificationsManager.getForumsMaintenance();
-                    Forums forumsDowntime = NotificationsManager.getForumsDowntime();
-
-                    if (ObjectUtils.allNotNull(newsGeneral, newsEvents, newsReleaseNotes, newsUpdates, forumsMaintenance, forumsDowntime)) {
-                        Logger.success("All API objects are not null.");
+                case "show-cache-news" -> {
+                    Logger.info("> News ========");
+                    for (LostArkNews[] lostArkNewsArray : NotificationsManager.getNews().values()) {
+                        for (LostArkNews lostArkNews : lostArkNewsArray) {
+                            Logger.info(lostArkNews.getTitle() + " (" + lostArkNews.getTag() + ") - " + lostArkNews.getPublishDate() + " (" + Hashable.create(
+                                    lostArkNews).hash() + ")");
+                        }
                     }
 
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    Logger.info("Listing done.");
+                }
+                case "show-cache-forum-names" -> {
+                    Logger.info("> Forum names ========");
+                    for (WrappedForumCategoryName wrappedForumCategoryName : NotificationsManager.getForumCategoryNames()) {
+                        Logger.info("(" + wrappedForumCategoryName.getId() + ") - " + wrappedForumCategoryName.getName() + "(" + wrappedForumCategoryName.getVerboseName() + ")");
 
-                    if (newsGeneral != null) {
-                        Logger.info("NewsGeneral:");
-                        Logger.info(gson.toJson(newsGeneral));
-                    } else {
-                        Logger.warn("News General is null.");
-                    }
+                        if (wrappedForumCategoryName.hasSubcategories()) {
+                            Logger.info("^ Has subcategories.");
 
-                    if (newsEvents != null) {
-                        Logger.info("NewsEvents:");
-                        Logger.info(gson.toJson(newsEvents));
-                    } else {
-                        Logger.warn("News Events is null.");
-                    }
-
-                    if (newsReleaseNotes != null) {
-                        Logger.info("NewsReleaseNotes:");
-                        Logger.info(gson.toJson(newsReleaseNotes));
-                    } else {
-                        Logger.warn("News Release Notes is null.");
-                    }
-
-                    if (newsUpdates != null) {
-                        Logger.info("NewsUpdates:");
-                        Logger.info(gson.toJson(newsUpdates));
-                    } else {
-                        Logger.warn("News Updates is null.");
-                    }
-
-                    if (forumsMaintenance != null) {
-                        Logger.info("ForumsMaintenance:");
-                        Logger.info(gson.toJson(forumsMaintenance));
-                    } else {
-                        Logger.warn("Forums Maintenance is null.");
-                    }
-
-                    if (forumsDowntime != null) {
-                        Logger.info("ForumsDowntime:");
-                        Logger.info(gson.toJson(forumsDowntime));
-                    } else {
-                        Logger.warn("Forums Downtime is null.");
+                            for (WrappedForumCategoryName wrappedForumCategoryName1 : wrappedForumCategoryName.getSubcategories()) {
+                                Logger.info("^^ (" + wrappedForumCategoryName1.getId() + ") - " + wrappedForumCategoryName1.getName() + "(" + wrappedForumCategoryName1.getVerboseName() + ")");
+                            }
+                        }
                     }
                 }
+                case "show-cache-forums" -> {
+                    Logger.info("> Forums ==========");
 
-                case "show-unread" -> {
-                    Notifications notifications = NotificationsManager.getUnreadNotifications();
+                    for (Map.Entry<Integer, LostArkForum> entry : NotificationsManager.getForums().entrySet()) {
+                        Logger.info("[" + entry.getKey() + "]: Parsed name: " + entry.getValue().getTopicList().parseNameFromMoreTopicsUrl());
+                        Logger.info("^ Topic list");
 
-                    int index = 0;
-
-                    Logger.info("Unread News: " + notifications.getNews().size());
-                    for (Map.Entry<NewsObject, NewsCategory> entry : notifications.getNews().entrySet()) {
-                        Logger.info("[" + index++ + "]: " + entry.getValue().name() + " | " + entry.getKey().getTitle() + " (" + entry.getKey().hash() + ")");
+                        for (LostArkForum.TopicList.Topic topic : entry.getValue().getTopicList().getTopics()) {
+                            Logger.info("- " + topic.getTitle() + " (" + topic.getId() + ") - " + topic.getCreatedAt());
+                        }
                     }
-
-                    index = 0;
-
-                    Logger.info("Unread Forums: " + notifications.getForums().size());
-                    for (Map.Entry<ForumsPostObject, ForumsCategory> entry : notifications.getForums().entrySet()) {
-                        Logger.info("[" + index++ + "]: " + entry.getValue().name() + " | " + entry.getKey().getTitle() + " (" + entry.getKey().hash() + ")");
-                    }
-                }
-
-                case "show-read" -> {
-                    List<String> hashesList = NotificationsManager.HashCache.getLoadedHashesList();
-
-                    if (hashesList == null) {
-                        Logger.warn("There was error while reading hashes. (hashesList == null)");
-                        return CommandResult.SUCCESS;
-                    }
-
-                    int index = 0;
-
-                    Logger.info("Read notifications: " + hashesList.size());
-                    for (String hash : hashesList) {
-                        Logger.info("[" + index++ + "]: " + hash);
-                    }
-                }
-
-                case "read-all" -> {
-                    Logger.info("Marking all as read...");
-                    Notifications notifications = NotificationsManager.getUnreadNotifications();
-
-                    NotificationsManager.HashCache.setAsSent(notifications.getForums().keySet().toArray(new Hashable[0]));
-                    NotificationsManager.HashCache.setAsSent(notifications.getNews().keySet().toArray(new Hashable[0]));
-
-                    Logger.success("Done marking.");
                 }
 
                 case "force-send-notifications" -> {
@@ -154,74 +88,46 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                     Logger.success("Sending done.");
                 }
 
-                /* TODO: Aktualizovat toto
+
                 case "force-send-server-status-change" -> {
                     Logger.info("Forcing Server Status Change...");
 
-                    GuildDataManager.processServerStatusChange(ServerDashboardManager.getPreviousServerCacheOld(), ServerDashboardManager.getLostArkServersCacheOld());
+                    ShardExecutorManager.submitForEachShard(UpdateType.SERVER_STATUS, shardId -> {
+                        GuildDataManager.processServerStatusChange(shardId, ServerDashboardManager.getPreviousLostArkServersCache(), ServerDashboardManager.getCurrentLostArkServersCache());
+                    });
 
                     Logger.info("Done.");
                 }
 
-                case "fake-server-status" -> {
-                    String serverName = Utils.getServerByName(argumentParser.getArgumentAtIndex(1).getValue());
-
-                    if (serverName == null) {
-                        Logger.error("This server does not exist!");
-                        return CommandResult.SUCCESS;
-                    }
-
-                    ServerStatus serverStatus;
-
-                    try {
-                        serverStatus = ServerStatus.valueOf(argumentParser.getArgumentAtIndex(2).getValue());
-                    } catch (Exception ignored) {
-                        Logger.error("Invalid status!");
-                        return CommandResult.SUCCESS;
-                    }
-
-                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCacheOld();
-                    LostArkServer lostArkServer = Utils.getServerFromList(lostArkServers.getServers(), serverName);
-
-                    lostArkServers.getServers().remove(lostArkServer);
-
-                    LostArkServer lostArkServerNew = new LostArkServer(serverName, null, serverStatus);
-
-                    lostArkServers.getServers().add(lostArkServerNew);
-
-                    Logger.success("Successfully faked server status for " + serverName + " to " + serverStatus.name() + "!");
-                }
-
                 case "fake-all-status" -> {
-                    ServerStatus serverStatus;
+                    LostArkServerStatus serverStatus;
 
                     try {
-                        serverStatus = ServerStatus.valueOf(argumentParser.getArgumentAtIndex(1).getValue());
+                        serverStatus = LostArkServerStatus.valueOf(argumentParser.getArgumentAtIndex(1).getValue());
                     } catch (Exception ignored) {
                         Logger.error("Invalid status!");
                         return CommandResult.SUCCESS;
                     }
 
-                    LostArkServers lostArkServers = ServerDashboardManager.getLostArkServersCacheOld();
+                    LostArkServers lostArkServers = ServerDashboardManager.getCurrentLostArkServersCache();
                     List<LostArkServer> servers = new LinkedList<>();
 
-                    for (LostArkServer lostArkServer : lostArkServers.getServers()) {
-                        servers.add(new LostArkServer(lostArkServer.getName(), null, serverStatus));
+                    for (LostArkServer lostArkServer : lostArkServers.get()) {
+                        servers.add(new LostArkServer(lostArkServer.getName(), lostArkServer.getRegion(), serverStatus));
                     }
 
-                    lostArkServers.getServers().clear();
-                    lostArkServers.getServers().addAll(servers);
+                    lostArkServers.get().clear();
+                    lostArkServers.get().addAll(servers);
 
                     Logger.success("Successfully faked all server statuses to " + serverStatus.name() + "!");
                 }
 
                 case "clear-all-servers" -> {
-                    ServerDashboardManager.getLostArkServersCacheOld().getServers().clear();
+                    ServerDashboardManager.getCurrentLostArkServersCache().get().clear();
 
                     Logger.success("Successfully removed all servers from cache!");
                 }
 
-                */
                 default -> {
                     return CommandResult.INCORRECT_SYNTAX;
                 }

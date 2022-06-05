@@ -39,7 +39,7 @@ dependencies {
     implementation 'dev.mayuna:mayus-json-utilities:1.3.1'
     implementation 'dev.mayuna:simple-java-api-wrapper:1.0.2'
     implementation 'dev.mayuna:top-gg-java-sdk:1.1.3'
-    implementation 'dev.mayuna:lost-ark-fetcher:0.2.1'
+    implementation 'dev.mayuna:lost-ark-fetcher:0.2.2'
 
     // Chewtils
     implementation "pw.chew:jda-chewtils:2.0-SNAPSHOT"

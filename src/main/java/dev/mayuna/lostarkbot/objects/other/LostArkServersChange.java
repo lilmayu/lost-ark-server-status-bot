@@ -30,7 +30,7 @@ public class LostArkServersChange {
             return false;
         }
 
-        return !LostArkUtils.doLostArkServersEqual(previousServers, currentServers);
+        return !LostArkUtils.doLostArkServersStatusesEqual(previousServers, currentServers);
     }
 
     public Difference getDifference(String serverName, LostArkServerStatus oldServerStatus, LostArkServerStatus newServerStatus) {

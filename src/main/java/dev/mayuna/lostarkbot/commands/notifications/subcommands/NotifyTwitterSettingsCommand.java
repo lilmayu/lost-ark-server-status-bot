@@ -174,8 +174,9 @@ public class NotifyTwitterSettingsCommand extends SlashCommand {
 
                     if (!success) {
                         interactionEvent.getInteractionHook()
-                                .editOriginalEmbeds(MessageInfo.errorEmbed("Could not enable account **" + twitterAccount + "**! This account is already enabled.").build())
-                                .queue();
+                                        .editOriginalEmbeds(MessageInfo.errorEmbed("Could not enable account **" + twitterAccount + "**! This account is already enabled.")
+                                                                       .build())
+                                        .queue();
                     } else {
                         notificationChannel.save();
                         getBaseAccountsMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());
@@ -210,8 +211,9 @@ public class NotifyTwitterSettingsCommand extends SlashCommand {
 
                     if (!success) {
                         interactionEvent.getInteractionHook()
-                                .editOriginalEmbeds(MessageInfo.errorEmbed("Could not disable account **" + twitterAccount + "**! This account is already disabled.").build())
-                                .queue();
+                                        .editOriginalEmbeds(MessageInfo.errorEmbed("Could not disable account **" + twitterAccount + "**! This account is already disabled.")
+                                                                       .build())
+                                        .queue();
                     } else {
                         notificationChannel.save();
                         getBaseAccountsMessage(notificationChannel).editOriginal(interactionEvent.getInteractionHook());

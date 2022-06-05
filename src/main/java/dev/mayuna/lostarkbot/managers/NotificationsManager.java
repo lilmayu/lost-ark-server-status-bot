@@ -3,41 +3,35 @@ package dev.mayuna.lostarkbot.managers;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import dev.mayuna.lostarkbot.old.api.ApiRestAction;
-import dev.mayuna.lostarkbot.old.api.misc.ApiResponse;
-import dev.mayuna.lostarkbot.old.api.unofficial.Forums;
-import dev.mayuna.lostarkbot.old.api.unofficial.News;
-import dev.mayuna.lostarkbot.old.api.unofficial.UnofficialLostArkApi;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsObject;
+import dev.mayuna.lostarkbot.Main;
 import dev.mayuna.lostarkbot.data.GuildDataManager;
-import dev.mayuna.lostarkbot.objects.other.Notifications;
 import dev.mayuna.lostarkbot.objects.abstracts.Hashable;
+import dev.mayuna.lostarkbot.objects.features.lostark.WrappedForumCategoryName;
+import dev.mayuna.lostarkbot.objects.features.lostark.WrappedForumTopic;
+import dev.mayuna.lostarkbot.objects.other.Notifications;
+import dev.mayuna.lostarkbot.objects.other.StaticNewsTags;
 import dev.mayuna.lostarkbot.util.*;
 import dev.mayuna.lostarkbot.util.logging.Logger;
+import dev.mayuna.lostarkfetcher.LostArkFetcher;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkForum;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkNews;
+import dev.mayuna.lostarkfetcher.objects.api.other.LostArkNewsTag;
 import dev.mayuna.mayusjsonutils.JsonUtil;
 import dev.mayuna.mayusjsonutils.objects.MayuJson;
 import dev.mayuna.mayuslibrary.exceptionreporting.ExceptionReporter;
 import lombok.Getter;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class NotificationsManager {
 
     private static final @Getter Timer notificationsUpdateWorker = new Timer("NotificationsUpdateWorker");
 
-    private static @Getter News newsGeneral;
-    private static @Getter News newsEvents;
-    private static @Getter News newsReleaseNotes;
-    private static @Getter News newsUpdates;
+    private static @Getter Map<StaticNewsTags, LostArkNews[]> news = new HashMap<>(); // News tag : Array of news
+    private static @Getter Map<Integer, LostArkForum> forums = new HashMap<>(); // Forum Category Id : Forum
 
-    private static @Getter Forums forumsMaintenance;
-    private static @Getter Forums forumsDowntime;
+    private static @Getter List<WrappedForumCategoryName> forumCategoryNames = Collections.synchronizedList(new LinkedList<>());
 
     public static void init() {
         Logger.info("[NOTIFICATIONS] Initializing Notification manager...");
@@ -72,14 +66,11 @@ public class NotificationsManager {
 
         Logger.info("There are new notifications! Sending them to Notification channels...");
         Logger.debug("News: " + notifications.getNews().size());
-        Logger.debug("Forums: " + notifications.getForums().size());
+        Logger.debug("Forums: " + notifications.getForumTopics().size());
 
         long start = System.currentTimeMillis();
         sendToAllNotificationChannelsByRules(notifications);
         long took = System.currentTimeMillis() - start;
-
-        HashCache.setAsSent(notifications.getForums().keySet().toArray(new Hashable[0]));
-        HashCache.setAsSent(notifications.getNews().keySet().toArray(new Hashable[0]));
 
         Logger.info("Queuing notifications messages for all shards done in " + took + "ms.");
     }
@@ -91,135 +82,150 @@ public class NotificationsManager {
     }
 
     public static void fetchAll() {
-        UnofficialLostArkApi api = new UnofficialLostArkApi();
+        LostArkFetcher lostArkFetcher = Main.getLostArkFetcher();
 
-        newsGeneral = fetch(api.fetchNews(NewsCategory.GENERAL), "News GENERAL");
-        newsEvents = fetch(api.fetchNews(NewsCategory.EVENTS), "News EVENTS");
-        newsReleaseNotes = fetch(api.fetchNews(NewsCategory.RELEASE_NOTES), "News RELEASE_NOTES");
-        newsUpdates = fetch(api.fetchNews(NewsCategory.UPDATES), "News UPDATES");
+        long start = System.currentTimeMillis();
 
-        forumsMaintenance = fetch(api.fetchForumPosts(ForumsCategory.MAINTENANCE), "Forums Maintenance");
-        forumsDowntime = fetch(api.fetchForumPosts(ForumsCategory.DOWNTIME), "Forums Downtime");
+        Logger.debug("[NOTIFICATIONS] Fetching news...");
+        news.clear();
+        forums.clear();
 
-        if (ObjectUtils.allNotNull(newsGeneral, newsEvents, newsReleaseNotes, newsUpdates, forumsMaintenance, forumsDowntime)) {
-            Logger.success("Successfully fetched all API objects.");
-        } else {
-            Logger.error("Some API objects are null! true == null");
-            Logger.debug("newsGeneral: " + (newsGeneral == null));
-            Logger.debug("newsEvents: " + (newsEvents == null));
-            Logger.debug("newsReleaseNotes: " + (newsReleaseNotes == null));
-            Logger.debug("newsUpdates: " + (newsUpdates == null));
-            Logger.debug("forumsMaintenance: " + (forumsMaintenance == null));
-            Logger.debug("forumsDowntime: " + (forumsDowntime == null));
+        synchronized (forumCategoryNames) {
+            forumCategoryNames.clear();
         }
 
-        if (forumsMaintenance != null) {
-            List<ForumsPostObject> toRemoveFromMaintenance = new ArrayList<>();
-            for (ForumsPostObject forumsPostObject : forumsMaintenance.getForumsPostObjects()) {
-                if (forumsPostObject.getTitle().startsWith("[Downtime]")) {
-                    toRemoveFromMaintenance.add(forumsPostObject);
-                }
+        lostArkFetcher.fetchNewsTags().execute().whenComplete((lostArkNewsTags, throwable) -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+                Logger.error("[NOTIFICATIONS] There was an exception while getting news tags!");
+                return;
             }
-            forumsMaintenance.remove(toRemoveFromMaintenance);
-        }
+
+            for (LostArkNewsTag newsTag : lostArkNewsTags) {
+                StaticNewsTags staticNewsTags = StaticNewsTags.get(newsTag.getDisplayName());
+
+                if (staticNewsTags == null) {
+                    Logger.error("[NOTIFICATIONS] There is new News Tag! " + newsTag.getDisplayName());
+                    continue;
+                }
+
+                Logger.debug("[NOTIFICATIONS] Fetching " + newsTag.getDisplayName() + " news...");
+                newsTag.fetchNews().execute().whenComplete(((lostArkNews, throwable1) -> {
+                    if (throwable1 != null) {
+                        throwable1.printStackTrace();
+                        Logger.error("[NOTIFICATIONS] There was an exception while getting News from News Tag " + newsTag.getDisplayName() + "!");
+                        return;
+                    }
+
+                    news.put(staticNewsTags, lostArkNews);
+                    Logger.debug("[NOTIFICATIONS] News for News Tag " + newsTag.getDisplayName() + " were loaded.");
+                }));
+            }
+        });
+
+        Logger.debug("[NOTIFICATIONS] Fetching forum categories...");
+        lostArkFetcher.fetchForumCategories().execute().whenComplete(((lostArkForumCategories, throwable) -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+                Logger.error("[NOTIFICATIONS] There was an exception while getting forum categories!");
+                return;
+            }
+
+            Arrays.stream(lostArkForumCategories.getCategoryList().getCategories()).forEach(category -> {
+                AtomicReference<WrappedForumCategoryName> wrappedForumCategoryName = new AtomicReference<>();
+
+                Logger.debug("[NOTIFICATIONS] Fetching Forum with category ID " + category.getId() + "...");
+                lostArkFetcher.fetchForum(category.getId()).execute().whenComplete((lostArkForum, throwable1) -> {
+                    if (throwable1 != null) {
+                        throwable1.printStackTrace();
+                        Logger.error("[NOTIFICATIONS] There was an exception while getting forum category " + category.getId() + "!");
+                        return;
+                    }
+
+                    wrappedForumCategoryName.set(new WrappedForumCategoryName(category.getId(), lostArkForum));
+                    forums.put(category.getId(), lostArkForum);
+                });
+
+                Arrays.stream(category.getSubcategoryIds()).forEach(forumCategoryId -> {
+                    Logger.debug("[NOTIFICATIONS] Fetching Forum with category ID " + forumCategoryId + "...");
+                    lostArkFetcher.fetchForum(forumCategoryId).execute().whenComplete((lostArkForum, throwable1) -> {
+                        if (throwable1 != null) {
+                            throwable1.printStackTrace();
+                            Logger.error("[NOTIFICATIONS] There was an exception while getting forum sub category " + forumCategoryId + "!");
+                            return;
+                        }
+
+                        wrappedForumCategoryName.get().addSubcategory(forumCategoryId, lostArkForum);
+                        forums.put(forumCategoryId, lostArkForum);
+                    });
+                });
+
+                synchronized (forumCategoryNames) {
+                    forumCategoryNames.add(wrappedForumCategoryName.get());
+                }
+            });
+        }));
+
+        Logger.success("[NOTIFICATIONS] News and Forums fetching done in " + ((System.currentTimeMillis() - start) / 1000) + " seconds!");
     }
 
     public static Notifications getUnreadNotifications() {
         Notifications notifications = new Notifications();
 
-        notifications.add(getUnreadNotifications(newsGeneral, NewsCategory.GENERAL));
-        notifications.add(getUnreadNotifications(newsEvents, NewsCategory.EVENTS));
-        notifications.add(getUnreadNotifications(newsReleaseNotes, NewsCategory.RELEASE_NOTES));
-        notifications.add(getUnreadNotifications(newsUpdates, NewsCategory.UPDATES));
+        Logger.debug("[NOTIFICATIONS] Checking for unread News...");
+        news.forEach(((staticNewsTags, lostArkNewsArray) -> {
+            Arrays.stream(lostArkNewsArray).forEach(lostArkNews -> {
+                notifications.add(getUnreadNotifications(lostArkNews));
+            });
+        }));
 
-        notifications.add(getUnreadNotifications(forumsMaintenance, ForumsCategory.MAINTENANCE));
-        notifications.add(getUnreadNotifications(forumsDowntime, ForumsCategory.DOWNTIME));
+        Logger.debug("[NOTIFICATIONS] Checking for unread Forum topics...");
+        forums.forEach((forumCategoryId, lostArkForum) -> {
+            notifications.add(getUnreadNotifications(forumCategoryId, lostArkForum));
+        });
 
         return notifications;
     }
 
-    public static Notifications getUnreadNotifications(News news, NewsCategory category) {
+    public static Notifications getUnreadNotifications(LostArkNews lostArkNews) {
         Notifications notifications = new Notifications();
 
-        if (news == null || news.getNewsObjects() == null) {
-            return notifications;
-        }
+        Hashable hashable = Hashable.create(lostArkNews);
 
-        for (NewsObject newsObject : news.getNewsObjects()) {
-            if (HashCache.wasSent(newsObject) == Result.FALSE) {
-                notifications.addNews(newsObject, category);
-            }
+        if (HashCache.wasSent(hashable) == Result.FALSE) {
+            notifications.addNews(lostArkNews);
+            HashCache.setAsSent(hashable);
         }
 
         return notifications;
     }
 
-    public static Notifications getUnreadNotifications(Forums forums, ForumsCategory category) {
+    public static Notifications getUnreadNotifications(int forumCategoryId, LostArkForum lostArkForum) {
         Notifications notifications = new Notifications();
 
-        if (forums == null || forums.getForumsPostObjects() == null) {
-            return notifications;
-        }
+        try {
+            String forumName = LostArkUtils.getForumCategoryName(forumCategoryId, lostArkForum);
 
-        for (ForumsPostObject forumsPostObject : forums.getForumsPostObjects()) {
-            if (HashCache.wasSent(forumsPostObject) == Result.FALSE) {
-                notifications.addForums(forumsPostObject, category);
-            }
-        }
+            for (LostArkForum.TopicList.Topic forumTopic : lostArkForum.getTopicList().getTopics()) {
+                Hashable hashable = Hashable.create(forumTopic);
 
-        return notifications;
-    }
-
-    private static <T extends ApiResponse> T fetch(ApiRestAction<T> restAction, String infoType) {
-        Logger.flow("[REQUESTER] Requesting " + infoType + " from API...");
-
-        AtomicReference<T> atomicReference = new AtomicReference<>();
-
-        AtomicInteger waitTime = new AtomicInteger(0);
-        AtomicInteger retries = new AtomicInteger(0);
-        AtomicBoolean canContinue = new AtomicBoolean(false);
-
-        do {
-            if (retries.get() >= 10) {
-                Logger.error("[REQUESTER] Failed to fetch " + infoType + " after 10 retries!");
-                return null;
-            }
-
-            restAction.onHttpError(httpError -> {
-                Logger.throwing(httpError.getException());
-                Logger.warn("[REQUESTER] HTTP Error occurred while requesting " + infoType + "! (retry " + retries.get() + ") Code: " + httpError.getCode());
-
-                waitTime.set(10000);
-                retries.addAndGet(1);
-            });
-            restAction.onApiError(apiError -> {
-                Logger.warn("[REQUESTER] API Error occurred while requesting " + infoType + "! (retry " + retries.get() + ") Code: " + apiError.getError());
-
-                waitTime.set(10000);
-                retries.addAndGet(1);
-            });
-            restAction.onSuccess((jsonObject, response) -> {
-                Logger.info("[REQUESTER] Request for " + infoType + " was successful.");
-                atomicReference.set(response);
-
-                waitTime.set(0);
-                canContinue.set(true);
-            });
-
-            restAction.execute();
-
-            if (waitTime.get() > 0) {
-                try {
-                    Thread.sleep(waitTime.get());
-                } catch (Exception exception) {
-                    Logger.throwing(exception);
-
-                    Logger.fatal("Thread was interrupted while requesting/sleeping.");
+                if (HashCache.wasSent(hashable) == Result.FALSE) {
+                    try {
+                        Logger.debug("[NOTIFICATIONS] Fetching Forum topic from forum ID " + forumCategoryId + " (" + forumTopic.getTitle() + ")...");
+                        notifications.addForumTopic(new WrappedForumTopic(forumCategoryId, forumName, forumTopic));
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                        Logger.error("[NOTIFICATIONS] Exception occurred while fetching forum post from forum ID " + forumCategoryId + "!");
+                    }
+                    HashCache.setAsSent(hashable);
                 }
             }
-        } while (!canContinue.get());
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            Logger.error("[NOTIFICATIONS] Exception occurred while getting unread notifications from forum ID " + forumCategoryId + "!");
+        }
 
-        return atomicReference.get();
+        return notifications;
     }
 
     public static class HashCache {

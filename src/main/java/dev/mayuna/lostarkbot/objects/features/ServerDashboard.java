@@ -284,7 +284,7 @@ public class ServerDashboard {
         embedBuilder.setTitle(languagePack.getTitle());
 
         String onlinePlayers = ServerDashboardManager.getOnlinePlayersCache();
-        String lastUpdated = lostArkServers.getLastUpdatedTime().replace("Last Updated: ", "");
+        String lastUpdated = lostArkServers.getLastUpdatedTime().replace("Last updated: ", "");
         
         String fullDescription = "";
         fullDescription += "`" + lastUpdated + "`\n";

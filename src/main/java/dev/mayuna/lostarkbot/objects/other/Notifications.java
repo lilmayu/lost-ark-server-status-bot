@@ -1,70 +1,66 @@
 package dev.mayuna.lostarkbot.objects.other;
 
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsObject;
+import dev.mayuna.lostarkbot.objects.features.lostark.WrappedForumTopic;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkNews;
 import lombok.Getter;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class Notifications {
 
-    private final @Getter Map<NewsObject, NewsCategory> news = new HashMap<>();
-    private final @Getter Map<ForumsPostObject, ForumsCategory> forums = new HashMap<>();
+    private final @Getter List<LostArkNews> news = new LinkedList<>();
+    private final @Getter List<WrappedForumTopic> forumTopics = new LinkedList<>();
 
     public Notifications() {
     }
 
     public boolean isThereAnyUnreadNotification() {
-        return !news.isEmpty() || !forums.isEmpty();
+        return !news.isEmpty() || !forumTopics.isEmpty();
     }
 
     public void add(Notifications notifications) {
         addNewsAll(notifications.getNews());
-        addForumsAll(notifications.getForums());
+        addForumTopicAll(notifications.getForumTopics());
     }
 
-    public void addNews(NewsObject newsObject, NewsCategory newsCategory) {
-        this.news.put(newsObject, newsCategory);
+    public void addNews(LostArkNews lostArkNews) {
+        this.news.add(lostArkNews);
     }
 
-    public void addNewsAll(Map<NewsObject, NewsCategory> news) {
-        this.news.putAll(news);
+    public void addNewsAll(List<LostArkNews> news) {
+        this.news.addAll(news);
     }
 
-    public void addForums(ForumsPostObject forumsPostObject, ForumsCategory forumsCategory) {
-        this.forums.put(forumsPostObject, forumsCategory);
+    public void addForumTopic(WrappedForumTopic wrappedForumTopic) {
+        this.forumTopics.add(wrappedForumTopic);
     }
 
-    public void addForumsAll(Map<ForumsPostObject, ForumsCategory> forums) {
-        this.forums.putAll(forums);
+    private void addForumTopicAll(List<WrappedForumTopic> forumTopics) {
+        this.forumTopics.addAll(forumTopics);
     }
 
-    public List<NewsObject> getNewsByCategory(NewsCategory newsCategory) {
-        List<NewsObject> newsObjects = new LinkedList<>();
+    public List<LostArkNews> getNewsByCategory(StaticNewsTags staticNewsTags) {
+        List<LostArkNews> news = new LinkedList<>();
 
-        for (Map.Entry<NewsObject, NewsCategory> entry : news.entrySet()) {
-            if (entry.getValue() == newsCategory) {
-                newsObjects.add(entry.getKey());
+        for (LostArkNews lostArkNews : this.news) {
+            if (lostArkNews.getTag().getDisplayName().equalsIgnoreCase(staticNewsTags.getDisplayName())) {
+                news.add(lostArkNews);
             }
         }
 
-        return newsObjects;
+        return news;
     }
 
-    public List<ForumsPostObject> getForumsByCategory(ForumsCategory forumsCategory) {
-        List<ForumsPostObject> forumsPostObject = new LinkedList<>();
+    public List<WrappedForumTopic> getForumTopicsByForumCategoryId(int forumCategoryId) {
+        List<WrappedForumTopic> forumTopics = new LinkedList<>();
 
-        for (Map.Entry<ForumsPostObject, ForumsCategory> entry : forums.entrySet()) {
-            if (entry.getValue() == forumsCategory) {
-                forumsPostObject.add(entry.getKey());
+        for (WrappedForumTopic wrappedForumTopic : this.forumTopics) {
+            if (wrappedForumTopic.getForumCategoryId() == forumCategoryId) {
+                forumTopics.add(wrappedForumTopic);
             }
         }
 
-        return forumsPostObject;
+        return forumTopics;
     }
 }

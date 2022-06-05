@@ -1,23 +1,13 @@
 package dev.mayuna.lostarkbot.util;
 
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsPostObject;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsObject;
-import dev.mayuna.lostarkbot.managers.LanguageManager;
-import dev.mayuna.lostarkbot.managers.ServerDashboardManager;
+import dev.mayuna.lostarkbot.objects.features.lostark.WrappedForumTopic;
 import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
-import dev.mayuna.lostarkbot.objects.other.MayuTweet;
-import dev.mayuna.lostarkbot.objects.features.LanguagePack;
-import dev.mayuna.lostarkbot.objects.features.ServerDashboard;
 import dev.mayuna.lostarkbot.util.logging.Logger;
-import dev.mayuna.lostarkfetcher.objects.api.LostArkServer;
-import dev.mayuna.lostarkfetcher.objects.api.LostArkServers;
+import dev.mayuna.lostarkfetcher.objects.api.LostArkNews;
 import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
 import dev.mayuna.lostarkfetcher.objects.api.other.LostArkServerStatus;
 import dev.mayuna.mayusjdautils.util.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.awt.*;
@@ -27,32 +17,31 @@ import java.util.*;
 
 public class EmbedUtils {
 
-    public static EmbedBuilder createEmbed(NewsObject newsObject, NewsCategory newsCategory) {
+    public static EmbedBuilder createEmbed(LostArkNews lostArkNews) {
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
 
-        embedBuilder.setAuthor("Lost Ark News | " + newsCategory.toString(), "https://www.playlostark.com/en-us/news");
-        embedBuilder.setTitle(newsObject.getTitle(), newsObject.getUrl());
+        embedBuilder.setAuthor("Lost Ark News | " + lostArkNews.getTag().getDisplayName(), "https://www.playlostark.com/en-us/news");
+        embedBuilder.setTitle(lostArkNews.getTitle(), lostArkNews.getUrl());
 
-        if (!newsObject.getDescription().equalsIgnoreCase(newsObject.getExcerpt())) {
-            embedBuilder.setDescription(parseDescription(newsObject.getDescription() + "\n\n" + newsObject.getExcerpt(), 3000));
-        } else {
-            embedBuilder.setDescription(parseDescription(newsObject.getDescription(), 3000));
-        }
+        embedBuilder.setDescription(parseDescription(lostArkNews.getDescription(), 3000));
 
-        embedBuilder.setImage(newsObject.getThumbnailUrl());
+        embedBuilder.setImage(lostArkNews.getThumbnailUrl());
         embedBuilder.setFooter("Provided by Mayu's Lost Ark Bot");
         embedBuilder.setTimestamp(Instant.now());
 
         return embedBuilder;
     }
 
-    public static EmbedBuilder createEmbed(ForumsPostObject forumsPostObject, ForumsCategory forumsCategory) {
+    public static EmbedBuilder createEmbed(WrappedForumTopic wrappedForumTopic) {
         EmbedBuilder embedBuilder = DiscordUtils.getDefaultEmbed();
 
-        embedBuilder.setAuthor("Lost Ark Forums | " + forumsCategory.toString(), "https://forums.playlostark.com/");
-        embedBuilder.setTitle(forumsPostObject.getTitle(), forumsPostObject.getUrl());
-        embedBuilder.setDescription(parseDescription(forumsPostObject.getPost_body(), 3000));
-        embedBuilder.setFooter("Author: " + forumsPostObject.getAuthor() + " | Provided by Mayu's Lost Ark Bot");
+        embedBuilder.setAuthor("Lost Ark Forums | " + wrappedForumTopic.getForumName(), "https://forums.playlostark.com/");
+        embedBuilder.setTitle(wrappedForumTopic.getTopicTitle(), wrappedForumTopic.getUrl());
+        embedBuilder.setDescription("Posted at " + wrappedForumTopic.getDiscordPostTime() + " (" + wrappedForumTopic.getDiscordPostTimeAgo() + ")" + "\n\n" + parseDescription(
+                wrappedForumTopic.getTopicBody(),
+                500
+        ));
+        embedBuilder.setFooter("Provided by Mayu's Lost Ark Bot");
         embedBuilder.setTimestamp(Instant.now());
 
         return embedBuilder;
@@ -66,7 +55,8 @@ public class EmbedUtils {
         }
     }
 
-    public static List<EmbedBuilder> createEmbeds(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences, List<LostArkServersChange.Difference> serverDifferences) {
+    public static List<EmbedBuilder> createEmbeds(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences,
+                                                  List<LostArkServersChange.Difference> serverDifferences) {
         List<EmbedBuilder> embedBuilders = new LinkedList<>();
         List<MessageEmbed.Field> fields = new LinkedList<>();
 
@@ -197,7 +187,7 @@ public class EmbedUtils {
     }
 
     private static List<LostArkServersChange.Difference> getAllDifferences(Map<LostArkServersChange.Difference, LostArkRegion> regionDifferences,
-            List<LostArkServersChange.Difference> serverDifferences) {
+                                                                           List<LostArkServersChange.Difference> serverDifferences) {
         List<LostArkServersChange.Difference> differences = new LinkedList<>(serverDifferences);
         differences.addAll(regionDifferences.keySet());
         return differences;

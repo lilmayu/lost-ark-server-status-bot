@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import dev.mayuna.lostarkbot.managers.TwitterManager;
 import dev.mayuna.lostarkbot.objects.other.LostArkServersChange;
+import dev.mayuna.lostarkbot.objects.other.StaticNewsTags;
 import dev.mayuna.lostarkbot.objects.other.StatusWhitelistObject;
 import dev.mayuna.lostarkbot.objects.other.TwitterUser;
 import dev.mayuna.lostarkbot.util.config.Config;
@@ -62,6 +63,18 @@ public class Utils {
         } catch (Exception exception) {
             Logger.throwing(exception);
             Logger.error("Cannot parse timestamp! Returning zero.");
+            return 0;
+        }
+    }
+
+    public static long toUnixTimestampForumTopic(String timestamp) {
+        try {
+            LocalDateTime localDateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US));
+            ZoneId zoneId = ZoneId.of("UTC");
+            return localDateTime.atZone(zoneId).toEpochSecond();
+        } catch (Exception exception) {
+            Logger.throwing(exception);
+            Logger.error("Cannot parse forum timestamp! Returning zero.");
             return 0;
         }
     }
@@ -151,7 +164,9 @@ public class Utils {
     public static OptionData getNewsTagArgument() {
         OptionData optionData = new OptionData(OptionType.STRING, "tag", "News tag", true);
 
-        // TODO: Staticky sem hodit názvy news tagů
+        for (StaticNewsTags tag : StaticNewsTags.values()) {
+            optionData.addChoice(tag.getDisplayName(), tag.name());
+        }
 
         return optionData;
     }
@@ -173,6 +188,7 @@ public class Utils {
         OptionData optionData = new OptionData(OptionType.STRING, "clear", "Determines which notifications should be removed", true);
         optionData.addChoice("News", "news");
         optionData.addChoice("Forums", "forums");
+        optionData.addChoice("Unknown Forums", "unknown_forums");
         optionData.addChoice("Status change Server", "status_server");
         optionData.addChoice("Status change Region", "status_region");
         optionData.addChoice("Status whitelist", "status_whitelist");
@@ -325,37 +341,17 @@ public class Utils {
         String oldServerStatus = String.valueOf(difference.getOldStatus());
         String newServerStatus = String.valueOf(difference.getNewStatus());
 
-        if (oldServerStatus.equals("null")) {
-            oldServerStatus = "OFFLINE";
-        }
-
-        if (newServerStatus.equals("null")) {
-            newServerStatus = "OFFLINE";
-        }
-
         // == Blacklist == //
 
-        if (blacklistStatusesTo.isEmpty()) {
-            for (String status : blacklistStatusesFrom) {
-                if (oldServerStatus.equalsIgnoreCase(status)) {
-                    return false;
-                }
+        for (String status : blacklistStatusesFrom) {
+            if (oldServerStatus.equalsIgnoreCase(status)) {
+                return false;
             }
         }
 
-        if (blacklistStatusesFrom.isEmpty()) {
-            for (String status : blacklistStatusesTo) {
-                if (newServerStatus.equalsIgnoreCase(status)) {
-                    return false;
-                }
-            }
-        }
-
-        for (String oldStatus : blacklistStatusesFrom) {
-            for (String newStatus : blacklistStatusesTo) {
-                if (oldStatus.equalsIgnoreCase(oldServerStatus) && newStatus.equalsIgnoreCase(newServerStatus)) {
-                    return false;
-                }
+        for (String status : blacklistStatusesTo) {
+            if (newServerStatus.equalsIgnoreCase(status)) {
+                return false;
             }
         }
 

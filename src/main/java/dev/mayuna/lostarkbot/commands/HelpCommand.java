@@ -95,7 +95,7 @@ public class HelpCommand extends SlashCommand {
                                       `/notify remove` - Unmarks current channel as a Notification channel
                                       `/notify info` - Shows information about Notification channel
                                       `/notify news` - Enables or disables News category
-                                      `/notify forums` - Enables or disables Forums category
+                                      `/notify forums` - Enables or disables Forums category (menu)
                                       `/notify twitter` - Enables or disables Twitter notifications
                                       `/notify twitter-filter` - Filters specified keywords in tweets
                                       `/notify twitter-ping` - Adds/removes roles to ping on new Tweets
@@ -177,10 +177,10 @@ public class HelpCommand extends SlashCommand {
                                             There are 4 types of notifications: News, Forums, Server status changes and Twitter
                                                           
                                             > News
-                                            News type corresponds to Notifications which comes from Lost Ark's news page. There are also 4 categories of News: General, Updates, Events, and Release-notes
+                                            News type corresponds to Notifications which comes from Lost Ark's news page. There are also 6 categories of News: Academy, Events, General, Release Notes, Showcase and Updates
                                                           
                                             > Forums
-                                            Forums type corresponds to Notifications which comes from Lost Ark's forums page. There are also 2 categories of Forums: Maintenance and Downtime
+                                            Forums type corresponds to Notifications which comes from Lost Ark's forums page. [These Forum categories are supported](https://forums.playlostark.com/categories)
                                                           
                                             > Server status changes
                                             This bot can also track [server status changes](https://i.imgur.com/cvfNohX.png) - the bot will send into the Notification channel a message with servers that changed their statuses. You can specify which servers to track by server name or by whole region. You can also whitelist specific statuses plus set roles which will be pinged.

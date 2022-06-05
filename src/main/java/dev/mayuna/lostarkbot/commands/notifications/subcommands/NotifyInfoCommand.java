@@ -2,12 +2,12 @@ package dev.mayuna.lostarkbot.commands.notifications.subcommands;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.ForumsCategory;
-import dev.mayuna.lostarkbot.old.api.unofficial.objects.NewsCategory;
 import dev.mayuna.lostarkbot.helpers.NotificationChannelHelper;
 import dev.mayuna.lostarkbot.objects.features.NotificationChannel;
+import dev.mayuna.lostarkbot.objects.features.lostark.WrappedForumCategoryName;
 import dev.mayuna.lostarkbot.objects.other.StatusWhitelistObject;
 import dev.mayuna.lostarkbot.util.AutoMessageUtils;
+import dev.mayuna.lostarkbot.util.LostArkUtils;
 import dev.mayuna.lostarkbot.util.Utils;
 import dev.mayuna.lostarkfetcher.objects.api.other.LostArkRegion;
 import dev.mayuna.mayusjdautils.util.MessageInfo;
@@ -75,7 +75,9 @@ public class NotifyInfoCommand extends SlashCommand {
             forumsCategories = "No Forums categories enabled.";
         } else {
             for (int forumCategoryId : notificationChannel.getForumCategories()) {
-                forumsCategories += forumCategoryId;
+                WrappedForumCategoryName wrappedForumCategoryName = LostArkUtils.getForumCategoryName(forumCategoryId);
+
+                forumsCategories += wrappedForumCategoryName.getVerboseName();
 
                 if (!Utils.isLast(notificationChannel.getForumCategories(), forumCategoryId)) {
                     forumsCategories += ",\n";
@@ -134,7 +136,7 @@ public class NotifyInfoCommand extends SlashCommand {
 
             blacklist = from + "\n" + to;
         }
-        statusWhitelistBlacklist = "> **Whitelist**\n" + whitelist + "\n\n> **Blacklist**\n" + blacklist;
+        statusWhitelistBlacklist = "> **Whitelist** (AND)\n" + whitelist + "\n\n> **Blacklist** (OR)\n" + blacklist;
 
         String statusChangePingRoles = "";
         if (notificationChannel.getStatusPingRolesIds().isEmpty()) {

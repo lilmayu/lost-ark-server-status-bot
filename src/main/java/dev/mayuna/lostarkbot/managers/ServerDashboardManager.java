@@ -59,7 +59,7 @@ public class ServerDashboardManager {
     }
 
     public static void updateCache() throws IOException {
-        currentLostArkServersCache = previousLostArkServersCache;
+        previousLostArkServersCache = currentLostArkServersCache;
 
         currentLostArkServersCache = Main.getLostArkFetcher().fetchServers().execute().join();
         PersistentServerCacheManager.updateServerCache(currentLostArkServersCache.get());
