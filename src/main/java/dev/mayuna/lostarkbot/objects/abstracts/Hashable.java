@@ -13,6 +13,6 @@ public interface Hashable {
     }
 
     static Hashable create(LostArkForum.TopicList.Topic lostArkForumTopic) {
-        return () -> HashUtils.hashMD5(lostArkForumTopic.getTitle() + "_" + lostArkForumTopic.getCreatedAt());
+        return () -> String.valueOf(lostArkForumTopic.getId());
     }
 }

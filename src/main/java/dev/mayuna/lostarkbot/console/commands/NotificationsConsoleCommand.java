@@ -46,7 +46,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                     Logger.info("> News ========");
                     for (LostArkNews[] lostArkNewsArray : NotificationsManager.getNews().values()) {
                         for (LostArkNews lostArkNews : lostArkNewsArray) {
-                            Logger.info(lostArkNews.getTitle() + " (" + lostArkNews.getTag() + ") - " + lostArkNews.getPublishDate() + " (" + Hashable.create(
+                            Logger.info(lostArkNews.getTitle() + " (" + lostArkNews.getTag().getDisplayName() + ") - " + lostArkNews.getPublishDate() + " (" + Hashable.create(
                                     lostArkNews).hash() + ")");
                         }
                     }
@@ -75,7 +75,7 @@ public class NotificationsConsoleCommand extends AbstractConsoleCommand {
                         Logger.info("^ Topic list");
 
                         for (LostArkForum.TopicList.Topic topic : entry.getValue().getTopicList().getTopics()) {
-                            Logger.info("- " + topic.getTitle() + " (" + topic.getId() + ") - " + topic.getCreatedAt());
+                            Logger.info("- " + topic.getTitle() + " (" + topic.getId() + ") - " + topic.getCreatedAt() + " (" + Hashable.create(topic).hash() + ")");
                         }
                     }
                 }
